@@ -1,0 +1,19 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "qSE78caosgQg3FwKrUvZnQdBpKI=",
+			"path": "github.com/luismesas/goPi/ioctl",
+			"revision": "a2f893e1c85c38ebd38f87e083015cedd6fc91c9",
+			"revisionTime": "2017-10-01T13:37:53Z"
+		},
+		{
+			"checksumSHA1": "Y5SOgWfvytCbnMxdDvBPgVGX5W4=",
+			"path": "github.com/luismesas/goPi/spi",
+			"revision": "a2f893e1c85c38ebd38f87e083015cedd6fc91c9",
+			"revisionTime": "2017-10-01T13:37:53Z"
+		}
+	],
+	"rootPath": "github.com/buttairfly/goPanel"
+}
