@@ -2,9 +2,10 @@ package spi
 
 import (
 	"fmt"
-	"github.com/luismesas/goPi/ioctl"
 	"os"
 	"unsafe"
+
+	"github.com/luismesas/goPi/ioctl"
 )
 
 const SPIDEV = "/dev/spidev"
@@ -65,7 +66,7 @@ func (spi *SPIDevice) Close() error {
 // Sends bytes over SPI channel and returns []byte response
 func (spi *SPIDevice) Send(wBuffer []byte) ([]byte, error) {
 	length := len(wBuffer)
-	rBuffer := make([]byte,length)
+	rBuffer := make([]byte, length)
 
 	// generates message
 	transfer := SPI_IOC_TRANSFER{}

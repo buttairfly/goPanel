@@ -5,14 +5,14 @@
 		{
 			"checksumSHA1": "qSE78caosgQg3FwKrUvZnQdBpKI=",
 			"path": "github.com/luismesas/goPi/ioctl",
-			"revision": "a2f893e1c85c38ebd38f87e083015cedd6fc91c9",
-			"revisionTime": "2017-10-01T13:37:53Z"
+			"revision": "43dbce205579a674e81f459b53d88ffd6d7a2d1d",
+			"revisionTime": "2017-10-01T15:23:42Z"
 		},
 		{
-			"checksumSHA1": "Y5SOgWfvytCbnMxdDvBPgVGX5W4=",
+			"checksumSHA1": "2IkT/Rj4bQnHcJnoWX7b9/FbuEU=",
 			"path": "github.com/luismesas/goPi/spi",
-			"revision": "a2f893e1c85c38ebd38f87e083015cedd6fc91c9",
-			"revisionTime": "2017-10-01T13:37:53Z"
+			"revision": "43dbce205579a674e81f459b53d88ffd6d7a2d1d",
+			"revisionTime": "2017-10-01T15:23:42Z"
 		}
 	],
 	"rootPath": "github.com/buttairfly/goPanel"
