@@ -3,6 +3,8 @@ package device
 import (
 	"fmt"
 
+	"sync"
+
 	"github.com/luismesas/goPi/spi"
 )
 
@@ -10,7 +12,7 @@ const (
 	ws2801_MODE  = uint8(0)
 	ws2801_BPW   = uint8(8)
 	ws2801_SPEED = uint32(1000000)
-	ws2801_DELAY = uint16(550)
+	ws2801_DELAY = uint16(1000)
 
 	WS2801_NUM_COLORS = 3
 )
@@ -18,6 +20,7 @@ const (
 type ws2801 struct {
 	device *spi.SPIDevice
 	numLed int
+	input  <-chan []byte
 }
 
 func NewWs2801Device(devPath string, numLed int) *ws2801 {
@@ -58,8 +61,25 @@ func (ws *ws2801) Release() error {
 func (ws *ws2801) Write(data []byte) error {
 	if len(data) != ws.numLed*WS2801_NUM_COLORS {
 		return fmt.Errorf(
-			"could not write %v bytes of data, %v is needed", len(data), WS2801_NUM_COLORS*ws.numLed)
+			"could not write %v bytes of data, %v is needed",
+			len(data), WS2801_NUM_COLORS*ws.numLed)
 	}
 	_, err := ws.device.Send(data)
 	return err
+}
+
+func (ws *ws2801) SetInput(input <-chan []byte) {
+	ws.input = input
+}
+
+func (ws *ws2801) Run(wg *sync.WaitGroup) {
+	defer wg.Done()
+	defer ws.Release()
+	for buffer := range ws.input {
+		ws.Write(buffer)
+	}
+}
+
+func (ws *ws2801) GetName() Name {
+	return WS2801Device
 }

@@ -7,21 +7,22 @@ import (
 )
 
 func main() {
-	pixelDevice := device.NewWs2801Device("/dev/spidev0.0", 200)
-	err := pixelDevice.Open()
+	pixelDevice, err := device.NewSpiDevice()
 	if err != nil {
-		log.Panic(err)
+		log.Fatal(err)
 	}
 	defer pixelDevice.Release()
 	const (
 		panelLed   = 200
 		bufferSize = panelLed * device.WS2801_NUM_COLORS
 	)
-	for c := byte(0x00); c < 0xFF; c++ {
-		data := make([]byte, bufferSize, bufferSize)
-		for i := range data {
-			data[i] = c
+	for {
+		for c := byte(0x00); c < 0xFF; c++ {
+			data := make([]byte, bufferSize, bufferSize)
+			for i := range data {
+				data[i] = c
+			}
+			pixelDevice.Write(data)
 		}
-		pixelDevice.Write(data)
 	}
 }
