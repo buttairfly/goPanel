@@ -18,7 +18,7 @@ type config struct {
 }
 
 type moduleConfig struct {
-	DeviceName device.Name                `json:"deviceName"`
+	DeviceType device.Type                `json:"deviceType"`
 	Width      int                        `json:"width"`
 	Height     int                        `json:"height"`
 	Origin     image.Point                `json:"origin"`
@@ -29,6 +29,7 @@ type moduleConfig struct {
 	Mirror     mirror                     `json:"mirror"`
 	LineOrder  lineOrder                  `json:"lineOrder"`
 }
+
 type rotation string
 
 const (
@@ -67,7 +68,7 @@ func NewModulesFromConfig(path string) ([]module, error) {
 	}
 	modules := make([]module, len(c.Modules))
 	for i, module := range c.Modules {
-		modules[i].deviceName = module.DeviceName
+		modules[i].deviceName = module.DeviceType
 		modules[i].width = module.Width
 		modules[i].height = module.Height
 		modules[i].origin = module.Origin

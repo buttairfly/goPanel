@@ -19,13 +19,13 @@ func (pd *printDevice) Open() error {
 	return nil
 }
 
-func (pd *printDevice) Release() error {
+func (pd *printDevice) Close() error {
 	return nil
 }
 
-func (pd *printDevice) Write(data []byte) error {
+func (pd *printDevice) Write(data []byte) (int, error) {
 	log.Printf("%+x", data)
-	return nil
+	return len(data), nil
 }
 
 func (pd *printDevice) SetInput(input <-chan []byte) {
@@ -34,12 +34,15 @@ func (pd *printDevice) SetInput(input <-chan []byte) {
 
 func (pd *printDevice) Run(wg *sync.WaitGroup) {
 	defer wg.Done()
-	defer pd.Release()
+	defer pd.Close()
 	for buffer := range pd.input {
-		pd.Write(buffer)
+		_, err := pd.Write(buffer)
+		if err != nil {
+			log.Panic(err)
+		}
 	}
 }
 
-func (pd *printDevice) GetName() Name {
+func (pd *printDevice) GetType() Type {
 	return Print
 }

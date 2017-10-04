@@ -23,7 +23,7 @@ func TestNewModulesFromConfig(t *testing.T) {
 			desc: "variants",
 			config: config{[]moduleConfig{
 				{
-					DeviceName: device.Print,
+					DeviceType: device.Print,
 					Height:     5,
 					Width:      3,
 					LineOrder:  LineOrderXY,

@@ -8,17 +8,17 @@ import (
 type SpiDevice interface {
 	Open() error
 	Run(wg *sync.WaitGroup)
-	Write(data []byte) error
-	Release() error
+	Write(data []byte) (int, error)
+	Close() error
 	SetInput(<-chan []byte)
-	GetName() Name
+	GetType() Type
 }
 
-type Name string
+type Type string
 
 const (
-	Print  = Name("print")
-	WS2801 = Name("ws2801")
+	Print  = Type("print")
+	WS2801 = Type("ws2801")
 )
 
 func NewSpiDevice() (SpiDevice, error) {

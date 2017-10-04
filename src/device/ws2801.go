@@ -5,6 +5,8 @@ import (
 
 	"sync"
 
+	"log"
+
 	"github.com/luismesas/goPi/spi"
 )
 
@@ -54,18 +56,18 @@ func (ws *ws2801) Open() error {
 	return nil
 }
 
-func (ws *ws2801) Release() error {
+func (ws *ws2801) Close() error {
 	return ws.device.Close()
 }
 
-func (ws *ws2801) Write(data []byte) error {
+func (ws *ws2801) Write(data []byte) (int, error) {
 	if len(data) != ws.numLed*WS2801NumColor {
-		return fmt.Errorf(
+		return 0, fmt.Errorf(
 			"could not write %v bytes of data, %v is needed",
 			len(data), WS2801NumColor*ws.numLed)
 	}
 	_, err := ws.device.Send(data)
-	return err
+	return len(data), err
 }
 
 func (ws *ws2801) SetInput(input <-chan []byte) {
@@ -74,12 +76,15 @@ func (ws *ws2801) SetInput(input <-chan []byte) {
 
 func (ws *ws2801) Run(wg *sync.WaitGroup) {
 	defer wg.Done()
-	defer ws.Release()
+	defer ws.Close()
 	for buffer := range ws.input {
-		ws.Write(buffer)
+		_, err := ws.Write(buffer)
+		if err != nil {
+			log.Panic(err)
+		}
 	}
 }
 
-func (ws *ws2801) GetName() Name {
+func (ws *ws2801) GetType() Type {
 	return WS2801
 }

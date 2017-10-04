@@ -8,7 +8,7 @@ import (
 )
 
 type module struct {
-	deviceName device.Name
+	deviceName device.Type
 	width      int
 	height     int
 	numPix     int
@@ -27,7 +27,7 @@ func (m *module) Serialize(img raw.Image) []byte {
 	bytes := make([]byte, m.numPix)
 	for y := 0; y < m.height; y++ {
 		for x := 0; x < m.width; x++ {
-			if ledPos, ok := m.pixLUT[image.Point{X:x,Y: y}]; ok {
+			if ledPos, ok := m.pixLUT[image.Point{X: x, Y: y}]; ok {
 				for c := range m.colLUT {
 					bytes[ledPos+m.colLUT[c]] = m.getValue(img, x, y, c)
 				}
@@ -40,6 +40,6 @@ func (m *module) Serialize(img raw.Image) []byte {
 func (m *module) getValue(img raw.Image, x, y int, c raw.RGB8Color) byte {
 	imgX := m.origin.X + x
 	imgY := m.origin.Y + y
-	corr := m.pixCor[ColorPoint{image.Point{X:x,Y: y}, c}]
+	corr := m.pixCor[ColorPoint{image.Point{X: x, Y: y}, c}]
 	return byte(float64(img.Canvas[imgX][imgY].GetColor(c)) * corr)
 }

@@ -11,7 +11,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer pixelDevice.Release()
+	defer pixelDevice.Close()
 	const (
 		panelLed   = 200
 		bufferSize = panelLed * device.WS2801NumColor
