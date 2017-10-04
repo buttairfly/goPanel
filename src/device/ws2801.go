@@ -9,12 +9,12 @@ import (
 )
 
 const (
-	ws2801_MODE  = uint8(0)
-	ws2801_BPW   = uint8(8)
-	ws2801_SPEED = uint32(1000000)
-	ws2801_DELAY = uint16(1000)
+	ws2801Mode  = uint8(0)
+	ws2801Bpw   = uint8(8)
+	ws2801Speed = uint32(1000000)
+	ws2801Delay = uint16(1000)
 
-	WS2801_NUM_COLORS = 3
+	WS2801NumColor = 3
 )
 
 type ws2801 struct {
@@ -23,9 +23,9 @@ type ws2801 struct {
 	input  <-chan []byte
 }
 
-func NewWs2801Device(devPath string, numLed int) *ws2801 {
+func NewWs2801Device(numLed int) *ws2801 {
 	ws := new(ws2801)
-	ws.device = spi.NewSPIDevice(spi.DEFAULT_BUS, spi.DEFAULT_CHIP, ws2801_DELAY)
+	ws.device = spi.NewSPIDevice(spi.DEFAULT_BUS, spi.DEFAULT_CHIP, ws2801Delay)
 	ws.numLed = numLed
 	return ws
 }
@@ -36,17 +36,17 @@ func (ws *ws2801) Open() error {
 		return err
 	}
 
-	err = ws.device.SetMode(ws2801_MODE)
+	err = ws.device.SetMode(ws2801Mode)
 	if err != nil {
 		return err
 	}
 
-	err = ws.device.SetBitsPerWord(ws2801_BPW)
+	err = ws.device.SetBitsPerWord(ws2801Bpw)
 	if err != nil {
 		return err
 	}
 
-	err = ws.device.SetSpeed(ws2801_SPEED)
+	err = ws.device.SetSpeed(ws2801Speed)
 	if err != nil {
 		return err
 	}
@@ -59,10 +59,10 @@ func (ws *ws2801) Release() error {
 }
 
 func (ws *ws2801) Write(data []byte) error {
-	if len(data) != ws.numLed*WS2801_NUM_COLORS {
+	if len(data) != ws.numLed*WS2801NumColor {
 		return fmt.Errorf(
 			"could not write %v bytes of data, %v is needed",
-			len(data), WS2801_NUM_COLORS*ws.numLed)
+			len(data), WS2801NumColor*ws.numLed)
 	}
 	_, err := ws.device.Send(data)
 	return err
@@ -81,5 +81,5 @@ func (ws *ws2801) Run(wg *sync.WaitGroup) {
 }
 
 func (ws *ws2801) GetName() Name {
-	return WS2801Device
+	return WS2801
 }

@@ -14,7 +14,7 @@ func main() {
 	defer pixelDevice.Release()
 	const (
 		panelLed   = 200
-		bufferSize = panelLed * device.WS2801_NUM_COLORS
+		bufferSize = panelLed * device.WS2801NumColor
 	)
 	for {
 		for c := byte(0x00); c < 0xFF; c++ {

@@ -6,32 +6,29 @@ import (
 	"fmt"
 	"image"
 	"io"
-
-	"os"
-
 	"io/ioutil"
+	"os"
 
 	"github.com/buttairfly/goPanel/src/device"
 	"github.com/buttairfly/goPanel/src/screen/raw"
 )
 
 type config struct {
-	Modules []moduleConfig `json"modules"`
+	Modules []moduleConfig `json:"modules"`
 }
 
 type moduleConfig struct {
-	DeviceName device.Name            `json"deviceName"`
-	Width      int                    `json"width"`
-	Height     int                    `json"height"`
-	Origin     image.Point            `json"origin"`
-	PixLUT     map[image.Point]int    `json"pixLut"`
-	PixCor     map[ColorPoint]float64 `json"pixCorrection"`
-	ColLUT     map[raw.RGB8Color]int  `json"colLut"`
-	Rotation   rotation               `json"rotation"`
-	Mirror     mirror                 `json"mirror"`
-	LineOrder  lineOrder              `json"lineOrder"`
+	DeviceName device.Name                `json:"deviceName"`
+	Width      int                        `json:"width"`
+	Height     int                        `json:"height"`
+	Origin     image.Point                `json:"origin"`
+	PixLUT     map[jsonPoint]int          `json:"pixLut"`
+	PixCor     map[JsonColorPoint]float64 `json:"pixCorrection"`
+	ColLUT     map[raw.RGB8Color]int      `json:"colLut"`
+	Rotation   rotation                   `json:"rotation"`
+	Mirror     mirror                     `json:"mirror"`
+	LineOrder  lineOrder                  `json:"lineOrder"`
 }
-
 type rotation string
 
 const (
@@ -70,6 +67,7 @@ func NewModulesFromConfig(path string) ([]module, error) {
 	}
 	modules := make([]module, len(c.Modules))
 	for i, module := range c.Modules {
+		modules[i].deviceName = module.DeviceName
 		modules[i].width = module.Width
 		modules[i].height = module.Height
 		modules[i].origin = module.Origin
@@ -118,8 +116,8 @@ func (mc *moduleConfig) generatePixCor() (pixCor map[ColorPoint]float64, err err
 	for y := 0; y < mc.Height; y++ {
 		for x := 0; x < mc.Width; x++ {
 			for c := range raw.RGB8Space {
-				colorPoint := ColorPoint{point: image.Point{x, y}, rgbOrder: c}
-				if val, ok := mc.PixCor[colorPoint]; ok {
+				colorPoint := ColorPoint{Point: image.Point{x, y}, rgbType: c}
+				if val, ok := mc.PixCor[marshalColorPoint(colorPoint)]; ok {
 					if val > 1.0 || val < 0 {
 						return nil, fmt.Errorf("value %v out of bounds at %+v", val, colorPoint)
 					}
@@ -158,7 +156,8 @@ func (mc *moduleConfig) generatePixLUT() (pixLUT map[image.Point]int, err error)
 	for y := 0; y < mc.Height; y++ {
 		for x := 0; x < mc.Width; x++ {
 			p := image.Point{x, y}
-			if pos, err := mc.translateLineOrder(p); err != nil {
+			var pos int
+			if pos, err = mc.translateLineOrder(p); err != nil {
 				return
 			} else {
 				if p, err = mc.translateRotation(p); err != nil {
@@ -188,7 +187,7 @@ func (mc *moduleConfig) translateLineOrder(p image.Point) (pos int, err error) {
 	case LineOrderManual:
 		if mc.PixLUT != nil {
 			var ok bool
-			pos, ok = mc.PixLUT[p]
+			pos, ok = mc.PixLUT[marshalPoint(p)]
 			if !ok {
 				pos = pixLutUndef
 			}

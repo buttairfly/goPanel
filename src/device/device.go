@@ -17,13 +17,13 @@ type SpiDevice interface {
 type Name string
 
 const (
-	PrintDevice  = Name("printDevice")
-	WS2801Device = Name("ws2801Device")
+	Print  = Name("print")
+	WS2801 = Name("ws2801")
 )
 
 func NewSpiDevice() (SpiDevice, error) {
 	var pixelDevice SpiDevice
-	pixelDevice = NewWs2801Device("/dev/spidev0.0", 200)
+	pixelDevice = NewWs2801Device(200)
 
 	err := pixelDevice.Open()
 	if err != nil {

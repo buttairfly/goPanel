@@ -29,7 +29,7 @@ const (
 )
 
 var RGB8Space = map[RGB8Color]struct{}{
-	R: nil,
-	G: nil,
-	B: nil,
+	R: {},
+	G: {},
+	B: {},
 }

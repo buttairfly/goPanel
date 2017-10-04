@@ -41,5 +41,5 @@ func (pd *printDevice) Run(wg *sync.WaitGroup) {
 }
 
 func (pd *printDevice) GetName() Name {
-	return PrintDevice
+	return Print
 }
