@@ -33,3 +33,7 @@ var RGB8Space = map[RGB8Color]struct{}{
 	G: {},
 	B: {},
 }
+
+func (c RGB8Color) String() string {
+	return string(c)
+}

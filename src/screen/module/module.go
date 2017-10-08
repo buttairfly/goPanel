@@ -3,6 +3,8 @@ package module
 import (
 	"image"
 
+	"fmt"
+
 	"github.com/buttairfly/goPanel/src/device"
 	"github.com/buttairfly/goPanel/src/screen/raw"
 )
@@ -21,6 +23,10 @@ type module struct {
 type ColorPoint struct {
 	image.Point
 	rgbType raw.RGB8Color
+}
+
+func (cp ColorPoint) String() string {
+	return fmt.Sprintf("%v %v", cp.Point, cp.rgbType)
 }
 
 func (m *module) Serialize(img raw.Image) []byte {

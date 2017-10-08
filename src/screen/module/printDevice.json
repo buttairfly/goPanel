@@ -1,9 +1,9 @@
 {
 	"modules": [
 		{
-			"deviceName": "print",
-			"width": 3,
-			"height": 5,
+			"deviceType": "print",
+			"width": 20,
+			"height": 10,
 			"origin": {
 				"X": 0,
 				"Y": 0

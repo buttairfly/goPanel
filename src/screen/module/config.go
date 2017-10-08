@@ -72,10 +72,10 @@ func NewModulesFromConfig(path string) ([]module, error) {
 		modules[i].width = module.Width
 		modules[i].height = module.Height
 		modules[i].origin = module.Origin
-		modules[i].numPix = len(module.PixLUT)
 		if modules[i].pixLUT, err = module.generatePixLUT(); err != nil {
 			return nil, fmt.Errorf("module %v: ", i, err)
 		}
+		modules[i].numPix = len(modules[i].pixLUT)
 		if modules[i].pixCor, err = module.generatePixCor(); err != nil {
 			return nil, fmt.Errorf("module %v: ", i, err)
 		}
@@ -212,25 +212,27 @@ func (mc *moduleConfig) translateMirror(p image.Point) (newP image.Point, err er
 		newP.X = invert(p.X, mc.Width)
 	default:
 		err = fmt.Errorf(
-			"no correct LineOrder=(%v) set", mc.LineOrder)
+			"no correct Mirror=(%v) set", mc.Mirror)
 	}
 	return
 }
 
 func (mc *moduleConfig) translateRotation(p image.Point) (newP image.Point, err error) {
-	newP = p
 	switch mc.Rotation {
 	case Rotate0:
+		newP = p
 	case Rotate90:
-
+		newP.Y = p.X
+		newP.X = invert(p.Y, mc.Height)
 	case Rotate180:
 		newP.Y = invert(p.Y, mc.Height)
 		newP.X = invert(p.X, mc.Width)
 	case Rotate270:
-
+		newP.Y = invert(p.X, mc.Width)
+		newP.X = p.Y
 	default:
 		err = fmt.Errorf(
-			"no correct LineOrder=(%v) set", mc.LineOrder)
+			"no correct Rotation=(%v) set", mc.Rotation)
 	}
 	return
 }
@@ -241,37 +243,4 @@ func invert(val, maxVal int) int {
 
 func isEven(val int) bool {
 	return val%2 != 0
-}
-
-func (mc *moduleConfig) rotate(p image.Point, angle rotation) (newP image.Point) {
-	midP := image.Point{
-		X: mc.Width / 2,
-		Y: mc.Height / 2,
-	}
-	newP.X = midP.X + ((p.X-midP.X)*cos(angle) - (p.Y-midP.Y)*sin(angle))
-	newP.Y = midP.Y + ((p.Y-midP.Y)*cos(angle) + (p.X-midP.X)*sin(angle))
-
-	return
-}
-
-func cos(angle rotation) int {
-	switch angle {
-	case Rotate0:
-		return 1
-	case Rotate180:
-		return -1
-	default:
-		return 0
-	}
-}
-
-func sin(angle rotation) int {
-	switch angle {
-	case Rotate90:
-		return 1
-	case Rotate270:
-		return -1
-	default:
-		return 0
-	}
 }

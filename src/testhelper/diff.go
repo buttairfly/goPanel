@@ -18,7 +18,8 @@ func RunCmd(t *testing.T, args []string) {
 	if err != nil {
 		t.Fatalf("err: %v cmd: %v msg:\n%v", err, cmd, message)
 	}
-	if message != "" {
-		t.Log(message)
-	}
+	/*
+		if message != "" {
+			t.Log(message)
+		}*/
 }
