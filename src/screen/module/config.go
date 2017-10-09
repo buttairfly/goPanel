@@ -33,26 +33,26 @@ type moduleConfig struct {
 type rotation string
 
 const (
-	Rotate0   = rotation("0")
-	Rotate90  = rotation("90")
-	Rotate180 = rotation("180")
-	Rotate270 = rotation("270")
+	Rotate0   rotation = "0"
+	Rotate90  rotation = "90"
+	Rotate180 rotation = "180"
+	Rotate270 rotation = "270"
 )
 
 type mirror string
 
 const (
-	MirrorNo = mirror("No")
-	MirrorV  = mirror("Vertical")
-	MirrorH  = mirror("Horizontal")
+	MirrorNo mirror = "No"
+	MirrorV  mirror = "Vertical"
+	MirrorH  mirror = "Horizontal"
 )
 
 type lineOrder string
 
 const (
-	LineOrderXY     = lineOrder("XY")
-	LineOrderSnake  = lineOrder("Snake")
-	LineOrderManual = lineOrder("Manual")
+	LineOrderXY     lineOrder = "XY"
+	LineOrderSnake  lineOrder = "Snake"
+	LineOrderManual lineOrder = "Manual"
 )
 
 const (
@@ -73,14 +73,14 @@ func NewModulesFromConfig(path string) ([]module, error) {
 		modules[i].height = module.Height
 		modules[i].origin = module.Origin
 		if modules[i].pixLUT, err = module.generatePixLUT(); err != nil {
-			return nil, fmt.Errorf("module %v: ", i, err)
+			return nil, fmt.Errorf("module %v: %v", i, err)
 		}
 		modules[i].numPix = len(modules[i].pixLUT)
 		if modules[i].pixCor, err = module.generatePixCor(); err != nil {
-			return nil, fmt.Errorf("module %v: ", i, err)
+			return nil, fmt.Errorf("module %v: %v", i, err)
 		}
 		if modules[i].colLUT, err = module.generateColLUT(); err != nil {
-			return nil, fmt.Errorf("module %v: ", i, err)
+			return nil, fmt.Errorf("module %v: %v", i, err)
 		}
 	}
 	return modules, nil

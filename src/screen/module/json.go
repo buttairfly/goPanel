@@ -50,7 +50,7 @@ func (jcp JsonColorPoint) colorPoint() (ColorPoint, error) {
 	}
 	return ColorPoint{
 		image.Point{X: val[0], Y: val[1]},
-		raw.RGB8Color(pointString[2]),
+		raw.RGB8ColorFromString(pointString[2]),
 	}, nil
 }
 

@@ -11,9 +11,9 @@
 			"pixLut": null,
 			"pixCorrection": null,
 			"colLut": {
-				"b": 2,
-				"g": 1,
-				"r": 0
+				"0": 0,
+				"1": 1,
+				"2": 2
 			},
 			"rotation": "0",
 			"mirror": "No",
@@ -30,9 +30,9 @@
 			"pixLut": null,
 			"pixCorrection": null,
 			"colLut": {
-				"b": 2,
-				"g": 1,
-				"r": 0
+				"0": 0,
+				"1": 1,
+				"2": 2
 			},
 			"rotation": "270",
 			"mirror": "No",
@@ -49,9 +49,9 @@
 			"pixLut": null,
 			"pixCorrection": null,
 			"colLut": {
-				"b": 2,
-				"g": 1,
-				"r": 0
+				"0": 0,
+				"1": 1,
+				"2": 2
 			},
 			"rotation": "270",
 			"mirror": "No",
