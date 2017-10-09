@@ -112,12 +112,12 @@ func (c *config) WriteToFile(path string) error {
 	return ioutil.WriteFile(path, jsonConfig, 0622)
 }
 
-func (mc *moduleConfig) generatePixCor() (pixCor map[ColorPoint]float64, err error) {
-	pixCor = make(map[ColorPoint]float64, mc.Width*mc.Height)
+func (mc *moduleConfig) generatePixCor() (pixCor map[raw.ColorPoint]float64, err error) {
+	pixCor = make(map[raw.ColorPoint]float64, mc.Width*mc.Height)
 	for y := 0; y < mc.Height; y++ {
 		for x := 0; x < mc.Width; x++ {
 			for c := range raw.RGB8Space {
-				colorPoint := ColorPoint{Point: image.Point{x, y}, rgbType: c}
+				colorPoint := raw.ColorPoint{Point: image.Point{X: x, Y: y}, C: c}
 				if val, ok := mc.PixCor[marshalColorPoint(colorPoint)]; ok {
 					if val > 1.0 || val < 0 {
 						return nil, fmt.Errorf("value %v out of bounds at %+v", val, colorPoint)
@@ -156,7 +156,7 @@ func (mc *moduleConfig) generatePixLUT() (pixLUT map[image.Point]int, err error)
 	pixLUT = make(map[image.Point]int, mc.Width*mc.Height)
 	for y := 0; y < mc.Height; y++ {
 		for x := 0; x < mc.Width; x++ {
-			p := image.Point{x, y}
+			p := image.Point{X: x, Y: y}
 			var pos int
 			if pos, err = mc.translateLineOrder(p); err != nil {
 				return

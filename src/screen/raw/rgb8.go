@@ -1,9 +1,30 @@
 package raw
 
-import "log"
+import (
+	"log"
+
+	"github.com/buttairfly/goPanel/src/helper"
+)
 
 type RGB8 struct {
 	R, G, B byte
+}
+
+const (
+	rgb8min = 0
+	rgb8max = 0xff
+	rgbaMin = 0
+	rgbaMax = 0xffff
+)
+
+func (c *RGB8) RGBA() (r, g, b, a uint32) {
+	return c.to16(R), c.to16(G), c.to16(B), rgbaMax
+}
+
+func (c *RGB8) to16(color RGB8Color) uint32 {
+	return uint32(helper.IntMap(
+		int(c.GetColor(color)),
+		rgb8min, rgb8max, rgbaMin, rgbaMax))
 }
 
 func (c *RGB8) GetColor(color RGB8Color) byte {

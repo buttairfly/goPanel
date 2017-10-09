@@ -37,7 +37,7 @@ func marshalPoint(p image.Point) jsonPoint {
 
 type JsonColorPoint string
 
-func (jcp JsonColorPoint) colorPoint() (ColorPoint, error) {
+func (jcp JsonColorPoint) colorPoint() (raw.ColorPoint, error) {
 	const numPar = 2
 	pointString := strings.Split(string(jcp), ",")
 	val := make([]int, numPar)
@@ -45,16 +45,16 @@ func (jcp JsonColorPoint) colorPoint() (ColorPoint, error) {
 	for i := 0; i < numPar; i++ {
 		val[i], err = strconv.Atoi(strings.TrimLeft(pointString[i], pre[i]))
 		if err != nil {
-			return ColorPoint{}, fmt.Errorf("could not parse %v%v", pre[i], err)
+			return raw.ColorPoint{}, fmt.Errorf("could not parse %v%v", pre[i], err)
 		}
 	}
-	return ColorPoint{
-		image.Point{X: val[0], Y: val[1]},
-		raw.RGB8ColorFromString(pointString[2]),
+	return raw.ColorPoint{
+		Point: image.Point{X: val[0], Y: val[1]},
+		C:     raw.RGB8ColorFromString(pointString[2]),
 	}, nil
 }
 
-func marshalColorPoint(cp ColorPoint) JsonColorPoint {
+func marshalColorPoint(cp raw.ColorPoint) JsonColorPoint {
 	return JsonColorPoint(fmt.Sprintf("%v%v, %v%v, %v%v",
-		pre[0], cp.X, pre[1], cp.Y, pre[2], cp.rgbType))
+		pre[0], cp.X, pre[1], cp.Y, pre[2], cp.C))
 }

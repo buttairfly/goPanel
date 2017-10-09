@@ -3,8 +3,6 @@ package module
 import (
 	"image"
 
-	"fmt"
-
 	"github.com/buttairfly/goPanel/src/device"
 	"github.com/buttairfly/goPanel/src/screen/raw"
 )
@@ -16,17 +14,8 @@ type module struct {
 	numPix     int
 	origin     image.Point
 	pixLUT     map[image.Point]int
-	pixCor     map[ColorPoint]float64
+	pixCor     map[raw.ColorPoint]float64
 	colLUT     map[raw.RGB8Color]int
-}
-
-type ColorPoint struct {
-	image.Point
-	rgbType raw.RGB8Color
-}
-
-func (cp ColorPoint) String() string {
-	return fmt.Sprintf("%v %v", cp.Point, cp.rgbType)
 }
 
 func (m *module) Serialize(img raw.Image) []byte {
@@ -46,6 +35,6 @@ func (m *module) Serialize(img raw.Image) []byte {
 func (m *module) getValue(img raw.Image, x, y int, c raw.RGB8Color) byte {
 	imgX := m.origin.X + x
 	imgY := m.origin.Y + y
-	corr := m.pixCor[ColorPoint{image.Point{X: x, Y: y}, c}]
+	corr := m.pixCor[raw.ColorPoint{Point: image.Point{X: x, Y: y}, C: c}]
 	return byte(float64(img.Canvas[imgX][imgY].GetColor(c)) * corr)
 }
