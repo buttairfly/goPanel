@@ -7,15 +7,15 @@ import (
 )
 
 func main() {
-	pixelDevice, err := device.NewSpiDevice()
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer pixelDevice.Close()
 	const (
 		panelLed   = 200
 		bufferSize = panelLed * device.WS2801NumColor
 	)
+	pixelDevice, err := device.NewSpiDevice(device.Print, panelLed)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer pixelDevice.Close()
 	for {
 		for c := byte(0x00); c < 0xFF; c++ {
 			data := make([]byte, bufferSize, bufferSize)

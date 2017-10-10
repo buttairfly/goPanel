@@ -22,7 +22,7 @@ func TestNewModulesFromConfig(t *testing.T) {
 	const testFolder = "testdata/"
 	cases := []struct {
 		desc       string
-		config     config
+		config     Config
 		resultFile string
 		actualFile string
 		fileName   string
@@ -30,7 +30,7 @@ func TestNewModulesFromConfig(t *testing.T) {
 	}{
 		{
 			desc: "20x10_print_ws2801",
-			config: config{[]moduleConfig{
+			config: Config{[]moduleConfig{
 				{
 					DeviceType: device.Print,
 					Height:     10,
@@ -70,7 +70,7 @@ func TestNewModulesFromConfig(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.desc, func(t *testing.T) {
 			if testhelper.RecordCall() {
-				t.Logf("Write config to file %v", c.fileName)
+				t.Logf("Write Config to file %v", c.fileName)
 				require.NoError(t, c.config.WriteToFile(c.fileName))
 			}
 			modules, err := NewModulesFromConfig(c.fileName)

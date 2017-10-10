@@ -1,7 +1,7 @@
 package device
 
 import (
-	"log"
+	"fmt"
 	"sync"
 )
 
@@ -21,17 +21,22 @@ const (
 	WS2801 = Type("ws2801")
 )
 
-func NewSpiDevice() (SpiDevice, error) {
+func NewSpiDevice(t Type, length int) (SpiDevice, error) {
 	var pixelDevice SpiDevice
-	pixelDevice = NewWs2801Device(200)
-
-	err := pixelDevice.Open()
-	if err != nil {
-		log.Print(err)
-		pixelDevice = NewPrintDevice()
+	switch t {
+	case Print:
+		pixelDevice = NewPrintDevice(length)
 		if err := pixelDevice.Open(); err != nil {
 			return nil, err
 		}
+		return pixelDevice, nil
+	case WS2801:
+		pixelDevice = NewWs2801Device(200)
+		if err := pixelDevice.Open(); err != nil {
+			return nil, err
+		}
+	default:
+		return nil, fmt.Errorf("unkown spi device type: %v", t)
 	}
-	return pixelDevice, err
+	return pixelDevice, nil
 }

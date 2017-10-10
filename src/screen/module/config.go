@@ -13,7 +13,7 @@ import (
 	"github.com/buttairfly/goPanel/src/screen/raw"
 )
 
-type config struct {
+type Config struct {
 	Modules []moduleConfig `json:"modules"`
 }
 
@@ -61,14 +61,14 @@ const (
 )
 
 func NewModulesFromConfig(path string) ([]module, error) {
-	var c config
+	var c Config
 	err := c.FromFile(path)
 	if err != nil {
 		return nil, err
 	}
 	modules := make([]module, len(c.Modules))
 	for i, module := range c.Modules {
-		modules[i].deviceName = module.DeviceType
+		modules[i].deviceType = module.DeviceType
 		modules[i].width = module.Width
 		modules[i].height = module.Height
 		modules[i].origin = module.Origin
@@ -86,7 +86,7 @@ func NewModulesFromConfig(path string) ([]module, error) {
 	return modules, nil
 }
 
-func (c *config) FromReader(r io.Reader) error {
+func (c *Config) FromReader(r io.Reader) error {
 	dec := json.NewDecoder(r)
 	err := dec.Decode(&*c)
 	if err != nil {
@@ -95,16 +95,16 @@ func (c *config) FromReader(r io.Reader) error {
 	return nil
 }
 
-func (c *config) FromFile(path string) error {
+func (c *Config) FromFile(path string) error {
 	f, err := os.Open(path)
 	if err != nil {
-		return fmt.Errorf("can not read config file %v. error: %v", path, err)
+		return fmt.Errorf("can not read Config file %v. error: %v", path, err)
 	}
 	defer f.Close()
 	return c.FromReader(f)
 }
 
-func (c *config) WriteToFile(path string) error {
+func (c *Config) WriteToFile(path string) error {
 	jsonConfig, err := json.MarshalIndent(c, "", "\t")
 	if err != nil {
 		return err

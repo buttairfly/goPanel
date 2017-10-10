@@ -1,16 +1,19 @@
 package device
 
 import (
+	"fmt"
 	"log"
 	"sync"
 )
 
 type printDevice struct {
-	input <-chan []byte
+	input  <-chan []byte
+	numPix int
 }
 
-func NewPrintDevice() *printDevice {
+func NewPrintDevice(numPix int) *printDevice {
 	pd := new(printDevice)
+	pd.numPix = numPix
 	return pd
 }
 
@@ -25,6 +28,10 @@ func (pd *printDevice) Close() error {
 
 func (pd *printDevice) Write(data []byte) (int, error) {
 	log.Printf("%+x", data)
+	if len(data) != pd.numPix {
+		return 0, fmt.Errorf(
+			"len write data %v does not equal numPix %v", len(data), pd.numPix)
+	}
 	return len(data), nil
 }
 

@@ -3,12 +3,16 @@ package raw
 import (
 	"log"
 
+	"image/color"
+
 	"github.com/buttairfly/goPanel/src/helper"
 )
 
 type RGB8 struct {
 	R, G, B byte
 }
+
+const RGB8NumBytes = 3
 
 const (
 	rgb8min = 0
@@ -17,17 +21,40 @@ const (
 	rgbaMax = 0xffff
 )
 
-func (c *RGB8) RGBA() (r, g, b, a uint32) {
+func (c RGB8) RGBA() (r, g, b, a uint32) {
 	return c.to16(R), c.to16(G), c.to16(B), rgbaMax
 }
 
-func (c *RGB8) to16(color RGB8Color) uint32 {
+func (c RGB8) to16(color RGB8Color) uint32 {
 	return uint32(helper.IntMap(
 		int(c.GetColor(color)),
 		rgb8min, rgb8max, rgbaMin, rgbaMax))
 }
 
-func (c *RGB8) GetColor(color RGB8Color) byte {
+var RGB8Model color.Model = color.ModelFunc(rgbaModel)
+
+func rgbaModel(c color.Color) color.Color {
+	if _, ok := c.(RGB8); ok {
+		return c
+	}
+	r, g, b, a := c.RGBA()
+	if a > rgbaMin && a < rgbaMax {
+		// Since Color.RGBA returns a alpha-premultiplied color, we should have r <= a && g <= a && b <= a.
+		r = (r * rgbaMax) / a
+		g = (g * rgbaMax) / a
+		b = (b * rgbaMax) / a
+	}
+	if a == rgbaMax {
+		return &RGB8{
+			byte(helper.IntMap(int(r), rgbaMin, rgbaMax, rgb8min, rgb8max)),
+			byte(helper.IntMap(int(g), rgbaMin, rgbaMax, rgb8min, rgb8max)),
+			byte(helper.IntMap(int(b), rgbaMin, rgbaMax, rgb8min, rgb8max)),
+		}
+	}
+	return &RGB8{0, 0, 0}
+}
+
+func (c RGB8) GetColor(color RGB8Color) byte {
 	switch color {
 	case R:
 		return c.R
@@ -41,7 +68,7 @@ func (c *RGB8) GetColor(color RGB8Color) byte {
 	return 0
 }
 
-func (c *RGB8) SetColor(val byte, color RGB8Color) {
+func (c RGB8) SetColor(val byte, color RGB8Color) {
 	switch color {
 	case R:
 		c.R = val
