@@ -76,7 +76,7 @@ func (s *screen) RGB8At(x, y int) raw.RGB8 {
 		return raw.RGB8{}
 	}
 	i := s.PixOffset(x, y)
-	return raw.RGB8{s.pix[i+0], s.pix[i+1], s.pix[i+2]}
+	return raw.RGB8{R: s.pix[i+0], G: s.pix[i+1], B: s.pix[i+2]}
 }
 
 func (s *screen) PixOffset(x, y int) int {
