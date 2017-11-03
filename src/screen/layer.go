@@ -2,6 +2,7 @@ package screen
 
 import (
 	"fmt"
+	"image"
 	"image/draw"
 )
 
@@ -10,7 +11,7 @@ type Layer interface {
 	GetZ() int
 	GetImage() draw.Image
 	GetBlendType() BlendType
-	SetMask(mask draw.Image)
+	SetMask(mask draw.Image, maskOrigin image.Point)
 }
 
 type BlendType string
@@ -20,10 +21,12 @@ const (
 )
 
 type layer struct {
-	zPos      int
-	img       draw.Image
-	blendType BlendType
-	mask      draw.Image
+	zPos       int
+	img        draw.Image
+	blendType  BlendType
+	mask       draw.Image
+	maskOrigin image.Point
+	//TODO: antiAliasing
 }
 
 func (l *layer) GetZ() int {
@@ -38,8 +41,9 @@ func (l *layer) GetBlendType() BlendType {
 	return l.blendType
 }
 
-func (l *layer) SetMask(mask draw.Image) {
+func (l *layer) SetMask(mask draw.Image, maskOrigin image.Point) {
 	l.mask = mask
+	l.maskOrigin = maskOrigin
 }
 
 func (l *layer) Blend(higher Layer) (Layer, error) {
@@ -59,14 +63,12 @@ func (l *layer) overWrite(higher Layer) (Layer, error) {
 			higher.GetZ(), l.zPos)
 	}
 
-	newLayer := new(layer)
-	if l.zPos < higher.GetZ() {
-		newLayer.zPos = higher.GetZ()
-	} else {
+	if l.zPos >= higher.GetZ() {
 		return nil, fmt.Errorf("higher layer %v must have a bigger z value than %v",
 			higher.GetZ(), l.zPos)
 	}
-	draw.Draw(newLayer.img, lowerRect, higher.GetImage(), newLayer.img.Bounds().Min, draw.Over)
+	draw.DrawMask(l.img, lowerRect, higher.GetImage(), l.img.Bounds().Min, l.mask, l.maskOrigin, draw.Over)
 
-	return newLayer, nil
+	//TODO: do return copy?!
+	return l, nil
 }

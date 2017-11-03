@@ -22,6 +22,7 @@ type screen struct {
 	modules       []Module
 	stride        int
 	pix           []byte
+	layers        []Layer
 }
 
 type Module interface {
@@ -59,6 +60,7 @@ func New(configFile string, name device.Type) (*screen, error) {
 	s.numPix = numPix
 	s.device, err = device.NewSpiDevice(name, numPix)
 	s.pix = make([]byte, raw.RGB8NumBytes*s.width*s.height)
+	s.layers = make([]Layer, 0)
 	if err != nil {
 		return nil, err
 	}
@@ -108,10 +110,13 @@ func (s *screen) SetRGB8(x, y int, c raw.RGB8) {
 	s.pix[i+0] = c.R
 	s.pix[i+1] = c.G
 	s.pix[i+2] = c.B
-
 }
 
-func (s *screen) Write() error {
+func (s *screen) AddLayer(l Layer) {
+	s.layers = append(s.layers, l)
+}
+
+func (s *screen) write() error {
 	buffer := make([]byte, 0)
 	for _, m := range s.modules {
 		buffer = append(buffer, m.Serialize(s)...)
