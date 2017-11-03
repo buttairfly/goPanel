@@ -1,5 +1,10 @@
 package screen
 
+/*
+ * screen has a byte buffer containing the image
+ * the image needs to be set via the Set(.) method
+ */
+
 import (
 	"fmt"
 	"image"
@@ -53,6 +58,7 @@ func New(configFile string, name device.Type) (*screen, error) {
 	s.stride = s.width * raw.RGB8NumBytes
 	s.numPix = numPix
 	s.device, err = device.NewSpiDevice(name, numPix)
+	s.pix = make([]byte, raw.RGB8NumBytes*s.width*s.height)
 	if err != nil {
 		return nil, err
 	}
