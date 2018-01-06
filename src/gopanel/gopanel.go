@@ -16,11 +16,12 @@ func main() {
 		log.Fatal(err)
 	}
 	defer pixelDevice.Close()
+
 	for {
-		for c := byte(0x00); c < 0xFF; c++ {
+		for c := 0; c < 0x100; c++ {
 			data := make([]byte, bufferSize, bufferSize)
 			for i := range data {
-				data[i] = c
+				data[i] = byte(c)
 			}
 			pixelDevice.Write(data)
 		}
