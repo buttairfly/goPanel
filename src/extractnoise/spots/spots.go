@@ -14,6 +14,15 @@ type spots struct {
 	Width  int
 }
 
+var _ Spots = spots{}
+
+func NewSpots(width int, points []image.Point) Spots {
+	return &spots{
+		Points: points,
+		Width:  width,
+	}
+}
+
 func (s spots) Len() int {
 	return len(s.Points)
 }
