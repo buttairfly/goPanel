@@ -2,9 +2,7 @@ package device
 
 import (
 	"fmt"
-
 	"sync"
-
 	"log"
 
 	"github.com/luismesas/goPi/spi"

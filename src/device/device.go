@@ -31,7 +31,7 @@ func NewSpiDevice(t Type, length int) (SpiDevice, error) {
 		}
 		return pixelDevice, nil
 	case WS2801:
-		pixelDevice = NewWs2801Device(200)
+		pixelDevice = NewWs2801Device(length)
 		if err := pixelDevice.Open(); err != nil {
 			return nil, err
 		}
