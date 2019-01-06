@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-	"time"
 
 	"github.com/buttairfly/goPanel/src/device"
 )
@@ -23,11 +22,10 @@ func main() {
 		for c := 0; c < 0x100; c++ {
 			data := make([]byte, bufferSize, bufferSize)
 			for i := range data {
-				data[i] = byte(c)
+				data[i] = byte(i + c)
 			}
 			pixelDevice.Write(data)
-
-			time.Sleep(100 * time.Millisecond)
+			//time.Sleep(time.Second)
 		}
 	}
 }
