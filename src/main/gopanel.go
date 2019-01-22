@@ -9,7 +9,7 @@ import (
 func main() {
 	const (
 		panelLed   = 200
-		bufferSize = panelLed * device.WS2801NumColor
+		bufferSize = panelLed * device.NumBytePerColor
 	)
 	pixelDevice, err := device.NewSpiDevice(device.WS2801, panelLed)
 	//pixelDevice, err := device.NewSpiDevice(device.Print, panelLed)

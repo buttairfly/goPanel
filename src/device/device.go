@@ -5,6 +5,10 @@ import (
 	"sync"
 )
 
+const (
+	NumBytePerColor = 3
+)
+
 type SpiDevice interface {
 	Open() error
 	Run(wg *sync.WaitGroup)
@@ -17,8 +21,9 @@ type SpiDevice interface {
 type Type string
 
 const (
-	Print  = Type("print")
-	WS2801 = Type("ws2801")
+	Print  = Type("print")  // Print debug print device
+	WS2801 = Type("ws2801") // direct spi serial device
+	Serial = Type("serial") // high level serial tty device
 )
 
 func NewSpiDevice(t Type, length int) (SpiDevice, error) {
@@ -32,6 +37,11 @@ func NewSpiDevice(t Type, length int) (SpiDevice, error) {
 		return pixelDevice, nil
 	case WS2801:
 		pixelDevice = NewWs2801Device(length)
+		if err := pixelDevice.Open(); err != nil {
+			return nil, err
+		}
+	case Serial:
+		pixelDevice = NewSerialDevice(length)
 		if err := pixelDevice.Open(); err != nil {
 			return nil, err
 		}
