@@ -1,4 +1,4 @@
-# github.com/davecgh/go-spew v0.0.0-20171005155431-ecdeabc65495
+# github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
 # github.com/luismesas/go-rpi v1.0.2
 github.com/luismesas/go-rpi/ioctl
@@ -6,7 +6,7 @@ github.com/luismesas/go-rpi/ioctl
 github.com/luismesas/goPi/spi
 # github.com/pmezard/go-difflib v1.0.0
 github.com/pmezard/go-difflib/difflib
-# github.com/stretchr/testify v0.0.0-20170809224252-890a5c3458b4
+# github.com/stretchr/testify v1.3.0
 github.com/stretchr/testify/assert
 github.com/stretchr/testify/require
 # github.com/tarm/serial v0.0.0-20180830185346-98f6abe2eb07

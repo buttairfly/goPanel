@@ -24,7 +24,7 @@ type ws2801 struct {
 // NewWs2801Device creates a new direct spi WS2801 device
 func NewWs2801Device(numLed int) *ws2801 {
 	ws := new(ws2801)
-	ws.device = spi.NewSPIDevice(spi.DEFAULT_BUS, spi.DEFAULT_CHIP, ws2801Delay)
+	ws.device = spi.NewSPIDevice(spi.DEFAULT_BUS, spi.DEFAULT_CHIP)
 	ws.numLed = numLed
 	return ws
 }
@@ -63,7 +63,11 @@ func (ws *ws2801) Write(data []byte) (int, error) {
 			"could not write %v bytes of data, %v is needed",
 			len(data), ws.numLed*NumBytePerColor)
 	}
-	_, err := ws.device.Send(data)
+	array := [3]byte{0, 0, 0}
+	for i := 0; i < 3; i++ {
+		array[i] = data[i]
+	}
+	_, err := ws.device.Send(array)
 	return len(data), err
 }
 
