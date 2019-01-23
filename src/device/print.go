@@ -11,6 +11,7 @@ type printDevice struct {
 	numPix int
 }
 
+// NewPrintDevice creates a new printDevice
 func NewPrintDevice(numPix int) *printDevice {
 	pd := new(printDevice)
 	pd.numPix = numPix

@@ -11,8 +11,9 @@ func main() {
 		panelLed   = 200
 		bufferSize = panelLed * device.NumBytePerColor
 	)
-	pixelDevice, err := device.NewSpiDevice(device.WS2801, panelLed)
-	//pixelDevice, err := device.NewSpiDevice(device.Print, panelLed)
+	pixelDevice, err := device.NewLedDevice(device.Serial, panelLed)
+	//pixelDevice, err := device.NewLedDevice(device.WS2801, panelLed)
+	//pixelDevice, err := device.NewLedDevice(device.Print, panelLed)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -24,7 +25,7 @@ func main() {
 			for i := range data {
 				data[i] = byte(i + c)
 			}
-			pixelDevice.Write(data)
+			//pixelDevice.Write(data)
 			//time.Sleep(time.Second)
 		}
 	}

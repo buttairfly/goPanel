@@ -16,12 +16,13 @@ type serialDevice struct {
 	input  <-chan []byte
 }
 
+// NewSerialDevice creates a new serial device
 func NewSerialDevice(numLed int) *serialDevice {
 	s := new(serialDevice)
 	s.config = &serial.Config{
 		Name:        "/dev/ttyUSB0",
 		Baud:        1152000,
-		ReadTimeout: time.Second,
+		ReadTimeout: time.Millisecond,
 		Size:        8,
 	}
 	s.numLed = numLed
@@ -34,8 +35,23 @@ func (s *serialDevice) Open() error {
 	if err != nil {
 		return err
 	}
+	s.init()
+	return err
+}
 
-	return nil
+func (s *serialDevice) init() {
+	command := "I00C8\n"
+	_, err := s.stream.Write([]byte(command))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	buf := make([]byte, 1024)
+	n, errRead := s.stream.Read(buf)
+	if errRead != nil {
+		log.Fatal(errRead)
+	}
+	log.Printf("%q", buf[:n])
 }
 
 func (s *serialDevice) Close() error {
@@ -48,20 +64,10 @@ func (s *serialDevice) Write(data []byte) (int, error) {
 			"could not write %v bytes of data, %v is needed",
 			len(data), s.numLed*NumBytePerColor)
 	}
-	//
-	command := "$INIT_LED_NUM$00C8$"
-	n, err := s.stream.Write([]byte(command))
+	n, err := s.stream.Write(data)
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	buf := make([]byte, 1024)
-	n, err = s.stream.Read(buf)
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Printf("%q", buf[:n])
-	//
 	return n, err
 }
 

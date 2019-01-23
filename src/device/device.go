@@ -6,10 +6,12 @@ import (
 )
 
 const (
+	// NumBytePerColor is the number of bytes per pixel
 	NumBytePerColor = 3
 )
 
-type SpiDevice interface {
+// LedDevice interface for all
+type LedDevice interface {
 	Open() error
 	Run(wg *sync.WaitGroup)
 	Write(data []byte) (int, error)
@@ -18,35 +20,33 @@ type SpiDevice interface {
 	GetType() Type
 }
 
+// Type is a LedDevice type
 type Type string
 
 const (
-	Print  = Type("print")  // Print debug print device
-	WS2801 = Type("ws2801") // direct spi serial device
-	Serial = Type("serial") // high level serial tty device
+	// Print debug print device
+	Print = Type("print")
+	// WS2801 direct spi serial device
+	WS2801 = Type("ws2801")
+	// Serial high level serial tty device
+	Serial = Type("serial")
 )
 
-func NewSpiDevice(t Type, length int) (SpiDevice, error) {
-	var pixelDevice SpiDevice
+// NewLedDevice creates a new Led device
+func NewLedDevice(t Type, length int) (LedDevice, error) {
+	var pixelDevice LedDevice
 	switch t {
 	case Print:
 		pixelDevice = NewPrintDevice(length)
-		if err := pixelDevice.Open(); err != nil {
-			return nil, err
-		}
-		return pixelDevice, nil
 	case WS2801:
 		pixelDevice = NewWs2801Device(length)
-		if err := pixelDevice.Open(); err != nil {
-			return nil, err
-		}
 	case Serial:
 		pixelDevice = NewSerialDevice(length)
-		if err := pixelDevice.Open(); err != nil {
-			return nil, err
-		}
 	default:
-		return nil, fmt.Errorf("unkown spi device type: %v", t)
+		return nil, fmt.Errorf("unkown led device type: %v", t)
+	}
+	if err := pixelDevice.Open(); err != nil {
+		return nil, err
 	}
 	return pixelDevice, nil
 }
