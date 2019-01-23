@@ -22,7 +22,7 @@ func NewSerialDevice(numLed int) *serialDevice {
 	s.config = &serial.Config{
 		Name:        "/dev/ttyUSB0",
 		Baud:        1152000,
-		ReadTimeout: time.Millisecond,
+		ReadTimeout: 500 * time.Millisecond,
 		Size:        8,
 	}
 	s.numLed = numLed
