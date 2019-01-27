@@ -2,6 +2,7 @@ package device
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"sync"
 	"time"
@@ -45,11 +46,16 @@ func (s *serialDevice) init() {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
 
+func (s *serialDevice) read() {
 	buf := make([]byte, 1024)
-	n, errRead := s.stream.Read(buf)
-	if errRead != nil {
-		log.Fatal(errRead)
+	n, err := s.stream.Read(buf)
+	if err != nil {
+		if err == io.EOF {
+			return
+		}
+		log.Fatal(err)
 	}
 	log.Printf("%q", buf[:n])
 }
@@ -78,11 +84,13 @@ func (s *serialDevice) SetInput(input <-chan []byte) {
 func (s *serialDevice) Run(wg *sync.WaitGroup) {
 	defer wg.Done()
 	defer s.Close()
-	for buffer := range s.input {
-		_, err := s.Write(buffer)
-		if err != nil {
-			log.Panic(err)
-		}
+	for range s.input {
+		//for buffer := range s.input {
+		//	_, err := s.Write(buffer)
+		//if err != nil {
+		//	log.Panic(err)
+		//}
+		s.read()
 	}
 }
 
