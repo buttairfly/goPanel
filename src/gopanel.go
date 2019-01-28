@@ -12,6 +12,9 @@ func main() {
 		panelLed   = 200
 		bufferSize = panelLed * device.NumBytePerColor
 	)
+
+	log.SetFlags(log.Ldate | log.Ltime | log.Lmicroseconds | log.Llongfile | log.LUTC)
+
 	pixelDevice, err := device.NewLedDevice(device.Serial, panelLed)
 	//pixelDevice, err := device.NewLedDevice(device.WS2801, panelLed)
 	//pixelDevice, err := device.NewLedDevice(device.Print, panelLed)
