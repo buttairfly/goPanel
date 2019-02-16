@@ -6,6 +6,7 @@ import (
 	"log"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/tarm/serial"
 )
@@ -23,7 +24,7 @@ func NewSerialDevice(numLed int) LedDevice {
 	s.config = &serial.Config{
 		Name:        "/dev/ttyUSB0",
 		Baud:        1152000,
-		ReadTimeout: 0,
+		ReadTimeout: time.Second,
 		Size:        8,
 	}
 	s.numLed = numLed
