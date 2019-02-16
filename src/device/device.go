@@ -8,6 +8,8 @@ import (
 const (
 	// NumBytePerColor is the number of bytes per pixel
 	NumBytePerColor = 3
+	// NumByteToRepresentHex is the number of bytes to represent one byte as hex number
+	NumByteToRepresentHex = 2
 )
 
 // LedDevice interface for all

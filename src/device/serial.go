@@ -88,12 +88,29 @@ func (s *serialDevice) SetInput(input <-chan []byte) {
 func (s *serialDevice) Run(wg *sync.WaitGroup) {
 	defer wg.Done()
 	defer s.Close()
-	for range s.input {
-		//for buffer := range s.input {
-		//	_, err := s.Write(buffer)
-		//if err != nil {
-		//	log.Panic(err)
-		//}
+	bufferSize := s.numLed * NumBytePerColor * NumByteToRepresentHex
+	buffer := make([]byte, bufferSize, bufferSize)
+	for frame := range s.input {
+		for i, b := range frame {
+			s := fmt.Sprintf("%2x", b)
+			bufIndex := i * NumByteToRepresentHex
+			buffer[bufIndex+0] = s[0]
+			buffer[bufIndex+1] = s[1]
+		}
+		for pixel := 0; pixel < s.numLed; pixel++ {
+			bufIndex := pixel * NumBytePerColor
+			command := fmt.Sprintf("P%4x%2x%2x%2x\n", pixel, buffer[bufIndex+0], buffer[bufIndex+1], buffer[bufIndex+2])
+			_, err := s.stream.Write([]byte(command))
+			if err != nil {
+				log.Fatal(err)
+			}
+			command = "S\n"
+			_, err = s.stream.Write([]byte(command))
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
+
 		s.read()
 	}
 }
