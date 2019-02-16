@@ -61,7 +61,6 @@ func (s *serialDevice) read(wg *sync.WaitGroup) {
 			n, err := s.stream.Read(buf)
 			if err != nil {
 				if err == io.EOF {
-					log.Println("Nothing to read")
 					continue
 				}
 				log.Fatal(err)
