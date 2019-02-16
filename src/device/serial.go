@@ -42,11 +42,9 @@ func (s *serialDevice) Open() error {
 }
 
 func (s *serialDevice) init() {
+	log.Println("INITIALIZE", s.numLed)
 	command := fmt.Sprintf("I%04x\n", s.numLed)
-	_, err := s.stream.Write([]byte(command))
-	if err != nil {
-		log.Fatal(err)
-	}
+	s.Write([]byte(command))
 }
 
 func (s *serialDevice) read() {
@@ -69,11 +67,7 @@ func (s *serialDevice) Close() error {
 }
 
 func (s *serialDevice) Write(data []byte) (int, error) {
-	if len(data) != s.numLed*NumBytePerColor {
-		return 0, fmt.Errorf(
-			"could not write %v bytes of data, %v is needed",
-			len(data), s.numLed*NumBytePerColor)
-	}
+	log.Print("write ", string(data))
 	n, err := s.stream.Write(data)
 	if err != nil {
 		log.Fatal(err)
@@ -88,38 +82,30 @@ func (s *serialDevice) SetInput(input <-chan []byte) {
 func (s *serialDevice) setPixel(pixel int, buffer []byte) {
 	bufIndex := pixel * NumBytePerColor
 	command := fmt.Sprintf("P%04x%02x%02x%02x\n", pixel, buffer[bufIndex+0], buffer[bufIndex+1], buffer[bufIndex+2])
-	log.Println("command", command)
-	_, err := s.stream.Write([]byte(command))
-	if err != nil {
-		log.Fatal(err)
-	}
+	s.Write([]byte(command))
+}
+
+func (s *serialDevice) shade(pixel int, buffer []byte) {
+	command := fmt.Sprintf("S%04x%02x%02x%02x\n", pixel, buffer[0], buffer[1], buffer[2])
+	s.Write([]byte(command))
 }
 
 func (s *serialDevice) latchFrame() {
 	command := "L\n"
-	_, err := s.stream.Write([]byte(command))
-	if err != nil {
-		log.Fatal(err)
-	}
+	s.Write([]byte(command))
 }
 
 func (s *serialDevice) Run(wg *sync.WaitGroup) {
 	defer wg.Done()
 	defer s.Close()
-	bufferSize := s.numLed * NumBytePerColor * NumByteToRepresentHex
-	buffer := make([]byte, bufferSize, bufferSize)
 	for frame := range s.input {
-		for i, b := range frame {
-			s := fmt.Sprintf("%2x", b)
-			bufIndex := i * NumByteToRepresentHex
-			buffer[bufIndex+0] = s[0]
-			buffer[bufIndex+1] = s[1]
-		}
-		for pixel := 0; pixel < s.numLed; pixel++ {
-			s.setPixel(pixel, buffer)
-		}
-		s.latchFrame()
-
+		/*
+			for pixel := 0; pixel < s.numLed; pixel++ {
+				s.setPixel(pixel, frame)
+			}
+			s.latchFrame()
+		*/
+		s.setPixel(s.numLed, frame[0:3])
 		s.read()
 	}
 }
