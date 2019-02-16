@@ -42,7 +42,7 @@ func (s *serialDevice) Open() error {
 }
 
 func (s *serialDevice) init() {
-	command := fmt.Sprintf("I%4x\n", s.numLed)
+	command := fmt.Sprintf("I%04x\n", s.numLed)
 	_, err := s.stream.Write([]byte(command))
 	if err != nil {
 		log.Fatal(err)
@@ -85,6 +85,24 @@ func (s *serialDevice) SetInput(input <-chan []byte) {
 	s.input = input
 }
 
+func (s *serialDevice) setPixel(pixel int, buffer []byte) {
+	bufIndex := pixel * NumBytePerColor
+	command := fmt.Sprintf("P%04x%02x%02x%02x\n", pixel, buffer[bufIndex+0], buffer[bufIndex+1], buffer[bufIndex+2])
+	log.Println("command", command)
+	_, err := s.stream.Write([]byte(command))
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func (s *serialDevice) latchFrame() {
+	command := "S\n"
+	_, err := s.stream.Write([]byte(command))
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
 func (s *serialDevice) Run(wg *sync.WaitGroup) {
 	defer wg.Done()
 	defer s.Close()
@@ -98,18 +116,9 @@ func (s *serialDevice) Run(wg *sync.WaitGroup) {
 			buffer[bufIndex+1] = s[1]
 		}
 		for pixel := 0; pixel < s.numLed; pixel++ {
-			bufIndex := pixel * NumBytePerColor
-			command := fmt.Sprintf("P%4x%2x%2x%2x\n", pixel, buffer[bufIndex+0], buffer[bufIndex+1], buffer[bufIndex+2])
-			_, err := s.stream.Write([]byte(command))
-			if err != nil {
-				log.Fatal(err)
-			}
-			command = "S\n"
-			_, err = s.stream.Write([]byte(command))
-			if err != nil {
-				log.Fatal(err)
-			}
+			s.setPixel(pixel, buffer)
 		}
+		s.latchFrame()
 
 		s.read()
 	}
