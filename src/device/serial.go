@@ -12,10 +12,11 @@ import (
 )
 
 type serialDevice struct {
-	config *serial.Config
-	stream *serial.Port
-	numLed int
-	input  <-chan []byte
+	config     *serial.Config
+	stream     *serial.Port
+	numLed     int
+	input      <-chan []byte
+	readActive chan bool
 }
 
 // NewSerialDevice creates a new serial device
@@ -24,7 +25,7 @@ func NewSerialDevice(numLed int) LedDevice {
 	s.config = &serial.Config{
 		Name:        "/dev/ttyUSB0",
 		Baud:        1152000,
-		ReadTimeout: 2000 * time.Millisecond,
+		ReadTimeout: 300 * time.Millisecond,
 		Size:        8,
 	}
 	s.numLed = numLed
@@ -47,18 +48,28 @@ func (s *serialDevice) init() {
 	s.Write([]byte(command))
 }
 
-func (s *serialDevice) read() {
+func (s *serialDevice) read(wg *sync.WaitGroup) {
+	defer wg.Done()
+	defer s.Close()
+
 	buf := make([]byte, 1024)
-	n, err := s.stream.Read(buf)
-	if err != nil {
-		if err == io.EOF {
+	for {
+		_, ok := <-s.readActive
+		if !ok {
 			return
 		}
-		log.Fatal(err)
-	}
-	lines := strings.Split(string(buf[:n]), "\n")
-	for _, line := range lines {
-		log.Println(line)
+
+		n, err := s.stream.Read(buf)
+		if err != nil {
+			if err == io.EOF {
+				continue
+			}
+			log.Fatal(err)
+		}
+		lines := strings.Split(string(buf[:n]), "\n")
+		for _, line := range lines {
+			log.Println(line)
+		}
 	}
 }
 
@@ -98,6 +109,12 @@ func (s *serialDevice) latchFrame() {
 func (s *serialDevice) Run(wg *sync.WaitGroup) {
 	defer wg.Done()
 	defer s.Close()
+	defer close(s.readActive)
+
+	s.readActive = make(chan bool)
+	wg.Add(1)
+	go s.read(wg)
+
 	for frame := range s.input {
 		/*
 			for pixel := 0; pixel < s.numLed; pixel++ {
@@ -106,7 +123,6 @@ func (s *serialDevice) Run(wg *sync.WaitGroup) {
 			s.latchFrame()
 		*/
 		s.shade(s.numLed, frame[0:3])
-		s.read()
 	}
 }
 
