@@ -25,7 +25,7 @@ func NewSerialDevice(numLed int) LedDevice {
 	s.config = &serial.Config{
 		Name:        "/dev/ttyUSB0",
 		Baud:        1152000,
-		ReadTimeout: 300 * time.Millisecond,
+		ReadTimeout: 1000 * time.Millisecond,
 		Size:        8,
 	}
 	s.numLed = numLed
@@ -50,27 +50,31 @@ func (s *serialDevice) init() {
 
 func (s *serialDevice) read(wg *sync.WaitGroup) {
 	defer wg.Done()
-	defer s.Close()
+	defer log.Println("closed read")
 
 	buf := make([]byte, 1024)
 	for {
-		_, ok := <-s.readActive
-		if !ok {
+		select {
+		case <-s.readActive:
 			return
-		}
-
-		n, err := s.stream.Read(buf)
-		if err != nil {
-			if err == io.EOF {
-				continue
+		default:
+			n, err := s.stream.Read(buf)
+			if err != nil {
+				if err == io.EOF {
+					log.Println("Nothing to read")
+					continue
+				}
+				log.Fatal(err)
 			}
-			log.Fatal(err)
-		}
-		lines := strings.Split(string(buf[:n]), "\n")
-		for _, line := range lines {
-			log.Println(line)
+			lines := strings.Split(string(buf[:n]), "\n")
+			for _, line := range lines {
+				if len(line) > 0 {
+					log.Println(line)
+				}
+			}
 		}
 	}
+
 }
 
 func (s *serialDevice) Close() error {
@@ -78,7 +82,7 @@ func (s *serialDevice) Close() error {
 }
 
 func (s *serialDevice) Write(data []byte) (int, error) {
-	log.Print("write ", string(data))
+	//log.Print("write ", string(data))
 	n, err := s.stream.Write(data)
 	if err != nil {
 		log.Fatal(err)
