@@ -33,7 +33,7 @@ func main() {
 		for c := 0; c < 0x100; c++ {
 			data := make([]byte, bufferSize, bufferSize)
 			for i := range data {
-				data[i] = byte(i + c)
+				data[i] = byte(c)
 			}
 			inputChan <- data
 			//pixelDevice.Write(data)
