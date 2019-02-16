@@ -96,7 +96,7 @@ func (s *serialDevice) setPixel(pixel int, buffer []byte) {
 }
 
 func (s *serialDevice) latchFrame() {
-	command := "S\n"
+	command := "L\n"
 	_, err := s.stream.Write([]byte(command))
 	if err != nil {
 		log.Fatal(err)
