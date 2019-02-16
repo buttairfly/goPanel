@@ -42,7 +42,8 @@ func (s *serialDevice) Open() error {
 }
 
 func (s *serialDevice) init() {
-	command := "I00C8\n"
+	//command := "I00C8\n"
+	command := "I1234\n"
 	_, err := s.stream.Write([]byte(command))
 	if err != nil {
 		log.Fatal(err)
