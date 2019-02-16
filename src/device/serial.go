@@ -6,7 +6,6 @@ import (
 	"log"
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/tarm/serial"
 )
@@ -19,12 +18,12 @@ type serialDevice struct {
 }
 
 // NewSerialDevice creates a new serial device
-func NewSerialDevice(numLed int) *serialDevice {
+func NewSerialDevice(numLed int) LedDevice {
 	s := new(serialDevice)
 	s.config = &serial.Config{
 		Name:        "/dev/ttyUSB0",
 		Baud:        1152000,
-		ReadTimeout: 500 * time.Millisecond,
+		ReadTimeout: 0,
 		Size:        8,
 	}
 	s.numLed = numLed

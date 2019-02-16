@@ -15,21 +15,21 @@ const (
 	ws2801Delay = uint16(1000)
 )
 
-type ws2801 struct {
+type ws2801Device struct {
 	device *spi.SPIDevice
 	numLed int
 	input  <-chan []byte
 }
 
 // NewWs2801Device creates a new direct spi WS2801 device
-func NewWs2801Device(numLed int) *ws2801 {
-	ws := new(ws2801)
+func NewWs2801Device(numLed int) LedDevice {
+	ws := new(ws2801Device)
 	ws.device = spi.NewSPIDevice(spi.DEFAULT_BUS, spi.DEFAULT_CHIP)
 	ws.numLed = numLed
 	return ws
 }
 
-func (ws *ws2801) Open() error {
+func (ws *ws2801Device) Open() error {
 	err := ws.device.Open()
 	if err != nil {
 		return err
@@ -53,11 +53,11 @@ func (ws *ws2801) Open() error {
 	return nil
 }
 
-func (ws *ws2801) Close() error {
+func (ws *ws2801Device) Close() error {
 	return ws.device.Close()
 }
 
-func (ws *ws2801) Write(data []byte) (int, error) {
+func (ws *ws2801Device) Write(data []byte) (int, error) {
 	if len(data) != ws.numLed*NumBytePerColor {
 		return 0, fmt.Errorf(
 			"could not write %v bytes of data, %v is needed",
@@ -71,11 +71,11 @@ func (ws *ws2801) Write(data []byte) (int, error) {
 	return len(data), err
 }
 
-func (ws *ws2801) SetInput(input <-chan []byte) {
+func (ws *ws2801Device) SetInput(input <-chan []byte) {
 	ws.input = input
 }
 
-func (ws *ws2801) Run(wg *sync.WaitGroup) {
+func (ws *ws2801Device) Run(wg *sync.WaitGroup) {
 	defer wg.Done()
 	defer ws.Close()
 	for buffer := range ws.input {
@@ -86,6 +86,6 @@ func (ws *ws2801) Run(wg *sync.WaitGroup) {
 	}
 }
 
-func (ws *ws2801) GetType() Type {
+func (ws *ws2801Device) GetType() Type {
 	return WS2801
 }

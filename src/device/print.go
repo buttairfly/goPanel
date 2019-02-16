@@ -12,7 +12,7 @@ type printDevice struct {
 }
 
 // NewPrintDevice creates a new printDevice
-func NewPrintDevice(numPix int) *printDevice {
+func NewPrintDevice(numPix int) LedDevice {
 	pd := new(printDevice)
 	pd.numPix = numPix
 	return pd
