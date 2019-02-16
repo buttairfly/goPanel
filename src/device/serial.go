@@ -49,8 +49,9 @@ func (s *serialDevice) init() {
 }
 
 func (s *serialDevice) read(wg *sync.WaitGroup) {
+	lastLine := ""
 	defer wg.Done()
-	defer log.Println("closed read")
+	defer log.Println(lastLine)
 
 	buf := make([]byte, 1024)
 	for {
@@ -65,7 +66,15 @@ func (s *serialDevice) read(wg *sync.WaitGroup) {
 				}
 				log.Fatal(err)
 			}
-			lines := strings.Split(string(buf[:n]), "\n")
+			s := lastLine + string(buf[:n])
+			lines := strings.Split(s, "\n")
+			if s[len(s)-1] != '\n' {
+				numLines := len(lines) - 1
+				lastLine = lines[numLines]
+				lines = lines[:numLines]
+			} else {
+				lastLine = ""
+			}
 			for _, line := range lines {
 				if len(line) > 0 {
 					log.Println(line)
