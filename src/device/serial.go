@@ -135,6 +135,7 @@ func (s *serialDevice) Run(wg *sync.WaitGroup) {
 			s.latchFrame()
 		*/
 		s.shade(s.numLed, frame[0:3])
+		time.Sleep(21 * time.Millisecond)
 	}
 }
 
