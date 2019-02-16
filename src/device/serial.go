@@ -105,7 +105,7 @@ func (s *serialDevice) Run(wg *sync.WaitGroup) {
 			}
 			s.latchFrame()
 		*/
-		s.setPixel(s.numLed, frame[0:3])
+		s.shade(s.numLed, frame[0:3])
 		s.read()
 	}
 }
