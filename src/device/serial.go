@@ -24,7 +24,7 @@ func NewSerialDevice(numLed int) LedDevice {
 	s.config = &serial.Config{
 		Name:        "/dev/ttyUSB0",
 		Baud:        1152000,
-		ReadTimeout: time.Second,
+		ReadTimeout: 2000 * time.Millisecond,
 		Size:        8,
 	}
 	s.numLed = numLed
@@ -42,8 +42,7 @@ func (s *serialDevice) Open() error {
 }
 
 func (s *serialDevice) init() {
-	//command := "I00C8\n"
-	command := "I1234\n"
+	command := "I00C8\n"
 	_, err := s.stream.Write([]byte(command))
 	if err != nil {
 		log.Fatal(err)
