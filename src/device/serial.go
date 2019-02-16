@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"strings"
 	"sync"
 	"time"
 
@@ -57,7 +58,10 @@ func (s *serialDevice) read() {
 		}
 		log.Fatal(err)
 	}
-	log.Printf("%q", buf[:n])
+	lines := strings.Split(string(buf[:n]), "\n")
+	for _, line := range lines {
+		log.Println(line)
+	}
 }
 
 func (s *serialDevice) Close() error {
