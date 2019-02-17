@@ -38,7 +38,6 @@ func (s *serialDevice) Open() error {
 	if err != nil {
 		return err
 	}
-	s.init()
 	return err
 }
 
@@ -132,6 +131,10 @@ func (s *serialDevice) Run(wg *sync.WaitGroup) {
 	const latchDelay = 11 * time.Millisecond
 	lastFrameTime := time.Now().Add(-latchDelay)
 
+	// initialize bitbanger with number of leds
+	time.Sleep(latchDelay)
+	s.init()
+
 	for frame := range s.input {
 		now := time.Now()
 		sleepDuration := latchDelay - (now.Sub(lastFrameTime))
@@ -141,7 +144,7 @@ func (s *serialDevice) Run(wg *sync.WaitGroup) {
 		// log.Print("frame ", frame)
 		for pixel := 0; pixel < s.numLed; pixel++ {
 			s.setPixel(pixel, frame)
-			time.Sleep(10 * time.Microsecond)
+			time.Sleep(100 * time.Microsecond)
 		}
 		s.latchFrame()
 		//s.shade(s.numLed, frame[0:3])
