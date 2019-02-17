@@ -1,12 +1,17 @@
 #!/bin/bash
 
-if env GOOS=linux GOARCH=arm GOARM=5 go build ./src/gopanel.go ; then
-    echo "build  ./src/gopanel.go"
-    if scp gopanel pi@ledpix:~/goPanel ; then
-        echo "deploy ./src/gopanel.go"
+BINARY=gopanel
+VERSION=`git describe --tags --always --dirty`
+DATE=`date -u +%FT%T%z`
+echo "${BINARY}: compiled at ${DATE} with version ${VERSION}"
+
+if env GOOS=linux GOARCH=arm GOARM=5 go build -ldflags "-X main.compileDate=${DATE} -X main.versionTag=${VERSION}" -o ${BINARY} ./src ; then
+    echo "build  ${BINARY}"
+    if scp ${BINARY} pi@ledpix:~/goPanel ; then
+        echo "deploy ${BINARY}"
         exit 0
-    elif scp gopanel pi@ledpix.fritz.box:~/goPanel ; then
-        echo "deploy ./src/gopanel.go"
+    elif scp ${BINARY} pi@ledpix.fritz.box:~/goPanel ; then
+        echo "deploy ${BINARY}"
         exit 0
     else
         echo "deploy failed" >&2

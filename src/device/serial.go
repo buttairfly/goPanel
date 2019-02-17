@@ -90,7 +90,7 @@ func (s *serialDevice) Close() error {
 }
 
 func (s *serialDevice) Write(data []byte) (int, error) {
-	//log.Print("write ", string(data))
+	// log.Print("write ", string(data))
 	n, err := s.stream.Write(data)
 	if err != nil {
 		log.Fatal(err)
@@ -136,8 +136,10 @@ func (s *serialDevice) Run(wg *sync.WaitGroup) {
 		if sleepDuration > 0 {
 			time.Sleep(sleepDuration)
 		}
+		// log.Print("frame ", frame)
 		for pixel := 0; pixel < s.numLed; pixel++ {
 			s.setPixel(pixel, frame)
+			time.Sleep(10 * time.Microsecond)
 		}
 		s.latchFrame()
 		//s.shade(s.numLed, frame[0:3])
