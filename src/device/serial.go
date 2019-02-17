@@ -43,7 +43,7 @@ func (s *serialDevice) Open() error {
 
 func (s *serialDevice) init() {
 	log.Println("Arduino version:")
-	command := "V"
+	command := "V\n"
 	s.Write([]byte(command))
 	command = fmt.Sprintf("I%04x\n", s.numLed)
 	s.Write([]byte(command))

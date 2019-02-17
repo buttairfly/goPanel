@@ -1,9 +1,16 @@
 #!/bin/bash
 
+# color codes
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+LIGHT_BLUE='\033[1;34m'
+NC='\033[0m' # No Color
+
 BINARY=gopanel
 VERSION=`git describe --always --dirty`
 DATE=`date -u +%FT%T%z`
-echo "${BINARY}: compiled at ${DATE} with version ${VERSION}"
+
+echo -e "${GREEN}${BINARY}${NC}: compiled at ${BLUE}${DATE}${NC} with version ${LIGHT_BLUE}${VERSION}${NC}"
 
 if env GOOS=linux GOARCH=arm GOARM=5 go build -ldflags "-X main.compileDate=${DATE} -X main.versionTag=${VERSION}" -o ${BINARY} ./src ; then
     echo "build  ${BINARY}"
