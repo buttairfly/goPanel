@@ -1,7 +1,7 @@
 #!/bin/bash
 
 BINARY=gopanel
-VERSION=`git describe --tags --always --dirty`
+VERSION=`git describe --always --dirty`
 DATE=`date -u +%FT%T%z`
 echo "${BINARY}: compiled at ${DATE} with version ${VERSION}"
 
