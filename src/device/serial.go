@@ -127,15 +127,20 @@ func (s *serialDevice) Run(wg *sync.WaitGroup) {
 	wg.Add(1)
 	go s.read(wg)
 
+	const latchDelay = 11 * time.Millisecond
+	lastFrameTime := time.Now().Add(-latchDelay)
+
 	for frame := range s.input {
-		/*
-			for pixel := 0; pixel < s.numLed; pixel++ {
-				s.setPixel(pixel, frame)
-			}
-			s.latchFrame()
-		*/
-		s.shade(s.numLed, frame[0:3])
-		time.Sleep(21 * time.Millisecond)
+		now := time.Now()
+		sleepDuration := latchDelay - (now.Sub(lastFrameTime))
+		if sleepDuration > 0 {
+			time.Sleep(sleepDuration)
+		}
+		for pixel := 0; pixel < s.numLed; pixel++ {
+			s.setPixel(pixel, frame)
+		}
+		s.latchFrame()
+		//s.shade(s.numLed, frame[0:3])
 	}
 }
 
