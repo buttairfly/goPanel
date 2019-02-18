@@ -40,15 +40,18 @@ func main() {
 
 	wg.Add(1)
 	go pixelDevice.Run(wg)
+
+	frame := make([]byte, bufferSize, bufferSize) // one buffer only as state
 	for {
-		for c := 0; c < 0x100; c++ {
-			data := make([]byte, bufferSize, bufferSize)
-			for i := range data {
-				data[i] = byte(c)
+		for c := 0; c < device.NumBytePerColor; c++ {
+			for b := 0; b < panelLed*device.NumBytePerColor; b++ {
+				if b%device.NumBytePerColor == c {
+					frame[b] = 0xff
+					data := make([]byte, bufferSize, bufferSize)
+					copy(data, frame)
+					inputChan <- data
+				}
 			}
-			inputChan <- data
-			//pixelDevice.Write(data)
-			//time.Sleep(time.Second)
 		}
 	}
 }
