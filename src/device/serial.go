@@ -42,11 +42,12 @@ func (s *serialDevice) Open() error {
 }
 
 func (s *serialDevice) init() {
-	log.Println("Arduino version:")
 	command := "V\n"
 	s.Write([]byte(command))
+	time.Sleep(10 * time.Millisecond)
 	command = fmt.Sprintf("I%04x\n", s.numLed)
 	s.Write([]byte(command))
+	time.Sleep(10 * time.Millisecond)
 }
 
 func (s *serialDevice) read(wg *sync.WaitGroup) {
