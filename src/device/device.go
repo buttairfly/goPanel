@@ -28,8 +28,6 @@ type Type string
 const (
 	// Print debug print device
 	Print = Type("print")
-	// WS2801 direct spi serial device
-	WS2801 = Type("ws2801")
 	// Serial high level serial tty device
 	Serial = Type("serial")
 )
@@ -40,8 +38,6 @@ func NewLedDevice(t Type, length int) (LedDevice, error) {
 	switch t {
 	case Print:
 		pixelDevice = NewPrintDevice(length)
-	case WS2801:
-		pixelDevice = NewWs2801Device(length)
 	case Serial:
 		pixelDevice = NewSerialDevice(length)
 	default:

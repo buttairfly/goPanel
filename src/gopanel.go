@@ -27,7 +27,6 @@ func main() {
 	printProgramInfo()
 
 	pixelDevice, err := device.NewLedDevice(device.Serial, panelLed)
-	//pixelDevice, err := device.NewLedDevice(device.WS2801, panelLed)
 	//pixelDevice, err := device.NewLedDevice(device.Print, panelLed)
 	if err != nil {
 		log.Fatal(err)
@@ -44,16 +43,28 @@ func main() {
 	frame := make([]byte, bufferSize, bufferSize) // one buffer only as state
 	for {
 		for c := 0; c < device.NumBytePerColor; c++ {
-			for b := 0; b < panelLed*device.NumBytePerColor; b++ {
-				if b%device.NumBytePerColor == c {
-					frame[b] = 0xff
-					data := make([]byte, bufferSize, bufferSize)
-					copy(data, frame)
-					inputChan <- data
-				}
+			for p := 0; p < panelLed; p++ {
+				frame = setStripPixelToColor(frame, p, rgbToColor(c%3 * 0xff, c%, b))
+
+				data := make([]byte, bufferSize, bufferSize)
+				copy(data, frame)
+				inputChan <- data
+
 			}
 		}
 	}
+}
+
+func rgbToColor(r, g, b byte) int {
+	return (int(r)<<16 | int(g)<<8 | int(b)) & 0xffffff
+}
+
+func setStripPixelToColor(frame []byte, posOnStrip int, color int) []byte {
+	pos := posOnStrip * device.NumBytePerColor
+	frame[pos+0] = byte(color >> 16)
+	frame[pos+1] = byte(color >> 8)
+	frame[pos+2] = byte(color)
+	return frame
 }
 
 func printProgramInfo() {
