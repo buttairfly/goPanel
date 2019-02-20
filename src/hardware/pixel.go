@@ -64,6 +64,7 @@ func (p Pixel) Dim(scale uint8) {
 	}
 }
 
+// Equals checks wheather the color of orhter and this pixel is identical
 func (p Pixel) Equals(other Pixel) bool {
 	return p[R] == other[R] && p[G] == other[G] && p[B] == other[B]
 }
