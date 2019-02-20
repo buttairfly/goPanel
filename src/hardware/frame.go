@@ -8,7 +8,7 @@ import (
 // Frame is a hardware frame
 type Frame interface {
 	image.Image
-	toLedStripe() ledStipe
+	ToLedStripe() LedStripe
 }
 
 type frame struct {
@@ -17,7 +17,7 @@ type frame struct {
 }
 
 // NewFrame return new Frame
-func NewFrame(modules []Module) *frame {
+func NewFrame(modules []Module) Frame {
 	r := image.ZR
 	for _, m := range modules {
 		r = r.Union(m.Bounds())
@@ -28,8 +28,8 @@ func NewFrame(modules []Module) *frame {
 	}
 }
 
-func (f *frame) toLedStripe() *ledStipe {
-	return &ledStipe{}
+func (f *frame) ToLedStripe() LedStripe {
+	return &ledStripe{}
 }
 
 // implements image interface

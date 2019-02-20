@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/buttairfly/goPanel/src/device"
+	"github.com/buttairfly/goPanel/src/hardware"
 )
 
 var (
@@ -43,8 +44,17 @@ func main() {
 	frame := make([]byte, bufferSize, bufferSize) // one buffer only as state
 	for {
 		for c := 0; c < device.NumBytePerColor; c++ {
+			var pixel hardware.Pixel
+			switch c {
+			case hardware.R:
+				pixel = hardware.NewPixelFromInts(0xff, 0, 0)
+			case hardware.G:
+				pixel = hardware.NewPixelFromInts(0, 0xff, 0)
+			case hardware.B:
+				pixel = hardware.NewPixelFromInts(0, 0, 0xff)
+			}
 			for p := 0; p < panelLed; p++ {
-				frame = setStripPixelToColor(frame, p, rgbToColor(c%3 * 0xff, c%, b))
+				frame = setStripPixelToColor(frame, p, pixel.ToInt())
 
 				data := make([]byte, bufferSize, bufferSize)
 				copy(data, frame)
@@ -53,10 +63,6 @@ func main() {
 			}
 		}
 	}
-}
-
-func rgbToColor(r, g, b byte) int {
-	return (int(r)<<16 | int(g)<<8 | int(b)) & 0xffffff
 }
 
 func setStripPixelToColor(frame []byte, posOnStrip int, color int) []byte {

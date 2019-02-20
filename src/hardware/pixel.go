@@ -35,23 +35,28 @@ func NewPixelFromSlice(s []byte, pos int) Pixel {
 	return s[pos : pos+NumBytePixel]
 }
 
-func (p Pixel) toSlice() []uint8 {
+// ToSlice converts to an slice color value
+func (p Pixel) ToSlice() []uint8 {
 	return ([]uint8)(p)
 }
 
-func (p Pixel) toInt() int {
+// ToInt converts to an int color value
+func (p Pixel) ToInt() int {
 	return int(p[R])<<16 | int(p[G])<<8 | int(p[B])
 }
 
 // TODO: move to higher frame
-func (p Pixel) brighten(scale uint8) {
+
+// Brighten will make the pixel more light by scale
+func (p Pixel) Brighten(scale uint8) {
 	//TODO: handle overflow
 	p[R] *= scale
 	p[G] *= scale
 	p[B] *= scale
 }
 
-func (p Pixel) dim(scale uint8) {
+// Dim dimms the pixel by scale
+func (p Pixel) Dim(scale uint8) {
 	if scale != 0 {
 		p[R] /= scale
 		p[G] /= scale
@@ -59,6 +64,6 @@ func (p Pixel) dim(scale uint8) {
 	}
 }
 
-func (p Pixel) equals(other Pixel) bool {
+func (p Pixel) Equals(other Pixel) bool {
 	return p[R] == other[R] && p[G] == other[G] && p[B] == other[B]
 }
