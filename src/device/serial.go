@@ -42,12 +42,13 @@ func (s *serialDevice) Open() error {
 }
 
 func (s *serialDevice) init() {
+	s.stream.Flush()
 	command := "V\n"
 	s.Write([]byte(command))
-	time.Sleep(10 * time.Millisecond)
+	time.Sleep(20 * time.Millisecond)
 	command = fmt.Sprintf("I%04x\n", s.numLed)
 	s.Write([]byte(command))
-	time.Sleep(10 * time.Millisecond)
+	time.Sleep(20 * time.Millisecond)
 }
 
 func (s *serialDevice) read(wg *sync.WaitGroup) {
@@ -88,11 +89,10 @@ func (s *serialDevice) read(wg *sync.WaitGroup) {
 }
 
 func (s *serialDevice) Close() error {
-	return nil
+	return s.stream.Close()
 }
 
 func (s *serialDevice) Write(data []byte) (int, error) {
-	// log.Print("write ", string(data))
 	n, err := s.stream.Write(data)
 	if err != nil {
 		log.Fatal(err)
@@ -129,7 +129,7 @@ func (s *serialDevice) Run(wg *sync.WaitGroup) {
 	wg.Add(1)
 	go s.read(wg)
 
-	const latchDelay = 11 * time.Millisecond
+	const latchDelay = 20 * time.Millisecond
 	lastFrameTime := time.Now().Add(-latchDelay)
 
 	// initialize bitbanger with number of leds
@@ -139,13 +139,14 @@ func (s *serialDevice) Run(wg *sync.WaitGroup) {
 	for frame := range s.input {
 		now := time.Now()
 		sleepDuration := latchDelay - (now.Sub(lastFrameTime))
+		log.Println(sleepDuration, now.Sub(lastFrameTime))
 		if sleepDuration > 0 {
 			time.Sleep(sleepDuration)
 		}
-		// log.Print("frame ", frame)
+		lastFrameTime = now
 		for pixel := 0; pixel < s.numLed; pixel++ {
 			s.setPixel(pixel, frame)
-			time.Sleep(100 * time.Microsecond)
+			time.Sleep(180 * time.Microsecond)
 		}
 		s.latchFrame()
 		//s.shade(s.numLed, frame[0:3])
