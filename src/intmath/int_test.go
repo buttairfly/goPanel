@@ -1,4 +1,4 @@
-package helper
+package intmath
 
 import (
 	"testing"
@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestIntMap(t *testing.T) {
+func TestRescale(t *testing.T) {
 	cases := []struct {
 		desc                     string
 		in, inMin, inMax         int
@@ -44,12 +44,12 @@ func TestIntMap(t *testing.T) {
 		},
 	}
 	for _, c := range cases {
-		out := IntMap(c.in, c.inMin, c.inMax, c.outMin, c.outMax)
-		assert.Equal(t, c.expected, out, "equal mapping")
+		out := Rescale(c.in, c.inMin, c.inMax, c.outMin, c.outMax)
+		assert.Equal(t, c.expected, out, "equal rescale")
 	}
 }
 
-func TestIntConstrain(t *testing.T) {
+func TestConstrain(t *testing.T) {
 	cases := []struct {
 		desc         string
 		in, min, max int
@@ -95,7 +95,7 @@ func TestIntConstrain(t *testing.T) {
 		},
 	}
 	for _, c := range cases {
-		out := IntConstrain(c.in, c.min, c.max)
+		out := Constrain(c.in, c.min, c.max)
 		assert.Equal(t, c.expected, out, "equal constrain")
 	}
 }

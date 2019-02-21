@@ -42,6 +42,7 @@ func main() {
 	go pixelDevice.Run(wg)
 
 	frame := make([]byte, bufferSize, bufferSize) // one buffer only as state
+
 	for {
 		for c := 0; c < device.NumBytePerColor; c++ {
 			var pixel hardware.Pixel
@@ -59,7 +60,6 @@ func main() {
 				data := make([]byte, bufferSize, bufferSize)
 				copy(data, frame)
 				inputChan <- data
-
 			}
 		}
 	}

@@ -15,12 +15,12 @@ import (
 func TestNewSpotsFromConfig(t *testing.T) {
 	const testFolder = "testdata/"
 	cases := []struct {
-		desc       string
-		config     InputPictureConfig
-		resultFile string
-		actualFile string
-		fileName   string
-		err        error
+		desc           string
+		config         InputPictureConfig
+		resultFile     string
+		actualFile     string
+		configFileName string
+		err            error
 	}{
 		{
 			desc: "20x10_testconfig",
@@ -32,18 +32,18 @@ func TestNewSpotsFromConfig(t *testing.T) {
 				Height:     10,
 				Width:      20,
 			},
-			resultFile: testFolder + "expected.spots",
-			actualFile: testFolder + "actual.spots",
-			fileName:   testFolder + "20x10_spots.json",
+			resultFile:     testFolder + "expected.spots",
+			actualFile:     testFolder + "actual.spots",
+			configFileName: testFolder + "20x10_spots.json",
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.desc, func(t *testing.T) {
 			if testhelper.RecordCall() {
-				t.Logf("Write Config to file %v", c.fileName)
-				require.NoError(t, c.config.WriteToFile(c.fileName))
+				t.Logf("Write Config to file %v", c.configFileName)
+				require.NoError(t, c.config.WriteToFile(c.configFileName))
 			}
-			spots, err := NewSpotsFromConfig(c.fileName)
+			spots, err := NewSpotsFromConfig(c.configFileName)
 			data := []byte(spotsToStr(spots))
 			if testhelper.RecordCall() {
 				t.Logf("Write result to file %v", c.resultFile)

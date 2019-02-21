@@ -5,6 +5,7 @@ import (
 	"strconv"
 )
 
+// RecordCall checks environment variables to
 func RecordCall() bool {
 	param := os.Getenv("TEST_RECORD")
 	record, err := strconv.ParseBool(param)

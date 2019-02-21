@@ -47,8 +47,8 @@ func (ipc *InputPictureConfig) FromFile(path string) error {
 	return ipc.FromReader(f)
 }
 
-func (c *InputPictureConfig) WriteToFile(path string) error {
-	jsonConfig, err := json.MarshalIndent(c, "", "\t")
+func (ipc *InputPictureConfig) WriteToFile(path string) error {
+	jsonConfig, err := json.MarshalIndent(ipc, "", "\t")
 	if err != nil {
 		return err
 	}
