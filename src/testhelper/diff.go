@@ -7,7 +7,7 @@ import (
 
 // Diff runs the diff program with two file paths
 func Diff(t *testing.T, expectedFile, actualFile string) {
-	cmd := []string{"diff", "-cbB", expectedFile, actualFile}
+	cmd := []string{"diff", "-abBcd", expectedFile, actualFile}
 	RunCmd(t, cmd)
 }
 
@@ -17,11 +17,7 @@ func RunCmd(t *testing.T, args []string) {
 	t.Logf("RunCmd: %v", cmd.Args)
 	output, err := cmd.CombinedOutput()
 	message := string(output)
-	if err != nil {
-		t.Fatalf("err: %v cmd: %v msg:\n%v", err, cmd, message)
+	if err != nil || message != "" {
+		t.Fatalf("err: %v", message)
 	}
-	/*
-		if message != "" {
-			t.Log(message)
-		}*/
 }
