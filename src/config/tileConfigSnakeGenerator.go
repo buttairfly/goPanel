@@ -1,4 +1,4 @@
-package hardware
+package config
 
 import (
 	"fmt"
@@ -28,16 +28,19 @@ func NewTileConfigSnakeMapFile(g TileConfigSnakeGenerator) (TileConfig, error) {
 		Min: g.startPoint,
 		Max: g.endPoint,
 	}
-	bounds := tileBoundsInFrame.Canon()
-	if !((g.startPoint.X == 0 || g.startPoint.X == bounds.Dx()) &&
-		(g.startPoint.Y == 0 || g.startPoint.Y == bounds.Dy())) {
-		return nil, fmt.Errorf("Starting point %s is not a corner of tile bounds %s, %d , %d",
-			g.startPoint, bounds, bounds.Dx(), bounds.Dy())
+	boundsInFrame := tileBoundsInFrame.Canon()
+	tileStart := g.startPoint.Sub(boundsInFrame.Min)
+	tileEnd := g.endPoint.Sub(boundsInFrame.Min)
+	bounds := image.Rectangle{Min: tileStart, Max: tileEnd}.Canon()
+	if !((tileStart.X == 0 || tileStart.X == bounds.Dx()) &&
+		(tileStart.Y == 0 || tileStart.Y == bounds.Dy())) {
+		return nil, fmt.Errorf("Tile start point %s is not a corner of tile bounds %s, %d , %d",
+			tileStart, bounds, bounds.Dx(), bounds.Dy())
 	}
-	if !((g.endPoint.X == 0 || g.endPoint.X == bounds.Dx()) &&
-		(g.endPoint.Y == 0 || g.endPoint.Y == bounds.Dy())) {
-		return nil, fmt.Errorf("Ending point %s is not a corner of tile bounds %s",
-			g.endPoint, bounds)
+	if !((tileEnd.X == 0 || tileEnd.X == bounds.Dx()) &&
+		(tileEnd.Y == 0 || tileEnd.Y == bounds.Dy())) {
+		return nil, fmt.Errorf("TIle end point %s is not a corner of tile bounds %s",
+			tileEnd, bounds)
 	}
 
 	ledStripeMap := map[string]int{}
@@ -46,8 +49,8 @@ func NewTileConfigSnakeMapFile(g TileConfigSnakeGenerator) (TileConfig, error) {
 	maxY := bounds.Dy() + 1
 	for dy := 0; dy < maxY; dy++ {
 		for dx := 0; dx < maxX; dx++ {
-			x := intmath.Abs(g.startPoint.X - dx)
-			y := intmath.Abs(g.startPoint.Y - dy)
+			x := intmath.Abs(tileStart.X - dx)
+			y := intmath.Abs(tileStart.Y - dy)
 
 			// snake the pixels
 			if g.direction == vertical {
@@ -76,7 +79,7 @@ func NewTileConfigSnakeMapFile(g TileConfigSnakeGenerator) (TileConfig, error) {
 	}
 	return &tileConfig{
 		ConnectionOrder: g.connectionOrder,
-		Bounds:          bounds,
+		Bounds:          boundsInFrame,
 		LedStripeMap:    ledStripeMap,
 	}, nil
 }

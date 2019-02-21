@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"os"
 	"strings"
@@ -18,6 +19,8 @@ var (
 )
 
 func main() {
+	panelConfigPtr := flag.String("config", "panelConfig.json", "a string")
+	flag.Parse()
 	const (
 		panelLed   = 200
 		bufferSize = panelLed * device.NumBytePerColor

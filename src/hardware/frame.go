@@ -4,6 +4,8 @@ import (
 	"image"
 	"image/color"
 	"sort"
+
+	"github.com/buttairfly/goPanel/src/config"
 )
 
 // Frame is a hardware frame
@@ -22,7 +24,7 @@ type frame struct {
 }
 
 // NewFrame return new Frame
-func NewFrame(tileConfigs TileConfigs) Frame {
+func NewFrame(tileConfigs config.TileConfigs) Frame {
 	frameBounds := image.ZR
 	sort.Sort(tileConfigs)
 	tiles := make([]Tile, tileConfigs.Len())

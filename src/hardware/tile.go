@@ -3,6 +3,8 @@ package hardware
 import (
 	"image"
 	"strconv"
+
+	"github.com/buttairfly/goPanel/src/config"
 )
 
 // Tile hardware interface
@@ -25,7 +27,7 @@ type tile struct {
 }
 
 // NewTile creates a new Tile
-func NewTile(tileConfig TileConfig, numPreviousLedsOnStripe int) Tile {
+func NewTile(tileConfig config.TileConfig, numPreviousLedsOnStripe int) Tile {
 	return &tile{
 		numPreviousLedsOnStripe: numPreviousLedsOnStripe,
 		connectionOrder:         tileConfig.GetConnectionOrder(),

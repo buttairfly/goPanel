@@ -1,4 +1,4 @@
-package hardware
+package config
 
 import (
 	"fmt"
@@ -12,7 +12,7 @@ import (
 )
 
 func TestNewTileConfigSnakeMapFile(t *testing.T) {
-	const testFolder = "testData/"
+	const testFolder = "testdata/"
 	cases := []struct {
 		desc         string
 		generator    TileConfigSnakeGenerator
@@ -22,7 +22,7 @@ func TestNewTileConfigSnakeMapFile(t *testing.T) {
 		err          error
 	}{
 		{
-			desc: "snake_horizontal_0-0_9-9",
+			desc: "snake_horizontal_c0_0-0_9-9",
 			generator: TileConfigSnakeGenerator{
 				startPoint:      image.Point{X: 0, Y: 0},
 				endPoint:        image.Point{X: 9, Y: 9},
@@ -30,37 +30,49 @@ func TestNewTileConfigSnakeMapFile(t *testing.T) {
 				connectionOrder: 0,
 			},
 			numPixel:     100,
-			expectedFile: "expected.config",
+			expectedFile: ".config",
 			actualFile:   "actual.config",
 		},
 		{
-			desc: "snake_horizontal_19-0_10-9",
+			desc: "snake_horizontal_c0_19-0_10-9",
 			generator: TileConfigSnakeGenerator{
-				startPoint:      image.Point{X: 9, Y: 0},
-				endPoint:        image.Point{X: 0, Y: 9},
+				startPoint:      image.Point{X: 19, Y: 0},
+				endPoint:        image.Point{X: 10, Y: 9},
 				direction:       horizontal,
 				connectionOrder: 0,
 			},
 			numPixel:     100,
-			expectedFile: "expected.config",
+			expectedFile: ".config",
 			actualFile:   "actual.config",
 		},
 		{
-			desc: "snake_vertical_19-0_10-9",
+			desc: "snake_vertical___c0_19-0_10-9",
 			generator: TileConfigSnakeGenerator{
-				startPoint:      image.Point{X: 9, Y: 0},
-				endPoint:        image.Point{X: 0, Y: 9},
+				startPoint:      image.Point{X: 19, Y: 0},
+				endPoint:        image.Point{X: 10, Y: 9},
 				direction:       vertical,
 				connectionOrder: 0,
 			},
 			numPixel:     100,
-			expectedFile: "expected.config",
+			expectedFile: ".config",
+			actualFile:   "actual.config",
+		},
+		{
+			desc: "snake_vertical___c1_9-0_0-9",
+			generator: TileConfigSnakeGenerator{
+				startPoint:      image.Point{X: 9, Y: 0},
+				endPoint:        image.Point{X: 0, Y: 9},
+				direction:       vertical,
+				connectionOrder: 1,
+			},
+			numPixel:     100,
+			expectedFile: ".config",
 			actualFile:   "actual.config",
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.desc, func(t *testing.T) {
-			expectedFile := fmt.Sprintf("%s%s_%s", testFolder, c.desc, c.expectedFile)
+			expectedFile := fmt.Sprintf("%s%s%s", testFolder, c.desc, c.expectedFile)
 			actualFile := fmt.Sprintf("%s%s_%s", testFolder, c.desc, c.actualFile)
 			config, err := NewTileConfigSnakeMapFile(c.generator)
 			require.NoError(t, err)
