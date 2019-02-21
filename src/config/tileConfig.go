@@ -59,8 +59,8 @@ func (tc *tileConfig) NumHardwarePixel() int {
 			numHardwarePixel++
 		}
 	}
-	if maxStripePos != numHardwarePixel-1 {
-		log.Printf("numHardwarePixel of %d tile %d is not within max stripe pos %d", numHardwarePixel, tc.ConnectionOrder, maxStripePos)
+	if maxStripePos > numHardwarePixel-1 {
+		log.Printf("numHardwarePixel (%d) of tile %d is not within max stripe pos %d", numHardwarePixel, tc.ConnectionOrder, maxStripePos)
 	}
 	return numHardwarePixel
 }

@@ -20,7 +20,7 @@ func (tc tileConfigs) Len() int {
 
 func (tc tileConfigs) Less(i, j int) bool {
 	if tc[i].GetConnectionOrder() == tc[j].GetConnectionOrder() {
-		log.Printf("ConnectionOrder of two modules (%d,%d) must not be equal: %d, %d",
+		log.Fatalf("ConnectionOrder of two modules (%d,%d) must not be equal: %d, %d",
 			i, j, tc[i].GetConnectionOrder(), tc[j].GetConnectionOrder())
 	}
 	return tc[i].GetConnectionOrder() < tc[j].GetConnectionOrder()

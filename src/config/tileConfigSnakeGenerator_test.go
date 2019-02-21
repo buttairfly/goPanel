@@ -31,8 +31,8 @@ func TestNewTileConfigSnakeMapFile(t *testing.T) {
 				connectionOrder: 0,
 			},
 			numPixel:     100,
-			expectedFile: ".config",
-			actualFile:   "actual.config",
+			expectedFile: ".config.json",
+			actualFile:   "actual.config.json",
 		},
 		{
 			desc: "snake_horizontal_c0_19-0_10-9",
@@ -43,8 +43,8 @@ func TestNewTileConfigSnakeMapFile(t *testing.T) {
 				connectionOrder: 0,
 			},
 			numPixel:     100,
-			expectedFile: ".config",
-			actualFile:   "actual.config",
+			expectedFile: ".config.json",
+			actualFile:   "actual.config.json",
 		},
 		{
 			desc: "snake_vertical___c0_19-0_10-9",
@@ -55,8 +55,8 @@ func TestNewTileConfigSnakeMapFile(t *testing.T) {
 				connectionOrder: 0,
 			},
 			numPixel:     100,
-			expectedFile: ".config",
-			actualFile:   "actual.config",
+			expectedFile: ".config.json",
+			actualFile:   "actual.config.json",
 		},
 		{
 			desc: "snake_vertical___c1_9-0_0-9",
@@ -67,8 +67,8 @@ func TestNewTileConfigSnakeMapFile(t *testing.T) {
 				connectionOrder: 1,
 			},
 			numPixel:     100,
-			expectedFile: ".config",
-			actualFile:   "actual.config",
+			expectedFile: ".config.json",
+			actualFile:   "actual.config.json",
 		},
 	}
 	for _, c := range cases {

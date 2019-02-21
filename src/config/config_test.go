@@ -25,13 +25,13 @@ func TestNewMainConfig(t *testing.T) {
 			desc: "main_config",
 			panelConfig: &PanelConfig{
 				TileConfigPaths: []string{
-					testFolder + "snake_vertical___c0_19-0_10-9.config",
-					testFolder + "snake_vertical___c1_9-0_0-9.config",
+					testFolder + "snake_vertical___c0_19-0_10-9.config.json",
+					testFolder + "snake_vertical___c1_9-0_0-9.config.json",
 				},
 			},
-			panelFile:    "panel.config",
-			expectedFile: "composedMain.config",
-			actualFile:   "actual.config",
+			panelFile:    "panel.config.json",
+			expectedFile: "composedMain.config.json",
+			actualFile:   "actual.config.json",
 		},
 	}
 	for _, c := range cases {
