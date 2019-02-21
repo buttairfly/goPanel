@@ -24,6 +24,7 @@ require (
 	github.com/fluxio/multierror v0.0.0-20160419044231-9c68d39025e5 // indirect
 	github.com/go-errors/errors v1.0.1 // indirect
 	github.com/golang/lint v0.0.0-20181217174547-8f45f776aaf1 // indirect
+	github.com/google/go-cmp v0.2.0
 	github.com/gordonklaus/ineffassign v0.0.0-20180909121442-1003c8bd00dc // indirect
 	github.com/gosuri/uitable v0.0.0-20160404203958-36ee7e946282 // indirect
 	github.com/h2non/filetype v1.0.8 // indirect

@@ -8,7 +8,6 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"strconv"
 
 	"github.com/buttairfly/goPanel/src/intmath"
 )
@@ -30,8 +29,8 @@ type tileConfig struct {
 	LedStripeMap    map[string]int  `json:"ledStripeMap"`
 }
 
-// NewTileConfigFromConfig creates a new tile from config file path
-func NewTileConfigFromConfig(path string) (TileConfig, error) {
+// NewTileConfigFromPath creates a new tile from config file path
+func NewTileConfigFromPath(path string) (TileConfig, error) {
 	tc := new(tileConfig)
 	err := tc.FromFile(path)
 	if err != nil {
@@ -42,23 +41,25 @@ func NewTileConfigFromConfig(path string) (TileConfig, error) {
 
 // NumHardwarePixel counts the number of actual valid hardware pixels in the config
 func (tc *tileConfig) NumHardwarePixel() int {
-	maxPixel := tc.Bounds.Dx() * tc.Bounds.Dy()
+	maxX := tc.Bounds.Dx() + 1
+	maxY := tc.Bounds.Dy() + 1
+	maxPixel := maxX * maxY
 	numHardwarePixel := 0
 	maxStripePos := 0
 	for tilePos := 0; tilePos < maxPixel; tilePos++ {
-		stripePos, ok := tc.LedStripeMap[strconv.Itoa(tilePos)]
-		stripePoint := image.Point{X: tilePos % tc.Bounds.Dx(), Y: tilePos / tc.Bounds.Dx()}
+		stripePos, ok := tc.LedStripeMap[tilePositionToString(tilePos)]
+		stripePoint := image.Point{X: tilePos % maxX, Y: tilePos / maxY}
 		maxStripePos = intmath.Max(stripePos, maxStripePos)
 		if ok &&
 			stripePos >= 0 &&
 			stripePoint.X >= 0 &&
 			stripePoint.Y >= 0 &&
-			stripePoint.X < tc.Bounds.Dx() &&
-			stripePoint.Y < tc.Bounds.Dy() {
+			stripePoint.X < maxX &&
+			stripePoint.Y < maxY {
 			numHardwarePixel++
 		}
 	}
-	if maxStripePos != numHardwarePixel {
+	if maxStripePos != numHardwarePixel-1 {
 		log.Printf("numHardwarePixel of %d tile %d is not within max stripe pos %d", numHardwarePixel, tc.ConnectionOrder, maxStripePos)
 	}
 	return numHardwarePixel
@@ -72,6 +73,16 @@ func (tc *tileConfig) FromFile(path string) error {
 	}
 	defer f.Close()
 	return tc.FromReader(f)
+}
+
+// FromReader decodes the config from io.Reader
+func (tc *tileConfig) FromReader(r io.Reader) error {
+	dec := json.NewDecoder(r)
+	err := dec.Decode(&*tc)
+	if err != nil {
+		return fmt.Errorf("can not decode json. error: %v", err)
+	}
+	return nil
 }
 
 // WriteToFile writes the config to a file at path
@@ -99,12 +110,10 @@ func (tc *tileConfig) GetLedStripeMap() map[string]int {
 	return tc.LedStripeMap
 }
 
-// FromReader decodes the config from io.Reader
-func (tc *tileConfig) FromReader(r io.Reader) error {
-	dec := json.NewDecoder(r)
-	err := dec.Decode(&*tc)
-	if err != nil {
-		return fmt.Errorf("can not decode json. error: %v", err)
-	}
-	return nil
+func tilePointxyToString(x, y, maxX int) string {
+	return tilePositionToString(y*maxX + x)
+}
+
+func tilePositionToString(pos int) string {
+	return fmt.Sprintf("%04d", pos)
 }

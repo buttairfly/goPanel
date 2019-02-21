@@ -1,8 +1,8 @@
 package hardware
 
 import (
+	"fmt"
 	"image"
-	"strconv"
 
 	"github.com/buttairfly/goPanel/src/config"
 )
@@ -14,12 +14,16 @@ type Tile interface {
 	Bounds() image.Rectangle
 	NumHardwarePixel() int
 	FramePoint(tilePoint image.Point) image.Point
+	GetWidth() int
+	GetHeight() int
 }
 
 type tile struct {
 	numPreviousLedsOnStripe int
 	connectionOrder         int
 	numHardwarePixel        int
+	width                   int
+	height                  int
 	bounds                  image.Rectangle
 	// ledStripeMap maps tile led position to tile relative stripe position
 	// (counting starts at 0 for every tile)
@@ -32,6 +36,8 @@ func NewTile(tileConfig config.TileConfig, numPreviousLedsOnStripe int) Tile {
 		numPreviousLedsOnStripe: numPreviousLedsOnStripe,
 		connectionOrder:         tileConfig.GetConnectionOrder(),
 		numHardwarePixel:        tileConfig.NumHardwarePixel(),
+		width:                   tileConfig.GetBounds().Dx() + 1,
+		height:                  tileConfig.GetBounds().Dy() + 1,
 		bounds:                  tileConfig.GetBounds(),
 		ledStripeMap:            tileConfig.GetLedStripeMap(),
 	}
@@ -42,13 +48,21 @@ func (t *tile) Bounds() image.Rectangle {
 	return t.bounds
 }
 
+func (t *tile) GetWidth() int {
+	return t.width
+}
+
+func (t *tile) GetHeight() int {
+	return t.height
+}
+
 func (t *tile) MapTilePixelToStripePosition(tilePixel image.Point) int {
-	tilePos := t.bounds.Dx()*tilePixel.Y + tilePixel.X
+	tilePos := t.width*tilePixel.Y + tilePixel.X
 	return t.MapTilePositionToStipePosition(tilePos)
 }
 
 func (t *tile) MapTilePositionToStipePosition(tileXYPos int) int {
-	stripePosition, ok := t.ledStripeMap[strconv.Itoa(tileXYPos)]
+	stripePosition, ok := t.ledStripeMap[tilePositionToString(tileXYPos)]
 	if ok && stripePosition >= 0 {
 		return stripePosition + t.numPreviousLedsOnStripe
 	}
@@ -61,4 +75,8 @@ func (t *tile) NumHardwarePixel() int {
 
 func (t *tile) FramePoint(tilePoint image.Point) image.Point {
 	return t.Bounds().Min.Add(tilePoint)
+}
+
+func tilePositionToString(pos int) string {
+	return fmt.Sprintf("%04d", pos)
 }

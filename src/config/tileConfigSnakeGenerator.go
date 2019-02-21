@@ -65,9 +65,9 @@ func NewTileConfigSnakeMapFile(g TileConfigSnakeGenerator) (TileConfig, error) {
 
 			mapKey := ""
 			if g.direction == vertical {
-				mapKey = xyToPositionString(y, x, maxY)
+				mapKey = tilePointxyToString(y, x, maxY)
 			} else {
-				mapKey = xyToPositionString(x, y, maxX)
+				mapKey = tilePointxyToString(x, y, maxX)
 			}
 			prevValue, ok := ledStripeMap[mapKey]
 			if ok {
@@ -82,8 +82,4 @@ func NewTileConfigSnakeMapFile(g TileConfigSnakeGenerator) (TileConfig, error) {
 		Bounds:          boundsInFrame,
 		LedStripeMap:    ledStripeMap,
 	}, nil
-}
-
-func xyToPositionString(x, y, maxX int) string {
-	return fmt.Sprintf("%04d", y*maxX+x)
 }

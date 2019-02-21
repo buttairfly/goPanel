@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/buttairfly/goPanel/src/testhelper"
+	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -74,16 +75,24 @@ func TestNewTileConfigSnakeMapFile(t *testing.T) {
 		t.Run(c.desc, func(t *testing.T) {
 			expectedFile := fmt.Sprintf("%s%s%s", testFolder, c.desc, c.expectedFile)
 			actualFile := fmt.Sprintf("%s%s_%s", testFolder, c.desc, c.actualFile)
-			config, err := NewTileConfigSnakeMapFile(c.generator)
+			genConfig, err := NewTileConfigSnakeMapFile(c.generator)
 			require.NoError(t, err)
+			require.NotNil(t, genConfig)
 
-			require.NotNil(t, config, "error config nil")
-			require.Equal(t, c.numPixel, len(config.GetLedStripeMap()), "error not enough pixels")
+			assert.Equal(t, c.numPixel, genConfig.NumHardwarePixel(), "error not enough pixel NumHardwarePixel")
+			assert.Equal(t, c.numPixel, len(genConfig.GetLedStripeMap()), "error not enough pixel GetLedStripeMap")
+			assert.Equal(t, c.generator.connectionOrder, genConfig.GetConnectionOrder(), "error not correct connection order")
+			assert.Equal(t, image.Rectangle{Min: c.generator.startPoint, Max: c.generator.endPoint}.Canon(), genConfig.GetBounds(), "error not correct bounds")
+
 			if testhelper.RecordCall() {
 				t.Logf("Write Config to file %v", expectedFile)
-				require.NoError(t, config.WriteToFile(expectedFile))
+				require.NoError(t, genConfig.WriteToFile(expectedFile))
 			}
-			assert.Equal(t, c.err, config.WriteToFile(actualFile), "error occurred in file write")
+
+			readConfig, err2 := NewTileConfigFromPath(expectedFile)
+			require.NoError(t, err2)
+			assert.True(t, cmp.Equal(readConfig, genConfig), "error read and generated tile config are not equal")
+			assert.Equal(t, c.err, genConfig.WriteToFile(actualFile), "error occurred in file write")
 			defer os.Remove(actualFile)
 			testhelper.Diff(t, expectedFile, actualFile)
 		})

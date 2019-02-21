@@ -54,8 +54,8 @@ func NewCopyFrameWithEmptyImage(other Frame) Frame {
 func (f *frame) ToLedStripe() LedStripe {
 	buffer := make([]uint8, f.sumHardwarePixel*NumBytePixel)
 	for _, tile := range f.tiles {
-		for x := 0; x < tile.Bounds().Dx(); x++ {
-			for y := 0; y < tile.Bounds().Dy(); y++ {
+		for x := 0; x < tile.GetWidth(); x++ {
+			for y := 0; y < tile.GetHeight(); y++ {
 				tilePoint := image.Pt(x, y)
 				stripePos := tile.MapTilePixelToStripePosition(tilePoint)
 				framePoint := tile.FramePoint(tilePoint)
