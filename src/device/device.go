@@ -3,6 +3,8 @@ package device
 import (
 	"fmt"
 	"sync"
+
+	"github.com/buttairfly/goPanel/src/hardware"
 )
 
 const (
@@ -18,7 +20,7 @@ type LedDevice interface {
 	Run(wg *sync.WaitGroup)
 	Write(data []byte) (int, error)
 	Close() error
-	SetInput(<-chan []byte)
+	SetInput(<-chan hardware.Frame)
 	GetType() Type
 }
 

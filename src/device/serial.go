@@ -8,6 +8,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/buttairfly/goPanel/src/hardware"
 	"github.com/tarm/serial"
 )
 
@@ -15,7 +16,7 @@ type serialDevice struct {
 	config     *serial.Config
 	stream     *serial.Port
 	numLed     int
-	input      <-chan []byte
+	input      <-chan hardware.Frame
 	readActive chan bool
 }
 
@@ -100,7 +101,7 @@ func (s *serialDevice) Write(data []byte) (int, error) {
 	return n, err
 }
 
-func (s *serialDevice) SetInput(input <-chan []byte) {
+func (s *serialDevice) SetInput(input <-chan hardware.Frame) {
 	s.input = input
 }
 
@@ -137,6 +138,7 @@ func (s *serialDevice) Run(wg *sync.WaitGroup) {
 	s.init()
 
 	for frame := range s.input {
+		buffer := ([]byte)(frame.ToLedStripe().GetBuffer())
 		now := time.Now()
 		sleepDuration := latchDelay - (now.Sub(lastFrameTime))
 		log.Println(sleepDuration, now.Sub(lastFrameTime))
@@ -145,7 +147,7 @@ func (s *serialDevice) Run(wg *sync.WaitGroup) {
 		}
 		lastFrameTime = now
 		for pixel := 0; pixel < s.numLed; pixel++ {
-			s.setPixel(pixel, frame)
+			s.setPixel(pixel, buffer)
 			time.Sleep(180 * time.Microsecond)
 		}
 		s.latchFrame()

@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"log"
 	"sync"
+
+	"github.com/buttairfly/goPanel/src/hardware"
 )
 
 type printDevice struct {
-	input  <-chan []byte
+	input  <-chan hardware.Frame
 	numPix int
 }
 
@@ -36,15 +38,15 @@ func (pd *printDevice) Write(data []byte) (int, error) {
 	return len(data), nil
 }
 
-func (pd *printDevice) SetInput(input <-chan []byte) {
+func (pd *printDevice) SetInput(input <-chan hardware.Frame) {
 	pd.input = input
 }
 
 func (pd *printDevice) Run(wg *sync.WaitGroup) {
 	defer wg.Done()
 	defer pd.Close()
-	for buffer := range pd.input {
-		_, err := pd.Write(buffer)
+	for frame := range pd.input {
+		_, err := pd.Write(([]byte)(frame.ToLedStripe().GetBuffer()))
 		if err != nil {
 			log.Panic(err)
 		}

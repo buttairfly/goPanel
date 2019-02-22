@@ -3,7 +3,6 @@ package hardware
 import (
 	"image"
 	"image/color"
-	"sort"
 
 	"github.com/buttairfly/goPanel/src/config"
 )
@@ -13,20 +12,24 @@ type Frame interface {
 	image.Image
 	ToLedStripe() LedStripe
 
+	GetSumHardwarePixel() int
+	SetRGBA(x, y int, c color.RGBA)
+	GetWidth() int
+	GetHeight() int
+
 	getTiles() []Tile
-	getSumHardwarePixel() int
 }
 
 type frame struct {
 	image            *image.RGBA
 	tiles            []Tile
 	sumHardwarePixel int
+	width, height    int
 }
 
 // NewFrame return new Frame
 func NewFrame(tileConfigs config.TileConfigs) Frame {
 	frameBounds := image.ZR
-	sort.Sort(tileConfigs)
 	tiles := make([]Tile, tileConfigs.Len())
 	numPreviousLedsOnStripe := 0
 	for i, tileConfig := range tileConfigs.GetSlice() {
@@ -38,6 +41,8 @@ func NewFrame(tileConfigs config.TileConfigs) Frame {
 		image:            image.NewRGBA(frameBounds),
 		tiles:            tiles,
 		sumHardwarePixel: numPreviousLedsOnStripe,
+		width:            frameBounds.Dx() + 1,
+		height:           frameBounds.Dy() + 1,
 	}
 }
 
@@ -47,7 +52,9 @@ func NewCopyFrameWithEmptyImage(other Frame) Frame {
 	return &frame{
 		image:            image.NewRGBA(other.Bounds()),
 		tiles:            other.getTiles(),
-		sumHardwarePixel: other.getSumHardwarePixel(),
+		sumHardwarePixel: other.GetSumHardwarePixel(),
+		width:            other.GetWidth(),
+		height:           other.GetHeight(),
 	}
 }
 
@@ -87,10 +94,23 @@ func (f *frame) At(x, y int) color.Color {
 	return f.image.At(x, y)
 }
 
-func (f *frame) getTiles() []Tile {
-	return f.tiles
+// SetRGBA makes image buffer muteable
+func (f *frame) SetRGBA(x, y int, c color.RGBA) {
+	f.image.SetRGBA(x, y, c)
 }
 
-func (f *frame) getSumHardwarePixel() int {
+func (f *frame) GetSumHardwarePixel() int {
 	return f.sumHardwarePixel
+}
+
+func (f *frame) GetWidth() int {
+	return f.width
+}
+
+func (f *frame) GetHeight() int {
+	return f.height
+}
+
+func (f *frame) getTiles() []Tile {
+	return f.tiles
 }
