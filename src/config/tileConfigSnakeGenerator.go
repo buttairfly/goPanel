@@ -14,6 +14,11 @@ const (
 	vertical
 )
 
+const (
+	even = 0
+	odd  = 1
+)
+
 // TileConfigSnakeGenerator struct to generate a tile config with snake pattern
 type TileConfigSnakeGenerator struct {
 	connectionOrder int
@@ -47,6 +52,11 @@ func NewTileConfigSnakeMapFile(g TileConfigSnakeGenerator) (TileConfig, error) {
 	pos := 0
 	maxX := bounds.Dx() + 1
 	maxY := bounds.Dy() + 1
+	snake := odd
+	if (g.direction == horizontal && tileStart.Y != 0 && tileStart.Y%2 == 1) ||
+		(g.direction == vertical && tileStart.X != 0 && tileStart.X%2 == 1) {
+		snake = even
+	}
 	for dy := 0; dy < maxY; dy++ {
 		for dx := 0; dx < maxX; dx++ {
 			x := intmath.Abs(tileStart.X - dx)
@@ -54,11 +64,11 @@ func NewTileConfigSnakeMapFile(g TileConfigSnakeGenerator) (TileConfig, error) {
 
 			// snake the pixels
 			if g.direction == vertical {
-				if x%2 == 1 {
+				if x%2 == snake {
 					y = bounds.Dy() - y
 				}
 			} else {
-				if y%2 == 1 {
+				if y%2 == snake {
 					x = bounds.Dx() - x
 				}
 			}
