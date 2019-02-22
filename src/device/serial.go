@@ -36,9 +36,6 @@ func NewSerialDevice(numLed int) LedDevice {
 func (s *serialDevice) Open() error {
 	var err error
 	s.stream, err = serial.OpenPort(s.config)
-	if err != nil {
-		return err
-	}
 	return err
 }
 
@@ -93,7 +90,7 @@ func (s *serialDevice) Close() error {
 }
 
 func (s *serialDevice) Write(data []byte) (int, error) {
-	log.Println("Command", string(data))
+	log.Print("Command", string(data))
 	n, err := s.stream.Write(data)
 	if err != nil {
 		log.Fatal(err)
@@ -105,13 +102,13 @@ func (s *serialDevice) SetInput(input <-chan hardware.Frame) {
 	s.input = input
 }
 
-func (s *serialDevice) setPixel(pixel int, buffer []byte) {
+func (s *serialDevice) setPixel(pixel int, buffer []uint8) {
 	bufIndex := pixel * NumBytePerColor
 	command := fmt.Sprintf("P%04x%02x%02x%02x\n", pixel, buffer[bufIndex+0], buffer[bufIndex+1], buffer[bufIndex+2])
 	s.Write([]byte(command))
 }
 
-func (s *serialDevice) shade(pixel int, buffer []byte) {
+func (s *serialDevice) shade(pixel int, buffer []uint8) {
 	command := fmt.Sprintf("S%04x%02x%02x%02x\n", pixel, buffer[0], buffer[1], buffer[2])
 	s.Write([]byte(command))
 }
@@ -138,7 +135,7 @@ func (s *serialDevice) Run(wg *sync.WaitGroup) {
 	s.init()
 
 	for frame := range s.input {
-		buffer := ([]byte)(frame.ToLedStripe().GetBuffer())
+		buffer := frame.ToLedStripe().GetBuffer()
 		now := time.Now()
 		sleepDuration := latchDelay - (now.Sub(lastFrameTime))
 		log.Println(sleepDuration, now.Sub(lastFrameTime))

@@ -3,6 +3,7 @@ package hardware
 import (
 	"image"
 	"image/color"
+	"log"
 
 	"github.com/buttairfly/goPanel/src/config"
 )
@@ -11,9 +12,10 @@ import (
 type Frame interface {
 	image.Image
 	ToLedStripe() LedStripe
-
 	GetSumHardwarePixel() int
 	SetRGBA(x, y int, c color.RGBA)
+	Set(x, y int, c color.Color)
+	RGBAAt(x, y int) color.RGBA
 	GetWidth() int
 	GetHeight() int
 
@@ -77,14 +79,17 @@ func (f *frame) ToLedStripe() LedStripe {
 			for y := 0; y < tile.GetHeight(); y++ {
 				tilePoint := image.Pt(x, y)
 				stripePos := tile.MapTilePixelToStripePosition(tilePoint)
+				bufferPos := stripePos * NumBytePixel
 				framePoint := tile.FramePoint(tilePoint)
-				frameColor := f.image.RGBAAt(framePoint.X, framePoint.Y)
-				buffer[stripePos+R] = frameColor.R
-				buffer[stripePos+G] = frameColor.G
-				buffer[stripePos+B] = frameColor.B
+				frameColor := f.RGBAAt(framePoint.X, framePoint.Y)
+				log.Print(f, tilePoint, stripePos, framePoint, frameColor)
+				buffer[bufferPos+R] = frameColor.R
+				buffer[bufferPos+G] = frameColor.G
+				buffer[bufferPos+B] = frameColor.B
 			}
 		}
 	}
+	log.Print(len(buffer), buffer)
 	return &ledStripe{
 		buffer:      buffer,
 		pixelLength: f.sumHardwarePixel,
@@ -106,9 +111,18 @@ func (f *frame) At(x, y int) color.Color {
 	return f.image.At(x, y)
 }
 
+// Set makes image buffer muteable
+func (f *frame) Set(x, y int, c color.Color) {
+	f.image.Set(x, y, c)
+}
+
 // SetRGBA makes image buffer muteable
 func (f *frame) SetRGBA(x, y int, c color.RGBA) {
 	f.image.SetRGBA(x, y, c)
+}
+
+func (f *frame) RGBAAt(x, y int) color.RGBA {
+	return f.image.RGBAAt(x, y)
 }
 
 func (f *frame) GetSumHardwarePixel() int {
