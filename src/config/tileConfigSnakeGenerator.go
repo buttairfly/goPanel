@@ -3,7 +3,6 @@ package config
 import (
 	"fmt"
 	"image"
-	"log"
 
 	"github.com/buttairfly/goPanel/src/intmath"
 )
@@ -53,29 +52,34 @@ func NewTileConfigSnakeMapFile(g TileConfigSnakeGenerator) (TileConfig, error) {
 	pos := 0
 	maxX := bounds.Dx() + 1
 	maxY := bounds.Dy() + 1
-	snake := odd
+	snakeParity := odd
 	if (g.direction == horizontal && tileStart.Y != 0 && tileStart.Y%2 == 1) ||
 		(g.direction == vertical && tileStart.X != 0 && tileStart.X%2 == 1) {
-		snake = even
+		snakeParity = even
+	}
+	stride := maxX
+	if g.direction == vertical {
+		stride = maxY
 	}
 	for dy := 0; dy < maxY; dy++ {
 		for dx := 0; dx < maxX; dx++ {
 			x := intmath.Abs(tileStart.X - dx)
 			y := intmath.Abs(tileStart.Y - dy)
+			if g.direction == vertical {
+				x, y = y, x
+			}
 
 			// snake the pixels
-			if y%2 == snake {
-				x = bounds.Dx() - x
-			}
-
-			mapKey := ""
 			if g.direction == vertical {
-				mapKey = tilePointxyToString(y, x, maxY)
+				if x%2 == snakeParity {
+					y = stride - 1 - y
+				}
 			} else {
-				mapKey = tilePointxyToString(x, y, maxX)
+				if y%2 == snakeParity {
+					x = stride - 1 - x
+				}
 			}
-
-			log.Printf("MAP %2s x%d y%d d%d", mapKey, x, y, g.direction)
+			mapKey := tilePointxyToString(x, y, stride)
 			prevValue, ok := ledStripeMap[mapKey]
 			if ok {
 				return nil, fmt.Errorf("Duplicate stripe map x: %d, y: %d, pos: %d, mapKey: %s, prevValue: %d", x, y, pos, mapKey, prevValue)

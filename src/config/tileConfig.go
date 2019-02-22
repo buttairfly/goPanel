@@ -115,5 +115,5 @@ func tilePointxyToString(x, y, maxX int) string {
 }
 
 func tilePositionToString(pos int) string {
-	return fmt.Sprintf("%d", pos)
+	return fmt.Sprintf("%2d", pos)
 }

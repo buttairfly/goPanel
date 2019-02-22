@@ -90,7 +90,7 @@ func (s *serialDevice) Close() error {
 }
 
 func (s *serialDevice) Write(data []byte) (int, error) {
-	log.Print("Command", string(data))
+	// log.Printf("Command %s", string(data))
 	n, err := s.stream.Write(data)
 	if err != nil {
 		log.Fatal(err)
