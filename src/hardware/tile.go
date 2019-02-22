@@ -78,5 +78,5 @@ func (t *tile) FramePoint(tilePoint image.Point) image.Point {
 }
 
 func tilePositionToString(pos int) string {
-	return fmt.Sprintf("%04d", pos)
+	return fmt.Sprintf(config.MapFormatString, pos)
 }

@@ -12,6 +12,9 @@ import (
 	"github.com/buttairfly/goPanel/src/intmath"
 )
 
+// MapFormatString is the string to format the map[string]int led position mapping
+const MapFormatString = "%2d"
+
 // TileConfig is the config of a tile or led module
 type TileConfig interface {
 	NumHardwarePixel() int
@@ -115,5 +118,5 @@ func tilePointxyToString(x, y, maxX int) string {
 }
 
 func tilePositionToString(pos int) string {
-	return fmt.Sprintf("%2d", pos)
+	return fmt.Sprintf(MapFormatString, pos)
 }
