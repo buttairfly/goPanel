@@ -39,12 +39,13 @@ func NewFrame(tileConfigs config.TileConfigs) Frame {
 		tiles[i] = NewTile(tileConfig, numPreviousLedsOnStripe)
 		numPreviousLedsOnStripe += tileConfig.NumHardwarePixel()
 	}
+	frameBounds.Canon()
 	return &frame{
 		image:            image.NewRGBA(frameBounds),
 		tiles:            tiles,
 		sumHardwarePixel: numPreviousLedsOnStripe,
-		width:            frameBounds.Dx() + 1,
-		height:           frameBounds.Dy() + 1,
+		width:            frameBounds.Dx(),
+		height:           frameBounds.Dy(),
 	}
 }
 
@@ -60,9 +61,17 @@ func NewCopyFrameWithEmptyImage(other Frame) Frame {
 	}
 }
 
-// NewCopyFrameWithImage creates a new Frame with the reference of Tiles
-// and sets
-func NewCopyFrameWithImage(other Frame, picture *image.RGBA) Frame {
+// NewCopyFrameFromImage creates a new Frame with the reference of Tiles
+// and copies the other image contents into the frame
+func NewCopyFrameFromImage(other Frame, pictureToCopy *image.RGBA) Frame {
+	if !other.Bounds().Eq(pictureToCopy.Bounds()) {
+		log.Fatalf("Can not copy picture (%v) with different bounds as frame (%v)",
+			other.Bounds(),
+			pictureToCopy.Bounds(),
+		)
+	}
+	picture := image.NewRGBA(pictureToCopy.Bounds())
+	copy(picture.Pix, pictureToCopy.Pix)
 	return &frame{
 		image:            picture,
 		tiles:            other.getTiles(),

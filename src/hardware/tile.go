@@ -36,8 +36,8 @@ func NewTile(tileConfig config.TileConfig, numPreviousLedsOnStripe int) Tile {
 		numPreviousLedsOnStripe: numPreviousLedsOnStripe,
 		connectionOrder:         tileConfig.GetConnectionOrder(),
 		numHardwarePixel:        tileConfig.NumHardwarePixel(),
-		width:                   tileConfig.GetBounds().Dx() + 1,
-		height:                  tileConfig.GetBounds().Dy() + 1,
+		width:                   tileConfig.GetBounds().Dx(),
+		height:                  tileConfig.GetBounds().Dy(),
 		bounds:                  tileConfig.GetBounds(),
 		ledStripeMap:            tileConfig.GetLedStripeMap(),
 	}

@@ -24,10 +24,10 @@ func TestNewTileConfigSnakeMapFile(t *testing.T) {
 		err          error
 	}{
 		{
-			desc: "snake_horizontal_c0_0-0_9-9",
+			desc: "snake_horizontal_c0_0-0_10-10",
 			generator: TileConfigSnakeGenerator{
 				startPoint:      image.Point{X: 0, Y: 0},
-				endPoint:        image.Point{X: 9, Y: 9},
+				endPoint:        image.Point{X: 10, Y: 10},
 				direction:       horizontal,
 				connectionOrder: 0,
 			},
@@ -40,10 +40,10 @@ func TestNewTileConfigSnakeMapFile(t *testing.T) {
 			actualFile:   "actual.config.json",
 		},
 		{
-			desc: "snake_horizontal_c0_19-0_10-9",
+			desc: "snake_horizontal_c0_20-0_10-10",
 			generator: TileConfigSnakeGenerator{
-				startPoint:      image.Point{X: 19, Y: 0},
-				endPoint:        image.Point{X: 10, Y: 9},
+				startPoint:      image.Point{X: 20, Y: 0},
+				endPoint:        image.Point{X: 10, Y: 10},
 				direction:       horizontal,
 				connectionOrder: 0,
 			},
@@ -56,10 +56,10 @@ func TestNewTileConfigSnakeMapFile(t *testing.T) {
 			actualFile:   "actual.config.json",
 		},
 		{
-			desc: "snake_vertical___c0_19-0_10-9",
+			desc: "snake_vertical___c0_20-0_10-10",
 			generator: TileConfigSnakeGenerator{
-				startPoint:      image.Point{X: 19, Y: 0},
-				endPoint:        image.Point{X: 10, Y: 9},
+				startPoint:      image.Point{X: 20, Y: 0},
+				endPoint:        image.Point{X: 10, Y: 10},
 				direction:       vertical,
 				connectionOrder: 0,
 			},
@@ -72,10 +72,10 @@ func TestNewTileConfigSnakeMapFile(t *testing.T) {
 			actualFile:   "actual.config.json",
 		},
 		{
-			desc: "snake_vertical___c1_9-0_0-9",
+			desc: "snake_vertical___c1_10-0_0-10",
 			generator: TileConfigSnakeGenerator{
-				startPoint:      image.Point{X: 9, Y: 0},
-				endPoint:        image.Point{X: 0, Y: 9},
+				startPoint:      image.Point{X: 10, Y: 0},
+				endPoint:        image.Point{X: 0, Y: 10},
 				direction:       vertical,
 				connectionOrder: 1,
 			},
@@ -88,10 +88,10 @@ func TestNewTileConfigSnakeMapFile(t *testing.T) {
 			actualFile:   "actual.config.json",
 		},
 		{
-			desc: "snake_vertical___c0_0-0_2-2",
+			desc: "snake_vertical___c0_0-0_3-3",
 			generator: TileConfigSnakeGenerator{
 				startPoint:      image.Point{X: 0, Y: 0},
-				endPoint:        image.Point{X: 2, Y: 2},
+				endPoint:        image.Point{X: 3, Y: 3},
 				direction:       vertical,
 				connectionOrder: 0,
 			},
@@ -105,10 +105,10 @@ func TestNewTileConfigSnakeMapFile(t *testing.T) {
 			actualFile:   "actual.config.json",
 		},
 		{
-			desc: "snake_vertical___c0_0-0_3-3",
+			desc: "snake_vertical___c0_0-0_4-4",
 			generator: TileConfigSnakeGenerator{
 				startPoint:      image.Point{X: 0, Y: 0},
-				endPoint:        image.Point{X: 3, Y: 3},
+				endPoint:        image.Point{X: 4, Y: 4},
 				direction:       vertical,
 				connectionOrder: 0,
 			},
@@ -123,9 +123,9 @@ func TestNewTileConfigSnakeMapFile(t *testing.T) {
 			actualFile:   "actual.config.json",
 		},
 		{
-			desc: "snake_vertical___c0_2-2_0-0",
+			desc: "snake_vertical___c0_3-3_0-0",
 			generator: TileConfigSnakeGenerator{
-				startPoint:      image.Point{X: 2, Y: 2},
+				startPoint:      image.Point{X: 3, Y: 3},
 				endPoint:        image.Point{X: 0, Y: 0},
 				direction:       vertical,
 				connectionOrder: 0,

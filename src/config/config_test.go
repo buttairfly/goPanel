@@ -25,8 +25,8 @@ func TestNewMainConfig(t *testing.T) {
 			desc: "main_config",
 			panelConfig: &PanelConfig{
 				TileConfigPaths: []string{
-					testFolder + "snake_vertical___c0_19-0_10-9.config.json",
-					testFolder + "snake_vertical___c1_9-0_0-9.config.json",
+					testFolder + "snake_vertical___c0_20-0_10-10.config.json",
+					testFolder + "snake_vertical___c1_10-0_0-10.config.json",
 				},
 			},
 			panelFile:    "panel.config.json",

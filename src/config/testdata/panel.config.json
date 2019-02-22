@@ -1,6 +1,6 @@
 {
 	"tileConfigPaths": [
-		"testdata/snake_vertical___c0_19-0_10-9.config.json",
-		"testdata/snake_vertical___c1_9-0_0-9.config.json"
+		"testdata/snake_vertical___c0_20-0_10-10.config.json",
+		"testdata/snake_vertical___c1_10-0_0-10.config.json"
 	]
 }

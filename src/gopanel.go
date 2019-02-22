@@ -50,7 +50,6 @@ func main() {
 	go pixelDevice.Run(wg)
 
 	mainPicture := image.NewRGBA(frame.Bounds())
-
 	for {
 		for c := 0; c < device.NumBytePerColor; c++ {
 			var pixel color.RGBA
@@ -62,25 +61,19 @@ func main() {
 			case hardware.B:
 				pixel = color.RGBA{0, 0, 0xff, 0xff}
 			}
-			for y := 0; y < frame.GetHeight(); y++ {
-				for x := 0; x < frame.GetWidth(); x++ {
-					mainPicture.SetRGBA(x, y, pixel)
-					picture := image.NewRGBA(mainPicture.Bounds())
-					copy(picture.Pix, mainPicture.Pix)
-					colorFrame := hardware.NewCopyFrameWithImage(frame, picture)
-					inputChan <- colorFrame
-				}
+			//for y := 0; y < frame.GetHeight(); y++ {
+			//	for x := 0; x < frame.GetWidth(); x++ {
+			if !(image.Point{19, 0}.In(mainPicture.Rect)) {
+				log.Printf("For whatever reason the image is to small", mainPicture.Rect, mainPicture.Pix, len(mainPicture.Pix))
 			}
+			mainPicture.SetRGBA(19, 0, pixel)
+			log.Print(mainPicture)
+			colorFrame := hardware.NewCopyFrameFromImage(frame, mainPicture)
+			inputChan <- colorFrame
+			//}
+			//}
 		}
 	}
-}
-
-func setStripPixelToColor(frame []byte, posOnStrip int, color int) []byte {
-	pos := posOnStrip * device.NumBytePerColor
-	frame[pos+0] = byte(color >> 16)
-	frame[pos+1] = byte(color >> 8)
-	frame[pos+2] = byte(color)
-	return frame
 }
 
 func printProgramInfo() {

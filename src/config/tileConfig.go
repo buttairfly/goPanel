@@ -44,8 +44,8 @@ func NewTileConfigFromPath(path string) (TileConfig, error) {
 
 // NumHardwarePixel counts the number of actual valid hardware pixels in the config
 func (tc *tileConfig) NumHardwarePixel() int {
-	maxX := tc.Bounds.Dx() + 1
-	maxY := tc.Bounds.Dy() + 1
+	maxX := tc.Bounds.Dx()
+	maxY := tc.Bounds.Dy()
 	maxPixel := maxX * maxY
 	numHardwarePixel := 0
 	maxStripePos := 0

@@ -50,11 +50,11 @@ func NewTileConfigSnakeMapFile(g TileConfigSnakeGenerator) (TileConfig, error) {
 
 	ledStripeMap := map[string]int{}
 	pos := 0
-	maxX := bounds.Dx() + 1
-	maxY := bounds.Dy() + 1
+	maxX := bounds.Dx()
+	maxY := bounds.Dy()
 	snakeParity := odd
-	if (g.direction == horizontal && tileStart.Y != 0 && tileStart.Y%2 == 1) ||
-		(g.direction == vertical && tileStart.X != 0 && tileStart.X%2 == 1) {
+	if (g.direction == horizontal && tileStart.Y != 0 && tileStart.Y%2 == even) ||
+		(g.direction == vertical && tileStart.X != 0 && tileStart.X%2 == even) {
 		snakeParity = even
 	}
 	stride := maxX
@@ -68,8 +68,12 @@ func NewTileConfigSnakeMapFile(g TileConfigSnakeGenerator) (TileConfig, error) {
 			if g.direction == vertical {
 				x, y = y, x
 			}
-			x = intmath.Abs(tileStart.X - x)
-			y = intmath.Abs(tileStart.Y - y)
+			if tileStart.X == maxX {
+				x = intmath.Abs(maxX - 1 - x)
+			}
+			if tileStart.Y == maxY {
+				y = intmath.Abs(maxY - 1 - y)
+			}
 
 			// snake the pixels
 			if g.direction == vertical {
@@ -81,6 +85,7 @@ func NewTileConfigSnakeMapFile(g TileConfigSnakeGenerator) (TileConfig, error) {
 					x = stride - 1 - x
 				}
 			}
+
 			mapKey := tilePointxyToString(x, y, stride)
 			prevValue, ok := ledStripeMap[mapKey]
 			if ok {
