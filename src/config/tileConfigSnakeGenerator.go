@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"image"
+	"log"
 
 	"github.com/buttairfly/goPanel/src/intmath"
 )
@@ -63,14 +64,8 @@ func NewTileConfigSnakeMapFile(g TileConfigSnakeGenerator) (TileConfig, error) {
 			y := intmath.Abs(tileStart.Y - dy)
 
 			// snake the pixels
-			if g.direction == vertical {
-				if x%2 == snake {
-					y = bounds.Dy() - y
-				}
-			} else {
-				if y%2 == snake {
-					x = bounds.Dx() - x
-				}
+			if y%2 == snake {
+				x = bounds.Dx() - x
 			}
 
 			mapKey := ""
@@ -79,6 +74,8 @@ func NewTileConfigSnakeMapFile(g TileConfigSnakeGenerator) (TileConfig, error) {
 			} else {
 				mapKey = tilePointxyToString(x, y, maxX)
 			}
+
+			log.Printf("MAP %2s x%d y%d d%d", mapKey, x, y, g.direction)
 			prevValue, ok := ledStripeMap[mapKey]
 			if ok {
 				return nil, fmt.Errorf("Duplicate stripe map x: %d, y: %d, pos: %d, mapKey: %s, prevValue: %d", x, y, pos, mapKey, prevValue)

@@ -96,7 +96,7 @@ func TestNewTileConfigSnakeMapFile(t *testing.T) {
 				direction:       vertical,
 				connectionOrder: 0,
 			},
-			testPixel:    map[string]int{"0": 0, "1": 7, "2": 8, "3": 12, "4": 1, "5": 6, "6": 9, "7": 13, "8": 2, "9": 5, "10": 10, "11": 14, "12": 3, "13": 4, "14": 11, "15": 15},
+			testPixel:    map[string]int{"0": 0, "1": 7, "2": 8, "3": 15, "4": 1, "5": 6, "6": 9, "7": 14, "8": 2, "9": 5, "10": 10, "11": 13, "12": 3, "13": 4, "14": 11, "15": 12},
 			numPixel:     16,
 			expectedFile: ".config.json",
 			actualFile:   "actual.config.json",
