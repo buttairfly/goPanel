@@ -63,11 +63,13 @@ func NewTileConfigSnakeMapFile(g TileConfigSnakeGenerator) (TileConfig, error) {
 	}
 	for dy := 0; dy < maxY; dy++ {
 		for dx := 0; dx < maxX; dx++ {
-			x := intmath.Abs(tileStart.X - dx)
-			y := intmath.Abs(tileStart.Y - dy)
+			x := dx
+			y := dy
 			if g.direction == vertical {
 				x, y = y, x
 			}
+			x = intmath.Abs(tileStart.X - x)
+			y = intmath.Abs(tileStart.Y - y)
 
 			// snake the pixels
 			if g.direction == vertical {
