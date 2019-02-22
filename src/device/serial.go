@@ -86,7 +86,6 @@ func (s *serialDevice) read(wg *sync.WaitGroup) {
 			}
 		}
 	}
-
 }
 
 func (s *serialDevice) Close() error {
@@ -94,6 +93,7 @@ func (s *serialDevice) Close() error {
 }
 
 func (s *serialDevice) Write(data []byte) (int, error) {
+	log.Println("Command", string(data))
 	n, err := s.stream.Write(data)
 	if err != nil {
 		log.Fatal(err)
