@@ -25,7 +25,7 @@ type tile struct {
 	width                   int
 	height                  int
 	bounds                  image.Rectangle
-	// ledStripeMap maps tile led position to tile relative stripe position
+	// ledStripeMap maps tile image pixel position to tile relative stripe position
 	// (counting starts at 0 for every tile)
 	ledStripeMap map[string]int
 }

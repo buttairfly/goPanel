@@ -20,6 +20,7 @@ func TestNewTileConfigSnakeMapFile(t *testing.T) {
 		expectedFile string
 		actualFile   string
 		numPixel     int
+		testPixel    map[string]int
 		err          error
 	}{
 		{
@@ -31,6 +32,7 @@ func TestNewTileConfigSnakeMapFile(t *testing.T) {
 				connectionOrder: 0,
 			},
 			numPixel:     100,
+			testPixel:    map[string]int{"0000": 0, "0009": 9, "0090": 99, "0099": 90},
 			expectedFile: ".config.json",
 			actualFile:   "actual.config.json",
 		},
@@ -43,6 +45,7 @@ func TestNewTileConfigSnakeMapFile(t *testing.T) {
 				connectionOrder: 0,
 			},
 			numPixel:     100,
+			testPixel:    map[string]int{"0000": 9, "0009": 0, "0090": 99, "0099": 99},
 			expectedFile: ".config.json",
 			actualFile:   "actual.config.json",
 		},
@@ -54,6 +57,7 @@ func TestNewTileConfigSnakeMapFile(t *testing.T) {
 				direction:       vertical,
 				connectionOrder: 0,
 			},
+			testPixel:    map[string]int{"0000": 99, "0009": 0, "0090": 90, "0099": 9},
 			numPixel:     100,
 			expectedFile: ".config.json",
 			actualFile:   "actual.config.json",
@@ -66,6 +70,7 @@ func TestNewTileConfigSnakeMapFile(t *testing.T) {
 				direction:       vertical,
 				connectionOrder: 1,
 			},
+			testPixel:    map[string]int{"0000": 99, "0009": 0, "0090": 90, "0099": 9},
 			numPixel:     100,
 			expectedFile: ".config.json",
 			actualFile:   "actual.config.json",
@@ -95,6 +100,10 @@ func TestNewTileConfigSnakeMapFile(t *testing.T) {
 			assert.Equal(t, c.err, genConfig.WriteToFile(actualFile), "error occurred in file write")
 			defer os.Remove(actualFile)
 			testhelper.Diff(t, expectedFile, actualFile)
+
+			for k, v := range c.testPixel {
+				assert.Equal(t, v, readConfig.GetLedStripeMap()[k], "testPixel not equal")
+			}
 		})
 	}
 }
