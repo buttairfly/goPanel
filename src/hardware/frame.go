@@ -91,14 +91,12 @@ func (f *frame) ToLedStripe() LedStripe {
 				bufferPos := stripePos * NumBytePixel
 				framePoint := tile.FramePoint(tilePoint)
 				frameColor := f.RGBAAt(framePoint.X, framePoint.Y)
-				log.Print(f, tilePoint, stripePos, framePoint, frameColor)
 				buffer[bufferPos+R] = frameColor.R
 				buffer[bufferPos+G] = frameColor.G
 				buffer[bufferPos+B] = frameColor.B
 			}
 		}
 	}
-	log.Print(len(buffer), buffer)
 	return &ledStripe{
 		buffer:      buffer,
 		pixelLength: f.sumHardwarePixel,
