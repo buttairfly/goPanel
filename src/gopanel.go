@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"image"
 	"image/color"
 	"log"
 	"os"
@@ -48,6 +49,8 @@ func main() {
 	wg.Add(1)
 	go pixelDevice.Run(wg)
 
+	mainPicture := image.NewRGBA(frame.Bounds())
+
 	for {
 		for c := 0; c < device.NumBytePerColor; c++ {
 			var pixel color.RGBA
@@ -60,9 +63,11 @@ func main() {
 				pixel = color.RGBA{0, 0, 0xff, 0xff}
 			}
 			for y := 0; y < frame.GetHeight(); y++ {
-				colorFrame := hardware.NewCopyFrameWithEmptyImage(frame)
 				for x := 0; x < frame.GetWidth(); x++ {
-					colorFrame.SetRGBA(x, y, pixel)
+					mainPicture.SetRGBA(x, y, pixel)
+					picture := image.NewRGBA(mainPicture.Bounds())
+					copy(picture.Pix, mainPicture.Pix)
+					colorFrame := hardware.NewCopyFrameWithImage(frame, picture)
 					inputChan <- colorFrame
 				}
 			}

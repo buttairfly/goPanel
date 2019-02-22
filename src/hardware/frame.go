@@ -58,6 +58,18 @@ func NewCopyFrameWithEmptyImage(other Frame) Frame {
 	}
 }
 
+// NewCopyFrameWithImage creates a new Frame with the reference of Tiles
+// and sets
+func NewCopyFrameWithImage(other Frame, picture *image.RGBA) Frame {
+	return &frame{
+		image:            picture,
+		tiles:            other.getTiles(),
+		sumHardwarePixel: other.GetSumHardwarePixel(),
+		width:            other.GetWidth(),
+		height:           other.GetHeight(),
+	}
+}
+
 func (f *frame) ToLedStripe() LedStripe {
 	buffer := make([]uint8, f.sumHardwarePixel*NumBytePixel)
 	for _, tile := range f.tiles {
