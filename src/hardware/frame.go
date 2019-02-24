@@ -82,7 +82,8 @@ func NewCopyFrameFromImage(other Frame, pictureToCopy *image.RGBA) Frame {
 }
 
 func (f *frame) ToLedStripe() LedStripe {
-	buffer := make([]uint8, f.sumHardwarePixel*NumBytePixel)
+	ledStripe := NewLedStripe(f.sumHardwarePixel)
+	buffer := ledStripe.GetBuffer()
 	for _, tile := range f.tiles {
 		for x := 0; x < tile.GetWidth(); x++ {
 			for y := 0; y < tile.GetHeight(); y++ {
@@ -97,10 +98,7 @@ func (f *frame) ToLedStripe() LedStripe {
 			}
 		}
 	}
-	return &ledStripe{
-		buffer:      buffer,
-		pixelLength: f.sumHardwarePixel,
-	}
+	return ledStripe
 }
 
 // ColorModel implements image interface

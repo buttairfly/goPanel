@@ -133,20 +133,25 @@ func (s *serialDevice) Run(wg *sync.WaitGroup) {
 	time.Sleep(latchDelay)
 	s.init()
 
+	lastLedStripe := hardware.NewLedStripe(s.numLed)
 	for frame := range s.input {
-		buffer := frame.ToLedStripe().GetBuffer()
-		now := time.Now()
-		sleepDuration := latchDelay - (now.Sub(lastFrameTime))
-		log.Println(sleepDuration, now.Sub(lastFrameTime))
-		if sleepDuration > 0 {
-			time.Sleep(sleepDuration)
+		ledStripe := frame.ToLedStripe()
+		ledStripeCompare := ledStripe.Compare(lastLedStripe)
+		if ledStripeCompare.HasChanged() {
+			now := time.Now()
+			sleepDuration := latchDelay - (now.Sub(lastFrameTime))
+			log.Println(sleepDuration, now.Sub(lastFrameTime))
+			if sleepDuration > 0 {
+				time.Sleep(sleepDuration)
+			}
+			lastFrameTime = now
+			for _, pixelIndex := range ledStripeCompare.GetOtherDiffPixels() {
+				s.setPixel(pixelIndex, ledStripe.GetBuffer())
+			}
+			s.latchFrame()
+			//s.shade(s.numLed, frame[0:3])
+			lastLedStripe = ledStripe
 		}
-		lastFrameTime = now
-		for pixel := 0; pixel < s.numLed; pixel++ {
-			s.setPixel(pixel, buffer)
-		}
-		s.latchFrame()
-		//s.shade(s.numLed, frame[0:3])
 	}
 }
 
