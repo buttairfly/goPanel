@@ -53,20 +53,18 @@ func main() {
 	go pixelDevice.Run(wg)
 
 	mainPicture := image.NewRGBA(frame.Bounds())
+
+	colors := make([]color.RGBA, 0, 10)
+	colors = append(colors, color.RGBA{0xff, 0, 0, 0xff})
+	colors = append(colors, color.RGBA{0xff, 0x64, 0x47, 0xff})
+	colors = append(colors, color.RGBA{0xff, 0xa5, 0, 0xff})
+	colors = append(colors, color.RGBA{0xf7f, 0x7f, 0, 0xff})
+
 	for {
-		for c := 0; c < device.NumBytePerColor; c++ {
-			var pixel color.RGBA
-			switch c {
-			case hardware.R:
-				pixel = color.RGBA{0xff, 0, 0, 0xff}
-			case hardware.G:
-				pixel = color.RGBA{0x7f, 0x7f, 0, 0xff}
-			case hardware.B:
-				pixel = color.RGBA{0x20, 0xc0, 0, 0xff}
-			}
+		for _, color := range colors {
 			for y := 0; y < frame.GetHeight(); y++ {
 				for x := 0; x < frame.GetWidth(); x++ {
-					mainPicture.SetRGBA(x, y, pixel)
+					mainPicture.SetRGBA(x, y, color)
 					colorFrame := hardware.NewCopyFrameFromImage(frame, mainPicture)
 					inputChan <- colorFrame
 				}
