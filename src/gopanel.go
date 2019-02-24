@@ -60,9 +60,9 @@ func main() {
 			case hardware.R:
 				pixel = color.RGBA{0xff, 0, 0, 0xff}
 			case hardware.G:
-				pixel = color.RGBA{0, 0xff, 0, 0xff}
+				pixel = color.RGBA{0x7f, 0x7f, 0, 0xff}
 			case hardware.B:
-				pixel = color.RGBA{0, 0, 0xff, 0xff}
+				pixel = color.RGBA{0x20, 0xc0, 0, 0xff}
 			}
 			for y := 0; y < frame.GetHeight(); y++ {
 				for x := 0; x < frame.GetWidth(); x++ {

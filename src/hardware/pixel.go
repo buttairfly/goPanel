@@ -29,10 +29,11 @@ func NewPixelFromInt(c int) Pixel {
 
 // NewPixelFromSlice creates a new rgb byte struct from uint8 slice
 func NewPixelFromSlice(s []uint8, pos int) Pixel {
-	if len(s) != NumBytePixel+pos {
-		log.Panic("no correct byteslice", len(s), "with offset", NumBytePixel+pos)
+	pixPos := pos * NumBytePixel
+	if len(s) <= pixPos+NumBytePixel {
+		log.Fatalf("no correct byteslice %d with offset %d", len(s), pixPos+NumBytePixel)
 	}
-	return s[pos : pos+NumBytePixel]
+	return s[pixPos : pixPos+NumBytePixel]
 }
 
 // ToSlice converts to an slice color value
@@ -48,23 +49,4 @@ func (p Pixel) ToInt() int {
 // Equals checks wheather the color of orhter and this pixel is identical
 func (p Pixel) Equals(other Pixel) bool {
 	return p[R] == other[R] && p[G] == other[G] && p[B] == other[B]
-}
-
-// TODO: move to higher frame
-
-// Brighten will make the pixel more light by scale
-func (p Pixel) Brighten(scale uint8) {
-	//TODO: handle overflow
-	p[R] *= scale
-	p[G] *= scale
-	p[B] *= scale
-}
-
-// Dim dimms the pixel by scale
-func (p Pixel) Dim(scale uint8) {
-	if scale != 0 {
-		p[R] /= scale
-		p[G] /= scale
-		p[B] /= scale
-	}
 }
