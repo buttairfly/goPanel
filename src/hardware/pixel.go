@@ -30,8 +30,8 @@ func NewPixelFromInt(c int) Pixel {
 // NewPixelFromSlice creates a new rgb byte struct from uint8 slice
 func NewPixelFromSlice(s []uint8, pos int) Pixel {
 	pixPos := pos * NumBytePixel
-	if len(s) <= pixPos+NumBytePixel {
-		log.Fatalf("no correct byteslice %d with offset %d", len(s), pixPos+NumBytePixel)
+	if len(s) < pixPos+NumBytePixel-1 {
+		log.Fatalf("no correct byteslice %d with offset %d", len(s), pixPos+NumBytePixel-1)
 	}
 	return s[pixPos : pixPos+NumBytePixel]
 }
