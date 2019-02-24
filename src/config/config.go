@@ -114,8 +114,7 @@ func (c *config) UnmarshalJSON(b []byte) error {
 	}
 
 	if objMap["deviceConfig"] != nil {
-		var deviceConfig DeviceConfig
-		err = json.Unmarshal(*objMap["deviceConfig"], &deviceConfig)
+		err = json.Unmarshal(*objMap["deviceConfig"], &c.DeviceConfig)
 		if err != nil {
 			return err
 		}

@@ -71,7 +71,6 @@ func TestNewMainConfig(t *testing.T) {
 			}
 
 			readConfig, err2 := newConfigFromPath(expectedFile)
-
 			require.NoError(t, err2)
 			require.NotNil(t, readConfig)
 
