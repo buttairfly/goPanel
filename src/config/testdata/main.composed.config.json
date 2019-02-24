@@ -243,7 +243,7 @@
 			"verbose": false,
 			"readBufferSize": 1024,
 			"initSleepTime": "20ms",
-			"latchSleepTime": "20ms",
+			"latchSleepTime": "10.5ms",
 			"commandSleepTime": "100µs"
 		}
 	}

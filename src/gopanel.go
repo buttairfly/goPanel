@@ -56,9 +56,9 @@ func main() {
 
 	colors := make([]color.RGBA, 0, 10)
 	colors = append(colors, color.RGBA{0xff, 0, 0, 0xff})
-	colors = append(colors, color.RGBA{0xff, 0x64, 0x47, 0xff})
+	colors = append(colors, color.RGBA{0xff, 0x45, 0, 0xff})
 	colors = append(colors, color.RGBA{0xff, 0xa5, 0, 0xff})
-	colors = append(colors, color.RGBA{0x7f, 0x7f, 0, 0xff})
+	colors = append(colors, color.RGBA{0xff, 0xff, 0, 0xff})
 
 	for {
 		for _, color := range colors {
