@@ -25,12 +25,13 @@ func TestNewMainConfig(t *testing.T) {
 			desc: "main_config",
 			panelConfig: &PanelConfig{
 				TileConfigPaths: []string{
-					testFolder + "snake_vertical___c0_20-0_10-10.config.json",
-					testFolder + "snake_vertical___c1_10-0_0-10.config.json",
+					"tile.snake_vertical_c0_20-0_10-10.config.json",
+					"tile.snake_vertical_c1_10-0_0-10.config.json",
 				},
+				DeviceConfigPath: "device.serial.config.json",
 			},
-			panelFile:    "panel.config.json",
-			expectedFile: "composedMain.config.json",
+			panelFile:    "main.panel.config.json",
+			expectedFile: "main.composed.config.json",
 			actualFile:   "actual.config.json",
 		},
 	}
@@ -42,21 +43,25 @@ func TestNewMainConfig(t *testing.T) {
 
 			skip := false
 			for _, tileConfigPath := range c.panelConfig.TileConfigPaths {
-				if _, err := os.Stat(tileConfigPath); err != nil {
+				if _, err := os.Stat(testFolder + tileConfigPath); err != nil {
 					t.Log(err.Error())
 					skip = true
 				}
 			}
+			if _, err := os.Stat(testFolder + c.panelConfig.DeviceConfigPath); err != nil {
+				t.Log(err.Error())
+				skip = true
+			}
 			if skip {
-				testhelper.FailAndSkip(t, "Run: env TEST_RECORD=true go test ./... -run TestNewTileConfigSnakeMapFile")
+				testhelper.FailAndSkip(t, "Re-Run: env TEST_RECORD=true go test ./...")
 			}
 
 			if testhelper.RecordCall() {
 				t.Logf("Write Panel Config to file %v", panelFile)
-				require.NoError(t, c.panelConfig.writeToFile(panelFile))
+				require.NoError(t, c.panelConfig.WriteToFile(panelFile))
 			}
 
-			genConfig, err := NewConfigFromPanelConfigPath(panelFile)
+			genConfig, err := NewConfigFromPanelConfigPath(testFolder, c.panelFile)
 			require.NoError(t, err)
 			require.NotNil(t, genConfig)
 
@@ -70,8 +75,8 @@ func TestNewMainConfig(t *testing.T) {
 			require.NoError(t, err2)
 			require.NotNil(t, readConfig)
 
-			assert.True(t, cmp.Equal(readConfig, genConfig), "error read and generated main config are not equal")
 			t.Log(cmp.Diff(readConfig, genConfig))
+			assert.True(t, cmp.Equal(readConfig, genConfig), "error read and generated main config are not equal")
 
 			assert.Equal(t, c.err, genConfig.WriteToFile(actualFile), "error occurred in actual file write")
 			defer os.Remove(actualFile)

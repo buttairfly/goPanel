@@ -1,0 +1,14 @@
+{
+	"type": "serial",
+	"serialConfig": {
+		"streamConfig": {
+			"name": "/dev/ttyUSB0",
+			"baud": 1152000,
+			"size": 8,
+			"readTimeout": "1s"
+		},
+		"initSleepTime": "20ms",
+		"latchSleepTime": "20ms",
+		"commandSleepTime": "100µs"
+	}
+}

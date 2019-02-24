@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/buttairfly/goPanel/src/config"
 	"github.com/buttairfly/goPanel/src/hardware"
 )
 
@@ -21,26 +22,16 @@ type LedDevice interface {
 	Write(data []byte) (int, error)
 	Close() error
 	SetInput(<-chan hardware.Frame)
-	GetType() Type
+	GetType() config.Type
 }
 
-// Type is a LedDevice type
-type Type string
-
-const (
-	// Print debug print device
-	Print = Type("print")
-	// Serial high level serial tty device
-	Serial = Type("serial")
-)
-
 // NewLedDevice creates a new Led device
-func NewLedDevice(t Type, length int) (LedDevice, error) {
+func NewLedDevice(t config.Type, length int) (LedDevice, error) {
 	var pixelDevice LedDevice
 	switch t {
-	case Print:
+	case config.Print:
 		pixelDevice = NewPrintDevice(length)
-	case Serial:
+	case config.Serial:
 		pixelDevice = NewSerialDevice(length)
 	default:
 		return nil, fmt.Errorf("unkown led device type: %v", t)

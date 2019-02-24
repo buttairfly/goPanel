@@ -26,17 +26,20 @@ func main() {
 
 	printProgramInfo()
 
-	panelConfigPtr := flag.String("config", "panel.config.json", "a string")
+	panelConfigPtr := flag.String("config", "main.panel.config.json", "a string")
+	folderConfigPtr := flag.String("folder", "", "a string")
 	flag.Parse()
-	mainConfig, err1 := config.NewConfigFromPanelConfigPath(*panelConfigPtr)
+	mainConfig, err1 := config.NewConfigFromPanelConfigPath(*folderConfigPtr, *panelConfigPtr)
 	if err1 != nil {
 		log.Fatal(err1)
 	}
 
 	frame := hardware.NewFrame(mainConfig.GetTileConfigs())
 
-	pixelDevice, err := device.NewLedDevice(device.Serial, frame.GetSumHardwarePixel())
-	//pixelDevice, err := device.NewLedDevice(device.Print, panelLed)
+	pixelDevice, err := device.NewLedDevice(
+		mainConfig.GetDeviceConfig().Type,
+		frame.GetSumHardwarePixel(),
+	)
 	if err != nil {
 		log.Fatal(err)
 	}

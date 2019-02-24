@@ -17,13 +17,11 @@ const MapFormatString = "%2d"
 
 // TileConfig is the config of a tile or led module
 type TileConfig interface {
+	JSONFileReadWriter
 	NumHardwarePixel() int
 	GetBounds() image.Rectangle
 	GetConnectionOrder() int
 	GetLedStripeMap() map[string]int
-	FromReader(r io.Reader) error
-	FromFile(path string) error
-	WriteToFile(path string) error
 }
 
 type tileConfig struct {

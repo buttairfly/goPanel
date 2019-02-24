@@ -5,6 +5,7 @@ import (
 	"log"
 	"sync"
 
+	"github.com/buttairfly/goPanel/src/config"
 	"github.com/buttairfly/goPanel/src/hardware"
 )
 
@@ -53,6 +54,6 @@ func (pd *printDevice) Run(wg *sync.WaitGroup) {
 	}
 }
 
-func (pd *printDevice) GetType() Type {
-	return Print
+func (pd *printDevice) GetType() config.Type {
+	return config.Print
 }

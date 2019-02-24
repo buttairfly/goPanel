@@ -10,13 +10,13 @@ import (
 
 // PanelConfig is the global panel config
 type PanelConfig struct {
-	TileConfigPaths []string `json:"tileConfigPaths"`
-	// DeviceConfig device.Config         `json:"deviceConfig"`
+	TileConfigPaths  []string `json:"tileConfigPaths"`
+	DeviceConfigPath string   `json:"deviceConfigPath"`
 }
 
-func newPanelConfigFromPath(path string) (*PanelConfig, error) {
+func newPanelConfigFromPath(folderOffset, path string) (*PanelConfig, error) {
 	pc := new(PanelConfig)
-	err := pc.fromFile(path)
+	err := pc.FromFile(folderOffset + path)
 	if err != nil {
 		return nil, err
 	}
@@ -24,17 +24,17 @@ func newPanelConfigFromPath(path string) (*PanelConfig, error) {
 }
 
 // FromFile reads the config from a file at path
-func (pc *PanelConfig) fromFile(path string) error {
+func (pc *PanelConfig) FromFile(path string) error {
 	f, err := os.Open(path)
 	if err != nil {
 		return fmt.Errorf("can not read Config file %v. error: %v", path, err)
 	}
 	defer f.Close()
-	return pc.fromReader(f)
+	return pc.FromReader(f)
 }
 
 // FromReader decodes the config from io.Reader
-func (pc *PanelConfig) fromReader(r io.Reader) error {
+func (pc *PanelConfig) FromReader(r io.Reader) error {
 	dec := json.NewDecoder(r)
 	err := dec.Decode(&*pc)
 	if err != nil {
@@ -44,7 +44,7 @@ func (pc *PanelConfig) fromReader(r io.Reader) error {
 }
 
 // WriteToFile writes the config to a file at path
-func (pc *PanelConfig) writeToFile(path string) error {
+func (pc *PanelConfig) WriteToFile(path string) error {
 	jsonConfig, err := json.MarshalIndent(pc, "", "\t")
 	if err != nil {
 		return err

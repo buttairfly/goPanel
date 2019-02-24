@@ -1,0 +1,71 @@
+package config
+
+import (
+	"fmt"
+	"os"
+	"testing"
+	"time"
+
+	"github.com/buttairfly/goPanel/src/testhelper"
+	"github.com/google/go-cmp/cmp"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+)
+
+func TestNewDeviceConfigFile(t *testing.T) {
+	const testFolder = "testdata/"
+	cases := []struct {
+		desc         string
+		deviceConfig *DeviceConfig
+		expectedFile string
+		actualFile   string
+		err          error
+	}{
+		{
+			desc: "serial",
+			deviceConfig: &DeviceConfig{
+				Type: Serial,
+				SerialConfig: &SerialConfig{
+					StreamConfig: &StreamConfig{
+						Name:        "/dev/ttyUSB0",
+						Baud:        1152000,
+						ReadTimeout: 1 * time.Second,
+						Size:        8,
+					},
+					InitSleepTime:    20 * time.Millisecond,
+					LatchSleepTime:   20 * time.Millisecond,
+					CommandSleepTime: 100 * time.Microsecond,
+				},
+			},
+			expectedFile: ".config.json",
+			actualFile:   "actual.config.json",
+		},
+		{
+			desc: "print",
+			deviceConfig: &DeviceConfig{
+				Type: Print,
+			},
+			expectedFile: ".config.json",
+			actualFile:   "actual.config.json",
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.desc, func(t *testing.T) {
+			expectedFile := fmt.Sprintf("%sdevice.%s%s", testFolder, c.desc, c.expectedFile)
+			actualFile := fmt.Sprintf("%sdevice.%s_%s", testFolder, c.desc, c.actualFile)
+
+			if testhelper.RecordCall() {
+				t.Logf("Write Device Config to file %+v %+v", c.deviceConfig, c.deviceConfig.SerialConfig)
+				require.NoError(t, c.deviceConfig.WriteToFile(expectedFile))
+			}
+
+			readConfig, err2 := NewDeviceConfigFromPath(expectedFile)
+			require.NoError(t, err2)
+			t.Log(cmp.Diff(readConfig, c.deviceConfig))
+			assert.True(t, cmp.Equal(readConfig, c.deviceConfig), "error read and generated device config are not equal")
+			assert.Equal(t, c.err, c.deviceConfig.WriteToFile(actualFile), "error occurred in file write")
+			defer os.Remove(actualFile)
+			testhelper.Diff(t, expectedFile, actualFile)
+		})
+	}
+}

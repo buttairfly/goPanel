@@ -56,7 +56,7 @@ func TestNewTileConfigSnakeMapFile(t *testing.T) {
 			actualFile:   "actual.config.json",
 		},
 		{
-			desc: "snake_vertical___c0_20-0_10-10",
+			desc: "snake_vertical_c0_20-0_10-10",
 			generator: TileConfigSnakeGenerator{
 				startPoint:      image.Point{X: 20, Y: 0},
 				endPoint:        image.Point{X: 10, Y: 10},
@@ -72,7 +72,7 @@ func TestNewTileConfigSnakeMapFile(t *testing.T) {
 			actualFile:   "actual.config.json",
 		},
 		{
-			desc: "snake_vertical___c1_10-0_0-10",
+			desc: "snake_vertical_c1_10-0_0-10",
 			generator: TileConfigSnakeGenerator{
 				startPoint:      image.Point{X: 10, Y: 0},
 				endPoint:        image.Point{X: 0, Y: 10},
@@ -88,7 +88,7 @@ func TestNewTileConfigSnakeMapFile(t *testing.T) {
 			actualFile:   "actual.config.json",
 		},
 		{
-			desc: "snake_vertical___c0_0-0_3-3",
+			desc: "snake_vertical_c0_0-0_3-3",
 			generator: TileConfigSnakeGenerator{
 				startPoint:      image.Point{X: 0, Y: 0},
 				endPoint:        image.Point{X: 3, Y: 3},
@@ -105,7 +105,7 @@ func TestNewTileConfigSnakeMapFile(t *testing.T) {
 			actualFile:   "actual.config.json",
 		},
 		{
-			desc: "snake_vertical___c0_0-0_4-4",
+			desc: "snake_vertical_c0_0-0_4-4",
 			generator: TileConfigSnakeGenerator{
 				startPoint:      image.Point{X: 0, Y: 0},
 				endPoint:        image.Point{X: 4, Y: 4},
@@ -123,7 +123,7 @@ func TestNewTileConfigSnakeMapFile(t *testing.T) {
 			actualFile:   "actual.config.json",
 		},
 		{
-			desc: "snake_vertical___c0_3-3_0-0",
+			desc: "snake_vertical_c0_3-3_0-0",
 			generator: TileConfigSnakeGenerator{
 				startPoint:      image.Point{X: 3, Y: 3},
 				endPoint:        image.Point{X: 0, Y: 0},
@@ -142,8 +142,8 @@ func TestNewTileConfigSnakeMapFile(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.desc, func(t *testing.T) {
-			expectedFile := fmt.Sprintf("%s%s%s", testFolder, c.desc, c.expectedFile)
-			actualFile := fmt.Sprintf("%s%s_%s", testFolder, c.desc, c.actualFile)
+			expectedFile := fmt.Sprintf("%stile.%s%s", testFolder, c.desc, c.expectedFile)
+			actualFile := fmt.Sprintf("%stile.%s_%s", testFolder, c.desc, c.actualFile)
 			genConfig, err := NewTileConfigSnakeMapFile(c.generator)
 			require.NoError(t, err)
 			require.NotNil(t, genConfig)
@@ -160,6 +160,8 @@ func TestNewTileConfigSnakeMapFile(t *testing.T) {
 
 			readConfig, err2 := NewTileConfigFromPath(expectedFile)
 			require.NoError(t, err2)
+
+			t.Log(cmp.Diff(readConfig, genConfig))
 			assert.True(t, cmp.Equal(readConfig, genConfig), "error read and generated tile config are not equal")
 			assert.Equal(t, c.err, genConfig.WriteToFile(actualFile), "error occurred in file write")
 			defer os.Remove(actualFile)

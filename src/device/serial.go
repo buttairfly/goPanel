@@ -8,26 +8,27 @@ import (
 	"sync"
 	"time"
 
+	"github.com/buttairfly/goPanel/src/config"
 	"github.com/buttairfly/goPanel/src/hardware"
 	"github.com/tarm/serial"
 )
 
 type serialDevice struct {
-	config     *serial.Config
-	stream     *serial.Port
-	numLed     int
-	input      <-chan hardware.Frame
-	readActive chan bool
+	streamConfig *serial.Config
+	stream       *serial.Port
+	numLed       int
+	input        <-chan hardware.Frame
+	readActive   chan bool
 }
 
 // NewSerialDevice creates a new serial device
 func NewSerialDevice(numLed int) LedDevice {
 	s := new(serialDevice)
-	s.config = &serial.Config{
+	s.streamConfig = &serial.Config{
 		Name:        "/dev/ttyUSB0",
 		Baud:        1152000,
-		ReadTimeout: 1000 * time.Millisecond,
 		Size:        8,
+		ReadTimeout: 1000 * time.Millisecond,
 	}
 	s.numLed = numLed
 	return s
@@ -35,7 +36,7 @@ func NewSerialDevice(numLed int) LedDevice {
 
 func (s *serialDevice) Open() error {
 	var err error
-	s.stream, err = serial.OpenPort(s.config)
+	s.stream, err = serial.OpenPort(s.streamConfig)
 	return err
 }
 
@@ -152,6 +153,6 @@ func (s *serialDevice) Run(wg *sync.WaitGroup) {
 	}
 }
 
-func (s *serialDevice) GetType() Type {
-	return Serial
+func (s *serialDevice) GetType() config.Type {
+	return config.Serial
 }
