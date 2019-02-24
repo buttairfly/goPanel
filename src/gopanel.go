@@ -27,7 +27,7 @@ func main() {
 	printProgramInfo()
 
 	panelConfigPtr := flag.String("config", "main.panel.config.json", "a string")
-	folderConfigPtr := flag.String("folder", "", "a string")
+	folderConfigPtr := flag.String("folder", "config/", "a string")
 	flag.Parse()
 	mainConfig, err1 := config.NewConfigFromPanelConfigPath(*folderConfigPtr, *panelConfigPtr)
 	if err1 != nil {

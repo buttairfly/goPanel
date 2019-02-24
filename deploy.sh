@@ -19,7 +19,7 @@ if env GOOS=linux GOARCH=arm GOARM=5 go build -ldflags "-X main.compileDate=${DA
         echo "deploy ${BINARY}"
         exit 0
     elif scp ${BINARY} pi@ledpix.fritz.box:~/goPanel ; then
-        scp ./config/* pi@ledpix.fritz.box:~/
+        scp ./config/* pi@ledpix.fritz.box:~/config
         echo "deploy ${BINARY}"
         exit 0
     else
