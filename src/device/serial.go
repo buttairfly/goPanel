@@ -14,29 +14,24 @@ import (
 )
 
 type serialDevice struct {
-	streamConfig *serial.Config
-	stream       *serial.Port
-	numLed       int
-	input        <-chan hardware.Frame
-	readActive   chan bool
+	config     *config.SerialConfig
+	stream     *serial.Port
+	numLed     int
+	input      <-chan hardware.Frame
+	readActive chan bool
 }
 
 // NewSerialDevice creates a new serial device
-func NewSerialDevice(numLed int) LedDevice {
+func NewSerialDevice(numLed int, serialDeviceConfig *config.SerialConfig) LedDevice {
 	s := new(serialDevice)
-	s.streamConfig = &serial.Config{
-		Name:        "/dev/ttyUSB0",
-		Baud:        1152000,
-		Size:        8,
-		ReadTimeout: 1000 * time.Millisecond,
-	}
+	s.config = serialDeviceConfig
 	s.numLed = numLed
 	return s
 }
 
 func (s *serialDevice) Open() error {
 	var err error
-	s.stream, err = serial.OpenPort(s.streamConfig)
+	s.stream, err = serial.OpenPort(s.config.StreamConfig.ToStreamSerialConfig())
 	return err
 }
 
@@ -44,10 +39,10 @@ func (s *serialDevice) init() {
 	s.stream.Flush()
 	command := "V\n"
 	s.Write([]byte(command))
-	time.Sleep(20 * time.Millisecond)
+	time.Sleep(s.config.InitSleepTime)
 	command = fmt.Sprintf("I%04x\n", s.numLed)
 	s.Write([]byte(command))
-	time.Sleep(20 * time.Millisecond)
+	time.Sleep(s.config.InitSleepTime)
 }
 
 func (s *serialDevice) read(wg *sync.WaitGroup) {
@@ -55,7 +50,7 @@ func (s *serialDevice) read(wg *sync.WaitGroup) {
 	defer wg.Done()
 	defer log.Println(lastLine)
 
-	buf := make([]byte, 1024)
+	buf := make([]byte, s.config.ReadBufferSize)
 	for {
 		select {
 		case <-s.readActive:
@@ -91,8 +86,11 @@ func (s *serialDevice) Close() error {
 }
 
 func (s *serialDevice) Write(data []byte) (int, error) {
-	// log.Printf("Command %s", string(data))
+	if s.config.Verbose {
+		log.Printf("Command %s", string(data))
+	}
 	n, err := s.stream.Write(data)
+	time.Sleep(s.config.CommandSleepTime)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -128,7 +126,7 @@ func (s *serialDevice) Run(wg *sync.WaitGroup) {
 	wg.Add(1)
 	go s.read(wg)
 
-	const latchDelay = 20 * time.Millisecond
+	latchDelay := s.config.LatchSleepTime
 	lastFrameTime := time.Now().Add(-latchDelay)
 
 	// initialize bitbanger with number of leds
@@ -146,7 +144,6 @@ func (s *serialDevice) Run(wg *sync.WaitGroup) {
 		lastFrameTime = now
 		for pixel := 0; pixel < s.numLed; pixel++ {
 			s.setPixel(pixel, buffer)
-			time.Sleep(180 * time.Microsecond)
 		}
 		s.latchFrame()
 		//s.shade(s.numLed, frame[0:3])

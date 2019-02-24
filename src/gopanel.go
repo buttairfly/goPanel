@@ -37,7 +37,7 @@ func main() {
 	frame := hardware.NewFrame(mainConfig.GetTileConfigs())
 
 	pixelDevice, err := device.NewLedDevice(
-		mainConfig.GetDeviceConfig().Type,
+		mainConfig.GetDeviceConfig(),
 		frame.GetSumHardwarePixel(),
 	)
 	if err != nil {
