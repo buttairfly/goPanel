@@ -22,6 +22,7 @@ func (l *ledStripe) GetPixelLength() int {
 	return l.pixelLength
 }
 
+// NewLedStripe creates a new led stripe buffer
 func NewLedStripe(numLed int) LedStripe {
 	bufferCap := numLed * NumBytePixel
 	buffer := make([]uint8, bufferCap, bufferCap)
