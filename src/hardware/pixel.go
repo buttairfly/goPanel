@@ -3,8 +3,6 @@ package hardware
 import (
 	"image/color"
 	"log"
-
-	"github.com/buttairfly/goPanel/src/palette.go"
 )
 
 // Red Green Blue an numBytePixel as constants
@@ -17,7 +15,8 @@ const (
 
 // Pixel interface implements color interface
 type Pixel interface {
-	palette.Color
+	color.Color
+	Equals(color.Color) bool
 	ToSlice() []uint8
 	ToInt() int
 }
