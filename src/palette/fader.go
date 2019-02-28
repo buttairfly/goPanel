@@ -59,8 +59,8 @@ func (f fader) Fade(step float64) color.Color {
 	if step < 0.0 {
 		step = 0.0
 	}
-	if step > float64(paletteLen-1) {
-		step = float64(paletteLen - 1)
+	if step > float64(paletteLen-2) {
+		step = float64(paletteLen - 2)
 	}
 	c1, _ := colorful.MakeColor(f[int(step)])
 	c2, _ := colorful.MakeColor(f[int(step)+1])
