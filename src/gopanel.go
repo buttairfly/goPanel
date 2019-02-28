@@ -13,6 +13,7 @@ import (
 	"github.com/buttairfly/goPanel/src/config"
 	"github.com/buttairfly/goPanel/src/device"
 	"github.com/buttairfly/goPanel/src/hardware"
+	"github.com/buttairfly/goPanel/src/palette"
 )
 
 var (
@@ -54,21 +55,27 @@ func main() {
 
 	mainPicture := image.NewRGBA(frame.Bounds())
 
-	colors := make([]color.RGBA, 0, 10)
+	colors := make([]color.Color, 0, 10)
 	colors = append(colors, color.RGBA{0xff, 0, 0, 0xff})
 	colors = append(colors, color.RGBA{0xff, 0x45, 0, 0xff})
 	colors = append(colors, color.RGBA{0xff, 0xa5, 0, 0xff})
 	colors = append(colors, color.RGBA{0xff, 0xff, 0, 0xff})
+	fader := palette.NewFader(colors)
 
+	const granularity int = 10
+	numSteps, faderIncrement := fader.NumStepsAndIncrement(granularity)
+	faderPos := 0.0
 	for {
-		for _, color := range colors {
+		for i := 0; i < numSteps; i++ {
 			for y := 0; y < frame.GetHeight(); y++ {
 				for x := 0; x < frame.GetWidth(); x++ {
-					mainPicture.SetRGBA(x, y, color)
+					color := fader.Fade(faderPos)
+					mainPicture.Set(x, y, color)
 					colorFrame := hardware.NewCopyFrameFromImage(frame, mainPicture)
 					inputChan <- colorFrame
 				}
 			}
+			faderPos += faderIncrement
 		}
 	}
 }

@@ -31,7 +31,7 @@ require (
 	github.com/jgautheron/goconst v0.0.0-20170703170152-9740945f5dcb // indirect
 	github.com/juju/errors v0.0.0-20190207033735-e65537c515d7 // indirect
 	github.com/kisielk/errcheck v1.2.0 // indirect
-	github.com/lucasb-eyer/go-colorful v0.0.0-20181028223441-12d3b2882a08 // indirect
+	github.com/lucasb-eyer/go-colorful v0.0.0-20181028223441-12d3b2882a08
 	github.com/luismesas/go-rpi v1.0.2 // indirect
 	github.com/luismesas/goPi v1.0.2
 	github.com/mattn/go-colorable v0.1.0 // indirect
