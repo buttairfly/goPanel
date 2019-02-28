@@ -108,6 +108,8 @@ github.com/kr/pretty v0.1.0/go.mod h1:dAy3ld7l9f0ibDNOQOHHMYYIIbhfbHSm3C4ZsoJORN
 github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=
 github.com/kr/pty v1.1.3/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=
 github.com/kr/text v0.1.0/go.mod h1:4Jbv+DJW3UT/LiOwJeYQe1efqtUx/iVham/4vfdArNI=
+github.com/lucasb-eyer/go-colorful v0.0.0-20181028223441-12d3b2882a08 h1:5MnxBC15uMxFv5FY/J/8vzyaBiArCOkMdFT9Jsw78iY=
+github.com/lucasb-eyer/go-colorful v0.0.0-20181028223441-12d3b2882a08/go.mod h1:NXg0ArsFk0Y01623LgUqoqcouGDB+PwCCQlrwrG6xJ4=
 github.com/luismesas/go-rpi v1.0.2 h1:qbtmG/pFgPtr7BiB1tR4O+5ODwBldBPoHuHDctQjnU8=
 github.com/luismesas/go-rpi v1.0.2/go.mod h1:X5HClL0mGP2US8C2ISmJStxOW6WPSvmVDrnP9zNGthg=
 github.com/luismesas/goPi v1.0.2 h1:JOtDgbru2ORpYQT2Ot0UwIBQMyxw84/bBlO7rkP2XhI=
