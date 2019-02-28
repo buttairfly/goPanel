@@ -38,7 +38,7 @@ func (f *fader) AddColor(c color.Color, pos int) {
 	if pos > numColors {
 		pos = numColors
 	}
-	if f.palette[pos].Equals(c) {
+	/*if f.palette[pos].Equals(c) {
 
-	}
+	}*/
 }
