@@ -13,20 +13,22 @@ type Fader interface {
 	Index(c color.Color) int
 	AddColor(c color.Color, pos int)
 	AddLastColor(c color.Color)
-	GetIncrements(granularity int) []float64
+	GetIncrements() []float64
 	Fade(step float64) color.Color
 }
 
 type fader struct {
-	palette  color.Palette
-	wrapping bool
+	palette     color.Palette
+	granularity int
+	wrapping    bool
 }
 
-const epsilon float64 = 0.000001
-
 // NewFader creates a Fader from a palette
-func NewFader(palette color.Palette, wrapping bool) Fader {
-	return &fader{palette: palette, wrapping: wrapping}
+func NewFader(palette color.Palette, granularity int, wrapping bool) Fader {
+	if granularity < 1 {
+		granularity = 1
+	}
+	return &fader{palette: palette, granularity: granularity, wrapping: wrapping}
 }
 
 func (f fader) Convert(c color.Color) color.Color {
@@ -69,7 +71,7 @@ func (f fader) Fade(step float64) color.Color {
 	}
 	fadeValue := step - math.Trunc(step)
 	baseStep := int(math.Trunc(step))
-	if math.Abs(fadeValue) < epsilon {
+	if math.Abs(fadeValue) < 0.1/float64(f.granularity) {
 		return f.palette[baseStep]
 	}
 
@@ -78,20 +80,18 @@ func (f fader) Fade(step float64) color.Color {
 	return c1.BlendHcl(c2, step-math.Trunc(step)).Clamped()
 }
 
-func (f fader) GetIncrements(granularity int) []float64 {
+func (f fader) GetIncrements() []float64 {
 	lenPalette := len(f.palette)
 	if lenPalette < 2 {
 		return []float64{0.0}
 	}
-	numSteps := granularity * lenPalette
+	numSteps := f.granularity*(lenPalette-1) + 1
 	if f.wrapping {
-		numSteps = granularity * (lenPalette + 1)
+		numSteps = f.granularity * lenPalette
 	}
 	increments := make([]float64, numSteps)
-	position := 0.0
-	for i := range increments {
-		increments[i] = position
-		position += 1.0 / float64(granularity)
+	for num := range increments {
+		increments[num] = float64(num) / float64(f.granularity)
 	}
 	return increments
 }

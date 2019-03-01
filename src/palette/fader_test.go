@@ -8,9 +8,9 @@ import (
 )
 
 var (
-	emptyPalette    = &fader{palette: nil, wrapping: false}
-	greenPalette    = &fader{palette: []color.Color{green}, wrapping: false}
-	redGreenPalette = &fader{palette: []color.Color{red, green}, wrapping: false}
+	emptyPalette    = &fader{palette: nil, granularity: 1, wrapping: false}
+	greenPalette    = &fader{palette: []color.Color{green}, granularity: 1, wrapping: false}
+	redGreenPalette = &fader{palette: []color.Color{red, green}, granularity: 1, wrapping: false}
 	red             = color.RGBA64{R: 0xffff, G: 0x0000, B: 0x0000, A: 0xffff}
 	green           = color.RGBA64{R: 0x0000, G: 0xffff, B: 0x0000, A: 0xffff}
 	redGreen0Point1 = color.RGBA64{R: 0xfedd, G: 0x4021, B: 0x0000, A: 0xffff}
@@ -19,12 +19,13 @@ var (
 
 func TestNewFader(t *testing.T) {
 	cases := []struct {
-		desc      string
-		colors    []color.Color
-		wrapping  bool
-		expected  Fader
-		step      float64
-		fadeColor color.Color
+		desc        string
+		colors      []color.Color
+		granularity int
+		wrapping    bool
+		expected    Fader
+		step        float64
+		fadeColor   color.Color
 	}{
 		{
 			desc:      "empty_fader",
@@ -113,7 +114,7 @@ func TestNewFader(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(c.desc, func(t *testing.T) {
-			fader := NewFader(c.colors, c.wrapping)
+			fader := NewFader(c.colors, c.granularity, c.wrapping)
 			assert.Equal(t, c.expected, fader)
 			fr, fg, fb, fa := fader.Fade(c.step).RGBA()
 			er, eg, eb, ea := c.fadeColor.RGBA()
@@ -135,31 +136,39 @@ func TestFaderIncrements(t *testing.T) {
 		expectedLen int
 	}{
 		{
-			desc:        "empty_fader_100",
+			desc:        "increment_empty_fader_100",
 			granularity: 100,
 			expected:    []float64{0.0},
 			expectedLen: 1,
 		},
 		{
-			desc:        "green_color_fader_2",
+			desc:        "increment_green_color_fader_2",
 			colors:      []color.Color{green},
-			granularity: 100,
+			granularity: 2,
 			expected:    []float64{0.0},
 			expectedLen: 1,
 		},
 		{
-			desc:        "green_color_fader_2",
-			colors:      []color.Color{green},
-			granularity: 100,
+			desc:        "increment_red_color_fader_10",
+			colors:      []color.Color{red},
+			granularity: 10,
 			expected:    []float64{0.0},
 			expectedLen: 1,
+		},
+
+		{
+			desc:        "increment_green_color_fader_10",
+			colors:      []color.Color{red, green},
+			granularity: 10,
+			expected:    []float64{0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0},
+			expectedLen: 11,
 		},
 	}
 
 	for _, c := range cases {
 		t.Run(c.desc, func(t *testing.T) {
-			fader := NewFader(c.colors, c.wrapping)
-			increments := fader.GetIncrements(c.granularity)
+			fader := NewFader(c.colors, c.granularity, c.wrapping)
+			increments := fader.GetIncrements()
 			assert.Equal(t, c.expectedLen, len(increments))
 			assert.Equal(t, c.expected, increments)
 		})
