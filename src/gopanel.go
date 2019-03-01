@@ -63,19 +63,17 @@ func main() {
 	fader := palette.NewFader(colors)
 
 	const granularity int = 10
-	numSteps, faderIncrement := fader.NumStepsAndIncrement(granularity)
-	faderPos := 0.0
+	increments := fader.GetIncrements(granularity)
 	for {
-		for i := 0; i < numSteps; i++ {
+		for _, increment := range increments {
 			for y := 0; y < frame.GetHeight(); y++ {
 				for x := 0; x < frame.GetWidth(); x++ {
-					color := fader.Fade(faderPos)
+					color := fader.Fade(increment)
 					mainPicture.Set(x, y, color)
 					colorFrame := hardware.NewCopyFrameFromImage(frame, mainPicture)
 					inputChan <- colorFrame
 				}
 			}
-			faderPos += faderIncrement
 		}
 	}
 }

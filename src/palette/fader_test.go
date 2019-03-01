@@ -8,9 +8,10 @@ import (
 )
 
 func TestNewFader(t *testing.T) {
-	red := color.RGBA{R: 0xff, B: 0, G: 0x00, A: 0xff}
-	green := color.RGBA{R: 0x00, B: 0xff, G: 0x00, A: 0xff}
-	green_red_0_1 := color.RGBA{R: 0x11, B: 0xdd, G: 0x00, A: 0xff}
+	red := color.RGBA64{R: 0xffff, G: 0x00, B: 0x00, A: 0xffff}
+	green := color.RGBA64{R: 0x00, G: 0xffff, B: 0x00, A: 0xffff}
+	green_red_0_1 := color.RGBA64{R: 0xfedd, G: 0x4021, B: 0x00, A: 0xffff}
+	green_red_0_9 := color.RGBA64{R: 0x6a81, G: 0xf02a, B: 0x00, A: 0xffff}
 	cases := []struct {
 		desc      string
 		colors    []color.Color
@@ -39,6 +40,13 @@ func TestNewFader(t *testing.T) {
 			fadeColor: green,
 		},
 		{
+			desc:      "green_color_fader_-0.1",
+			colors:    []color.Color{green},
+			expected:  fader([]color.Color{green}),
+			step:      -0.1,
+			fadeColor: green,
+		},
+		{
 			desc:      "green_color_fader_1.0",
 			colors:    []color.Color{green},
 			expected:  fader([]color.Color{green}),
@@ -53,45 +61,45 @@ func TestNewFader(t *testing.T) {
 			fadeColor: green,
 		},
 		{
-			desc:      "green_color_fader_-0.1",
-			colors:    []color.Color{green},
-			expected:  fader([]color.Color{green}),
-			step:      -0.1,
-			fadeColor: green,
-		},
-		{
 			desc:      "red_green_color_fader_0.1",
-			colors:    []color.Color{green, red},
-			expected:  fader([]color.Color{green, red}),
+			colors:    []color.Color{red, green},
+			expected:  fader([]color.Color{red, green}),
 			step:      0.1,
 			fadeColor: green_red_0_1,
 		},
 		{
+			desc:      "red_green_color_fader_0.9",
+			colors:    []color.Color{red, green},
+			expected:  fader([]color.Color{red, green}),
+			step:      0.9,
+			fadeColor: green_red_0_9,
+		},
+		{
 			desc:      "red_green_color_fader_0.0",
-			colors:    []color.Color{green, red},
-			expected:  fader([]color.Color{green, red}),
+			colors:    []color.Color{red, green},
+			expected:  fader([]color.Color{red, green}),
 			step:      0.0,
-			fadeColor: green,
-		},
-		{
-			desc:      "red_green_color_fader_1.0",
-			colors:    []color.Color{green, red},
-			expected:  fader([]color.Color{green, red}),
-			step:      1.0,
-			fadeColor: red,
-		},
-		{
-			desc:      "red_green_color_fader_1.1",
-			colors:    []color.Color{green, red},
-			expected:  fader([]color.Color{green, red}),
-			step:      1.1,
 			fadeColor: red,
 		},
 		{
 			desc:      "red_green_color_fader_-0.1",
-			colors:    []color.Color{green, red},
-			expected:  fader([]color.Color{green, red}),
+			colors:    []color.Color{red, green},
+			expected:  fader([]color.Color{red, green}),
 			step:      -0.1,
+			fadeColor: red,
+		},
+		{
+			desc:      "red_green_color_fader_1.0",
+			colors:    []color.Color{red, green},
+			expected:  fader([]color.Color{red, green}),
+			step:      1.0,
+			fadeColor: green,
+		},
+		{
+			desc:      "red_green_color_fader_1.1",
+			colors:    []color.Color{red, green},
+			expected:  fader([]color.Color{red, green}),
+			step:      1.1,
 			fadeColor: green,
 		},
 	}
@@ -100,8 +108,8 @@ func TestNewFader(t *testing.T) {
 		t.Run(c.desc, func(t *testing.T) {
 			fader := NewFader(c.colors)
 			assert.Equal(t, c.expected, fader)
-			fr, fg, fb, fa := c.fadeColor.RGBA()
-			er, eg, eb, ea := fader.Fade(c.step).RGBA()
+			fr, fg, fb, fa := fader.Fade(c.step).RGBA()
+			er, eg, eb, ea := c.fadeColor.RGBA()
 			assert.Equal(t, er, fr, "R")
 			assert.Equal(t, eg, fg, "G")
 			assert.Equal(t, eb, fb, "B")
