@@ -55,10 +55,8 @@ func main() {
 
 	mainPicture := image.NewRGBA(frame.Bounds())
 
-	colors := make([]color.Color, 0, 10)
+	colors := make([]color.Color, 0, 100)
 	colors = append(colors, color.RGBA{0xff, 0, 0, 0xff})
-	colors = append(colors, color.RGBA{0xff, 0x45, 0, 0xff})
-	colors = append(colors, color.RGBA{0xff, 0xa5, 0, 0xff})
 	colors = append(colors, color.RGBA{0xff, 0xff, 0, 0xff})
 	const granularity int = 10
 	const wrapping bool = false
