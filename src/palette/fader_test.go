@@ -71,6 +71,8 @@ func TestNewFader(t *testing.T) {
 				-0.1: redGreen0Point1,
 				1.0:  green,
 				1.1:  redGreen0Point9,
+				2.1:  redGreen0Point1,
+				-5.1: redGreen0Point9,
 			},
 		},
 	}

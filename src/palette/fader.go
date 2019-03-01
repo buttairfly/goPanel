@@ -2,7 +2,6 @@ package palette
 
 import (
 	"image/color"
-	"log"
 	"math"
 
 	"github.com/lucasb-eyer/go-colorful"
@@ -72,14 +71,18 @@ func (f fader) Fade(step float64) color.Color {
 
 	if step < 0.0 {
 		if f.wrapping {
-			step += numColorsToFade // it is a subtract since step is negative
+			for step < 0.0 { // this may happen more then once
+				step += numColorsToFade // it is a subtract since step is negative
+			}
 		} else {
 			step = 0.0
 		}
 	}
 	if step > numColorsToFade {
 		if f.wrapping {
-			step -= numColorsToFade
+			for step > numColorsToFade { // this may happen more then once
+				step -= numColorsToFade
+			}
 		} else {
 			step = numColorsToFade
 		}
@@ -92,7 +95,6 @@ func (f fader) Fade(step float64) color.Color {
 	var c2 colorful.Color
 
 	c1, _ := colorful.MakeColor(f.palette[baseStep])
-	log.Print(f.wrapping, baseStep, paletteLen)
 	if f.wrapping && baseStep+1 == paletteLen {
 		c2, _ = colorful.MakeColor(f.palette[0])
 	} else {
