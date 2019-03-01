@@ -66,14 +66,14 @@ func main() {
 	increments := fader.GetIncrements()
 	for {
 		for _, increment := range increments {
+			color := fader.Fade(increment)
 			for y := 0; y < frame.GetHeight(); y++ {
 				for x := 0; x < frame.GetWidth(); x++ {
-					color := fader.Fade(increment)
 					mainPicture.Set(x, y, color)
-					colorFrame := hardware.NewCopyFrameFromImage(frame, mainPicture)
-					inputChan <- colorFrame
 				}
 			}
+			colorFrame := hardware.NewCopyFrameFromImage(frame, mainPicture)
+			inputChan <- colorFrame
 		}
 	}
 }

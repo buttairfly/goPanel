@@ -1,6 +1,7 @@
 package hardware
 
 import (
+	"fmt"
 	"image/color"
 	"log"
 )
@@ -17,14 +18,23 @@ const (
 type Pixel interface {
 	color.Color
 	Equals(color.Color) bool
-	ToSlice() []uint8
-	ToInt() int
+	Slice() []uint8
+	Int() int
+	Hex() string
 }
 
 // Pixel hardware struct
 type pixel []uint8
 
 var _ Pixel = (*pixel)(nil)
+
+// NewPixelFromColor creates a new rgb byte struct from color.Color
+func NewPixelFromColor(c color.Color) Pixel {
+	r, g, b, _ := c.RGBA()
+	slice := make(pixel, 0, NumBytePixel)
+	p := append(slice, uint8(r>>8), uint8(g>>8), uint8(b>>8))
+	return &p
+}
 
 // NewPixelFromInts creates a new rgb byte struct from single ints
 func NewPixelFromInts(r, g, b uint32) Pixel {
@@ -50,6 +60,27 @@ func NewPixelFromSlice(s []uint8, pos int) Pixel {
 	return &p
 }
 
+// NewPixelFromHex parses a "html" hex color-string, either in the 3 "#f0c" or 6 "#ff1034" digits form.
+func NewPixelFromHex(hex string) (Pixel, error) {
+	format := "#%02x%02x%02x"
+	if len(hex) == 4 {
+		format = "#%1x%1x%1x"
+	}
+
+	var r, g, b uint8
+	n, err := fmt.Sscanf(hex, format, &r, &g, &b)
+	if err != nil {
+		return nil, err
+	}
+	if n != 3 {
+		return nil, fmt.Errorf("color: %v is not a hex-color", hex)
+	}
+
+	slice := make(pixel, 0, NumBytePixel)
+	p := append(slice, uint8(r), uint8(g), uint8(b))
+	return &p, nil
+}
+
 // RGBA implements color.Color interface
 func (p *pixel) RGBA() (r, g, b, a uint32) {
 	r = uint32((*p)[R])
@@ -62,14 +93,19 @@ func (p *pixel) RGBA() (r, g, b, a uint32) {
 	return
 }
 
-// ToSlice converts to an slice color value
-func (p *pixel) ToSlice() []uint8 {
+// Slice converts to an slice color value
+func (p *pixel) Slice() []uint8 {
 	return ([]uint8)(*p)
 }
 
-// ToInt converts to an int color value
-func (p *pixel) ToInt() int {
+// Int converts to an int color value
+func (p *pixel) Int() int {
 	return int((*p)[R])<<16 | int((*p)[G])<<8 | int((*p)[B])
+}
+
+// Hex returns the hex "html" representation of the color, as in #ff0080
+func (p *pixel) Hex() string {
+	return fmt.Sprintf("#%02x%02x%02x", (*p)[R], (*p)[G], (*p)[B])
 }
 
 // Equals checks wheather the color of another color is identical

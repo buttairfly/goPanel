@@ -138,9 +138,6 @@ func (s *serialDevice) Run(wg *sync.WaitGroup) {
 		ledStripe := frame.ToLedStripe()
 		ledStripeCompare := ledStripe.Compare(lastLedStripe)
 		if ledStripeCompare.HasChanged() {
-			for _, pixelIndex := range ledStripeCompare.GetOtherDiffPixels() {
-				s.setPixel(pixelIndex, ledStripe.GetBuffer())
-			}
 			now := time.Now()
 			sleepDuration := latchDelay - (now.Sub(lastFrameTime))
 			log.Println(sleepDuration, now.Sub(lastFrameTime))
@@ -148,8 +145,15 @@ func (s *serialDevice) Run(wg *sync.WaitGroup) {
 				time.Sleep(sleepDuration)
 			}
 			lastFrameTime = now
+			fullColor := ledStripeCompare.GetFullColor()
+			if fullColor != nil {
+				s.shade(s.numLed, fullColor.Slice())
+			}
+			for _, pixelIndex := range ledStripeCompare.GetOtherDiffPixels() {
+				s.setPixel(pixelIndex, ledStripe.GetBuffer())
+			}
+
 			s.latchFrame()
-			//s.shade(s.numLed, frame[0:3])
 			lastLedStripe = ledStripe
 		}
 	}
