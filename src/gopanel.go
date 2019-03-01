@@ -60,7 +60,7 @@ func main() {
 	colors = append(colors, color.RGBA{0xff, 0x45, 0, 0xff})
 	colors = append(colors, color.RGBA{0xff, 0xa5, 0, 0xff})
 	colors = append(colors, color.RGBA{0xff, 0xff, 0, 0xff})
-	fader := palette.NewFader(colors)
+	fader := palette.NewFader(colors, false)
 
 	const granularity int = 10
 	increments := fader.GetIncrements(granularity)
