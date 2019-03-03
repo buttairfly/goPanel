@@ -39,8 +39,8 @@ func (s *serialDevice) Open() error {
 
 func (s *serialDevice) init() {
 	defer func() {
-		if s.config.Verbose {
-			s.sendInitComand("Q00ff\n")
+		if !s.config.Verbose {
+			s.sendInitComand("Q0fff\n")
 		}
 	}()
 
