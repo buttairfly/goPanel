@@ -21,6 +21,7 @@ type fader struct {
 	palette     color.Palette
 	granularity int
 	wrapping    bool
+	//luminance   float64
 }
 
 // NewFader creates a Fader from a palette

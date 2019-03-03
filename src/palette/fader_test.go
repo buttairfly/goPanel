@@ -1,13 +1,6 @@
 package palette
 
-import (
-	"fmt"
-	"image/color"
-	"testing"
-
-	"github.com/stretchr/testify/assert"
-)
-
+/*
 var (
 	emptyPalette        = &fader{palette: nil, granularity: 1, wrapping: false}
 	greenPalette        = &fader{palette: []color.Color{green}, granularity: 1, wrapping: false}
@@ -152,3 +145,4 @@ func TestFaderIncrements(t *testing.T) {
 		})
 	}
 }
+*/

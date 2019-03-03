@@ -57,7 +57,7 @@ func main() {
 
 	colors := make([]color.Color, 0, 10)
 	colors = append(colors, color.RGBA{0xff, 0, 0, 0xff})
-	colors = append(colors, color.RGBA{0x00, 0, 0xff, 0xff})
+	colors = append(colors, color.RGBA{0xff, 0xa5, 0, 0xff})
 	const granularity int = 200
 	const wrapping bool = true
 	fader := palette.NewFader(colors, granularity, wrapping)
