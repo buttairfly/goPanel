@@ -19,6 +19,7 @@ type serialDevice struct {
 	numLed     int
 	input      <-chan hardware.Frame
 	readActive chan bool
+	initDone   chan bool
 }
 
 // NewSerialDevice creates a new serial device
@@ -36,11 +37,27 @@ func (s *serialDevice) Open() error {
 }
 
 func (s *serialDevice) init() {
+	defer(func(){
+		if s.config.Verbose {
+			s.sendInitComand("Q00ff\n")
+		}
+	})
+
 	s.stream.Flush()
+	s.sendInitComand("Q0000\n")
+	s.sendInitComand("V\n")
+	for {
+		select {
+		case <-s.initDone:
+			return
+		default:
+			s.sendInitComand(fmt.Sprintf("I%04x\n", s.numLed))
+		}
+	}
+}
+
+func (s *serialDevice) sendInitComand(command string) {
 	command := "V\n"
-	s.Write([]byte(command))
-	time.Sleep(s.config.InitSleepTime)
-	command = fmt.Sprintf("I%04x\n", s.numLed)
 	s.Write([]byte(command))
 	time.Sleep(s.config.InitSleepTime)
 }
@@ -75,9 +92,21 @@ func (s *serialDevice) read(wg *sync.WaitGroup) {
 			for _, line := range lines {
 				if len(line) > 0 {
 					log.Println(line)
+					if s.needsInit() && line == fmt.Sprint("Init %04x", s.numLed) {
+						close(s.initDone)
+					}
 				}
 			}
 		}
+	}
+}
+
+func (s *serialDevice) needsInit() bool {
+	select {
+	case <- s.initDone:
+		return false
+	default:
+		return true
 	}
 }
 
@@ -123,6 +152,7 @@ func (s *serialDevice) Run(wg *sync.WaitGroup) {
 	defer close(s.readActive)
 
 	s.readActive = make(chan bool)
+	s.initDone = make(chan bool)
 	wg.Add(1)
 	go s.read(wg)
 
