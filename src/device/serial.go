@@ -95,9 +95,9 @@ func (s *serialDevice) read(wg *sync.WaitGroup) {
 					if s.needsInit() {
 						parts := strings.Split(line, " ")
 						if len(parts) == 2 && parts[0] == "Init" {
-							initLed, err := strconv.ParseInt(parts[1], 16, 0))
+							initLed, err := strconv.ParseInt(parts[1], 16, 0)
 							if err != nil {
-								log.Print( err)
+								log.Print(err)
 							} else {
 								if initLed == s.numLed {
 									close(s.initDone)
