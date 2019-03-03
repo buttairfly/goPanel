@@ -37,27 +37,26 @@ func (s *serialDevice) Open() error {
 }
 
 func (s *serialDevice) init() {
-	defer(func(){
+	defer func() {
 		if s.config.Verbose {
 			s.sendInitComand("Q00ff\n")
 		}
-	})
+	}()
 
-	s.stream.Flush()
-	s.sendInitComand("Q0000\n")
-	s.sendInitComand("V\n")
 	for {
 		select {
 		case <-s.initDone:
 			return
 		default:
+			s.stream.Flush()
+			s.sendInitComand("Q0000\n")
+			s.sendInitComand("V\n")
 			s.sendInitComand(fmt.Sprintf("I%04x\n", s.numLed))
 		}
 	}
 }
 
 func (s *serialDevice) sendInitComand(command string) {
-	command := "V\n"
 	s.Write([]byte(command))
 	time.Sleep(s.config.InitSleepTime)
 }
@@ -80,9 +79,9 @@ func (s *serialDevice) read(wg *sync.WaitGroup) {
 				}
 				log.Fatal(err)
 			}
-			s := lastLine + string(buf[:n])
-			lines := strings.Split(s, "\n")
-			if s[len(s)-1] != '\n' {
+			read := lastLine + string(buf[:n])
+			lines := strings.Split(read, "\n")
+			if read[len(read)-1] != '\n' {
 				numLines := len(lines) - 1
 				lastLine = lines[numLines]
 				lines = lines[:numLines]
@@ -103,7 +102,7 @@ func (s *serialDevice) read(wg *sync.WaitGroup) {
 
 func (s *serialDevice) needsInit() bool {
 	select {
-	case <- s.initDone:
+	case <-s.initDone:
 		return false
 	default:
 		return true
