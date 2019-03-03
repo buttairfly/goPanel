@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -91,8 +92,14 @@ func (s *serialDevice) read(wg *sync.WaitGroup) {
 			for _, line := range lines {
 				if len(line) > 0 {
 					log.Println(line)
-					if s.needsInit() && line == fmt.Sprint("Init %04x", s.numLed) {
-						close(s.initDone)
+					if s.needsInit() {
+						parts := strings.Split(line, " ")
+						if len(parts) == 2 && parts[0] == "Init" {
+							initLed := strconv.Atoi(parts[1])
+							if initLed == s.numLed {
+								close(s.initDone)
+							}
+						}
 					}
 				}
 			}
