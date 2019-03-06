@@ -28,7 +28,8 @@ func TestNewMainConfig(t *testing.T) {
 					"tile.snake_vertical_c0_20-0_10-10.config.json",
 					"tile.snake_vertical_c1_10-0_0-10.config.json",
 				},
-				DeviceConfigPath: "device.serial.config.json",
+				DeviceConfigPath:       "device.serial.config.json",
+				ArduinoErrorConfigPath: "device.serial.arduino.error.config.json",
 			},
 			panelFile:    "main.panel.config.json",
 			expectedFile: "main.composed.config.json",
@@ -49,6 +50,10 @@ func TestNewMainConfig(t *testing.T) {
 				}
 			}
 			if _, err := os.Stat(testFolder + c.panelConfig.DeviceConfigPath); err != nil {
+				t.Log(err.Error())
+				skip = true
+			}
+			if _, err := os.Stat(testFolder + c.panelConfig.ArduinoErrorConfigPath); err != nil {
 				t.Log(err.Error())
 				skip = true
 			}

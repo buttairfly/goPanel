@@ -58,6 +58,7 @@ func (s *serialDevice) Run(wg *sync.WaitGroup) {
 	defer wg.Done()
 	defer s.Close()
 	defer close(s.readActive)
+	defer close(s.stats)
 
 	s.readActive = make(chan bool)
 	s.initDone = make(chan bool)

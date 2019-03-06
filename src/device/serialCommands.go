@@ -47,6 +47,7 @@ func (s *serialDevice) read(wg *sync.WaitGroup) {
 			return
 		default:
 			n, err := s.stream.Read(buf)
+			timeStamp := time.Now()
 			if err != nil {
 				if err == io.EOF {
 					continue
@@ -64,7 +65,20 @@ func (s *serialDevice) read(wg *sync.WaitGroup) {
 			}
 			for _, line := range lines {
 				if len(line) > 0 {
-					log.Println(line)
+					if IsArduinoError(line) {
+						arduinoError, err := NewArduinoError(s.config.ArduinoErrorConfig, line)
+						if err != nil {
+							log.Print(err)
+							continue
+						}
+						s.stats <- stats{
+							event:     ardoinoErrorType,
+							timeStamp: timeStamp,
+							message:   arduinoError.Error(),
+						}
+						continue
+					}
+					log.Print(line)
 					s.checkInitDone(line)
 				}
 			}
@@ -76,7 +90,7 @@ func (s *serialDevice) printStats(wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	for stat := range s.stats {
-		log.Printf("%v: %s", stat.timeStamp, stat.message)
+		log.Printf("%02d.%06d: %s", stat.timeStamp.Second(), stat.timeStamp.Nanosecond()/1000, stat.message)
 	}
 }
 

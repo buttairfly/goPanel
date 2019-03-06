@@ -240,6 +240,68 @@
 				"size": 8,
 				"readTimeout": "1s"
 			},
+			"arduinoErrorConfig": {
+				"Elati": {
+					"name": "latch timeout",
+					"param": "min latch wait time ms"
+				},
+				"Encmd": {
+					"name": "no command",
+					"character": "command"
+				},
+				"Endcm": {
+					"name": "not defined command",
+					"character": "command"
+				},
+				"Enebs": {
+					"name": "not enough bytes color param",
+					"param": "current number of bytes",
+					"character": "current char"
+				},
+				"Enhxc": {
+					"name": "not hex color parameter",
+					"character": "current char"
+				},
+				"Enhxn": {
+					"name": "not hex number parameter",
+					"character": "current char"
+				},
+				"Enini": {
+					"name": "not initialized",
+					"character": "current char"
+				},
+				"Enpeq": {
+					"name": "number parameter overflow equals num leds",
+					"param": "number paramerter",
+					"character": "current char"
+				},
+				"Enpov": {
+					"name": "number parameter overflow",
+					"param": "number paramerter",
+					"character": "current char"
+				},
+				"Enret": {
+					"name": "no return",
+					"character": "current char"
+				},
+				"Eucmd": {
+					"name": "unknown command",
+					"param": "command",
+					"character": "current char"
+				},
+				"Euini": {
+					"name": "no initialisation possible"
+				},
+				"Eulet": {
+					"name": "unknown letter",
+					"param": "charType (0: undefined, 1: command, 2: hexnumber, 3: linebreak (return))",
+					"character": "letter"
+				},
+				"Euret": {
+					"name": "unknown return",
+					"character": "current char"
+				}
+			},
 			"verbose": false,
 			"readBufferSize": 1024,
 			"initSleepTime": "20ms",

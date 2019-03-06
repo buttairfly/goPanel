@@ -67,20 +67,22 @@ const (
 type Type string
 
 type SerialConfig struct {
-	StreamConfig     *StreamConfig `json:"streamConfig"`
-	Verbose          bool          `json:"verbose"`
-	ReadBufferSize   int           `json:"readBufferSize"`
-	InitSleepTime    time.Duration `json:"initSleepTime,omitempty"`
-	LatchSleepTime   time.Duration `json:"latchSleepTime,omitempty"`
-	CommandSleepTime time.Duration `json:"commandSleepTime,omitempty"`
+	StreamConfig       *StreamConfig       `json:"streamConfig"`
+	ArduinoErrorConfig *ArduinoErrorConfig `json:"arduinoErrorConfig,omitempty"`
+	Verbose            bool                `json:"verbose"`
+	ReadBufferSize     int                 `json:"readBufferSize"`
+	InitSleepTime      time.Duration       `json:"initSleepTime,omitempty"`
+	LatchSleepTime     time.Duration       `json:"latchSleepTime,omitempty"`
+	CommandSleepTime   time.Duration       `json:"commandSleepTime,omitempty"`
 }
 type aliasSerialConfig struct {
-	StreamConfig     *StreamConfig `json:"streamConfig"`
-	Verbose          bool          `json:"verbose"`
-	ReadBufferSize   int           `json:"readBufferSize"`
-	InitSleepTime    string        `json:"initSleepTime,omitempty"`
-	LatchSleepTime   string        `json:"latchSleepTime,omitempty"`
-	CommandSleepTime string        `json:"commandSleepTime,omitempty"`
+	StreamConfig       *StreamConfig       `json:"streamConfig"`
+	ArduinoErrorConfig *ArduinoErrorConfig `json:"arduinoErrorConfig,omitempty"`
+	Verbose            bool                `json:"verbose"`
+	ReadBufferSize     int                 `json:"readBufferSize"`
+	InitSleepTime      string              `json:"initSleepTime,omitempty"`
+	LatchSleepTime     string              `json:"latchSleepTime,omitempty"`
+	CommandSleepTime   string              `json:"commandSleepTime,omitempty"`
 }
 
 // UnmarshalJSON unmarshals JSONDuration
@@ -107,6 +109,7 @@ func (sc *SerialConfig) UnmarshalJSON(b []byte) error {
 	}
 
 	sc.StreamConfig = tmp.StreamConfig
+	sc.ArduinoErrorConfig = tmp.ArduinoErrorConfig
 	sc.Verbose = tmp.Verbose
 	sc.ReadBufferSize = tmp.ReadBufferSize
 
@@ -115,12 +118,13 @@ func (sc *SerialConfig) UnmarshalJSON(b []byte) error {
 
 func (sc *SerialConfig) MarshalJSON() ([]byte, error) {
 	return json.Marshal(&aliasSerialConfig{
-		StreamConfig:     sc.StreamConfig,
-		Verbose:          sc.Verbose,
-		ReadBufferSize:   sc.ReadBufferSize,
-		InitSleepTime:    fmt.Sprintf("%s", time.Duration(sc.InitSleepTime)),
-		LatchSleepTime:   fmt.Sprintf("%s", time.Duration(sc.LatchSleepTime)),
-		CommandSleepTime: fmt.Sprintf("%s", time.Duration(sc.CommandSleepTime)),
+		StreamConfig:       sc.StreamConfig,
+		ArduinoErrorConfig: sc.ArduinoErrorConfig,
+		Verbose:            sc.Verbose,
+		ReadBufferSize:     sc.ReadBufferSize,
+		InitSleepTime:      fmt.Sprintf("%s", time.Duration(sc.InitSleepTime)),
+		LatchSleepTime:     fmt.Sprintf("%s", time.Duration(sc.LatchSleepTime)),
+		CommandSleepTime:   fmt.Sprintf("%s", time.Duration(sc.CommandSleepTime)),
 	})
 }
 

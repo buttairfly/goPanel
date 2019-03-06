@@ -10,17 +10,15 @@ import (
 
 // PanelConfig is the global panel config
 type PanelConfig struct {
-	TileConfigPaths  []string `json:"tileConfigPaths"`
-	DeviceConfigPath string   `json:"deviceConfigPath"`
+	TileConfigPaths        []string `json:"tileConfigPaths"`
+	DeviceConfigPath       string   `json:"deviceConfigPath"`
+	ArduinoErrorConfigPath string   `json:"arduinoErrorConfigPath,omitempty"`
 }
 
 func newPanelConfigFromPath(folderOffset, path string) (*PanelConfig, error) {
 	pc := new(PanelConfig)
 	err := pc.FromFile(folderOffset + path)
-	if err != nil {
-		return nil, err
-	}
-	return pc, nil
+	return pc, err
 }
 
 // FromFile reads the config from a file at path

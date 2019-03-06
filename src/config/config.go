@@ -52,6 +52,15 @@ func NewConfigFromPanelConfigPath(folderOffset, path string) (Config, error) {
 		return nil, err
 	}
 
+	if deviceConfig.Type == Serial {
+		var arduinoErrorConfig *ArduinoErrorConfig
+		arduinoErrorConfig, err = NewArduinoErrorConfigFromPath(folderOffset + panelConfig.ArduinoErrorConfigPath)
+		if err != nil {
+			return nil, err
+		}
+		deviceConfig.SerialConfig.ArduinoErrorConfig = arduinoErrorConfig
+	}
+
 	return &config{
 		TileConfigs:  tileConfigs,
 		DeviceConfig: deviceConfig,

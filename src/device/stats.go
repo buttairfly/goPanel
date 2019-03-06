@@ -5,7 +5,7 @@ import "time"
 type statsType int
 
 const (
-	errorType statsType = iota
+	ardoinoErrorType statsType = iota
 	printType
 	latchType
 )
