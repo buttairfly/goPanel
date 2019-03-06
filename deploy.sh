@@ -25,11 +25,11 @@ echo -e "${GREEN}${BINARY}${NC}: compiled at ${BLUE}${DATE}${NC} with version ${
 
 if BUILD; then
     echo -e "build  ${GREEN}${BINARY}${NC}"
-    if COPY ./${BINARY} pi@ledpix:~/${BINARY} ; then
+    if COPY ./${BINARY} pi@ledpix:~ ; then
         COPY ./config/ pi@ledpix:~/config
         echo -e "deploy ${GREEN}${BINARY}${NC}"
         exit 0
-    elif COPY ./${BINARY} pi@ledpix.fritz.box:~/${BINARY} ; then
+    elif COPY ./${BINARY} pi@ledpix.fritz.box:~ ; then
         COPY ./config/ pi@ledpix.fritz.box:~/config
         echo -e "deploy ${GREEN}${BINARY}${NC}"
         exit 0
