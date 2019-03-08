@@ -52,7 +52,7 @@
 	},
 	"Eulet": {
 		"name": "unknown letter",
-		"param": "charType (0: undefined, 1: command, 2: hexnumber, 3: linebreak (return))",
+		"param": "charType (D: undefined, C: command, H: hexnumber, R: return)",
 		"character": "letter"
 	},
 	"Euret": {
