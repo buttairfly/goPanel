@@ -87,6 +87,8 @@ func (aec *ArduinoErrorConfig) ToCppFile(filePath, name string) error {
 	header += fmt.Sprintf("// %s\n", fileName)
 	header += fmt.Sprintf("#ifndef %s\n", upperFileName)
 	header += fmt.Sprintf("#define %s\n", upperFileName)
+	header += "\n"
+	header += "#include \"Arduino.h\"\n"
 	footer := fmt.Sprintf("#endif // %s\n", fileName)
 
 	defines := ""
@@ -111,7 +113,7 @@ func (aec *ArduinoErrorConfig) ToCppFile(filePath, name string) error {
 			}
 			errorComment += fmt.Sprintf("%scharacter: %s", commentStart, errorInfo.Character)
 		}
-		defines += fmt.Sprintf("inline const std::string %s = \"%s\";%s\n", ToCppVarName(errorVarName), errorKey, errorComment)
+		defines += fmt.Sprintf("const String Error%s = \"%s\";%s\n", ToCppVarName(errorVarName), errorKey, errorComment)
 	}
 
 	content := []byte(fmt.Sprintf("%s\n%s\n%s", header, defines, footer))

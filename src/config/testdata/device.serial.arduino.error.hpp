@@ -5,19 +5,21 @@
 #ifndef DEVICE_SERIAL_ARDUINO_ERROR_HPP
 #define DEVICE_SERIAL_ARDUINO_ERROR_HPP
 
-inline const std::string LatchTimeout = "Elati"; // param: min latch wait time ms
-inline const std::string NoCommand = "Encmd"; // character: command
-inline const std::string NotDefinedCommand = "Endcm"; // character: command
-inline const std::string NotEnoughBytesColorParam = "Enebs"; // param: current number of bytes, character: current char
-inline const std::string NotHexColorParameter = "Enhxc"; // character: current char
-inline const std::string NotHexNumberParameter = "Enhxn"; // character: current char
-inline const std::string NotInitialized = "Enini"; // character: current char
-inline const std::string NumberParameterOverflowEqualsNumLeds = "Enpeq"; // param: number paramerter, character: current char
-inline const std::string NumberParameterOverflow = "Enpov"; // param: number paramerter, character: current char
-inline const std::string NoReturn = "Enret"; // character: current char
-inline const std::string UnknownCommand = "Eucmd"; // param: command, character: current char
-inline const std::string NoInitialisationPossible = "Euini";
-inline const std::string UnknownLetter = "Eulet"; // param: charType (0: undefined, 1: command, 2: hexnumber, 3: linebreak (return)), character: letter
-inline const std::string UnknownReturn = "Euret"; // character: current char
+#include "Arduino.h"
+
+const String ErrorLatchTimeout = "Elati"; // param: min latch wait time ms
+const String ErrorNoCommand = "Encmd"; // character: command
+const String ErrorNotDefinedCommand = "Endcm"; // character: command
+const String ErrorNotEnoughBytesColorParam = "Enebs"; // param: current number of bytes, character: current char
+const String ErrorNotHexColorParameter = "Enhxc"; // character: current char
+const String ErrorNotHexNumberParameter = "Enhxn"; // character: current char
+const String ErrorNotInitialized = "Enini"; // character: current char
+const String ErrorNumberParameterOverflowEqualsNumLeds = "Enpeq"; // param: number paramerter, character: current char
+const String ErrorNumberParameterOverflow = "Enpov"; // param: number paramerter, character: current char
+const String ErrorNoReturn = "Enret"; // character: current char
+const String ErrorUnknownCommand = "Eucmd"; // param: command, character: current char
+const String ErrorNoInitialisationPossible = "Euini";
+const String ErrorUnknownLetter = "Eulet"; // param: charType (0: undefined, 1: command, 2: hexnumber, 3: linebreak (return)), character: letter
+const String ErrorUnknownReturn = "Euret"; // character: current char
 
 #endif // device.serial.arduino.error.hpp
