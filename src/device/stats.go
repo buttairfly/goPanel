@@ -2,12 +2,12 @@ package device
 
 import "time"
 
-type statsType int
+type statsType string
 
 const (
-	ardoinoErrorType statsType = iota
-	printType
-	latchType
+	ardoinoErrorType statsType = "Error arduino"
+	printType        statsType = "Info         "
+	latchType        statsType = "Latch        "
 )
 
 type stats struct {

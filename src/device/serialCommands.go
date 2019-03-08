@@ -65,23 +65,38 @@ func (s *serialDevice) read(wg *sync.WaitGroup) {
 			}
 			for _, line := range lines {
 				if len(line) > 0 {
+					s.checkInitDone(line)
+					stat := &stats{
+						event:     printType,
+						timeStamp: timeStamp,
+						message:   line,
+					}
 					if IsArduinoError(line) {
 						arduinoError, err := NewArduinoError(s.config.ArduinoErrorConfig, line)
 						if err != nil {
 							log.Print(err)
 							continue
 						}
-						s.stats <- stats{
-							event:     ardoinoErrorType,
-							timeStamp: timeStamp,
-							message:   arduinoError.Error(),
-						}
-						continue
+						stat.event = ardoinoErrorType
+						stat.message = arduinoError.Error()
 					}
-					log.Print(line)
-					s.checkInitDone(line)
+					s.stats <- stat
 				}
 			}
+		}
+	}
+}
+
+func (s *serialDevice) printLatches(wg *sync.WaitGroup) {
+	defer wg.Done()
+	start := time.Now()
+	for {
+		select {
+		case <-s.latchEnd:
+			return
+		default:
+			timeDiff := start.Sub(time.Now()) / time.Second
+			log.Printf("Latched frames: %f/s last diff: %v", float64(s.latched)/float64(timeDiff), timeDiff)
 		}
 	}
 }
@@ -90,7 +105,12 @@ func (s *serialDevice) printStats(wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	for stat := range s.stats {
-		log.Printf("%02d.%06d: %s", stat.timeStamp.Second(), stat.timeStamp.Nanosecond()/1000, stat.message)
+		if stat.event != latchType {
+			timeStamp := fmt.Sprintf("%02d.%06d", stat.timeStamp.Second(), stat.timeStamp.Nanosecond()/1000)
+			log.Printf("%s %s: %s", stat.event, timeStamp, stat.message)
+		} else {
+			s.latched++
+		}
 	}
 }
 

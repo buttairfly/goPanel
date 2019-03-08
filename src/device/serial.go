@@ -1,6 +1,7 @@
 package device
 
 import (
+	"fmt"
 	"log"
 	"sync"
 	"time"
@@ -17,7 +18,9 @@ type serialDevice struct {
 	input      <-chan hardware.Frame
 	readActive chan bool
 	initDone   chan bool
-	stats      chan stats
+	stats      chan *stats
+	latchEnd   chan bool
+	latched    int64
 }
 
 // NewSerialDevice creates a new serial device
@@ -59,15 +62,18 @@ func (s *serialDevice) Run(wg *sync.WaitGroup) {
 	defer s.Close()
 	defer close(s.readActive)
 	defer close(s.stats)
+	defer close(s.latchEnd)
 
 	s.readActive = make(chan bool)
 	s.initDone = make(chan bool)
-	s.stats = make(chan stats)
+	s.latchEnd = make(chan bool)
+	s.stats = make(chan *stats, 10)
 	wg.Add(1)
 	go s.read(wg)
-
 	wg.Add(1)
 	go s.printStats(wg)
+	wg.Add(1)
+	go s.printLatches(wg)
 
 	latchDelay := s.config.LatchSleepTime
 	lastFrameTime := time.Now().Add(-latchDelay)
@@ -83,7 +89,11 @@ func (s *serialDevice) Run(wg *sync.WaitGroup) {
 		if ledStripeCompare.HasChanged() {
 			now := time.Now()
 			sleepDuration := latchDelay - (now.Sub(lastFrameTime))
-			log.Println(sleepDuration, now.Sub(lastFrameTime))
+			s.stats <- &stats{
+				event:     latchType,
+				timeStamp: now,
+				message:   fmt.Sprintf("%v", sleepDuration),
+			}
 			if sleepDuration > 0 {
 				time.Sleep(sleepDuration)
 			}
