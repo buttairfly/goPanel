@@ -97,6 +97,7 @@ func (s *serialDevice) printLatches(wg *sync.WaitGroup) {
 		default:
 			timeDiff := start.Sub(time.Now()) / time.Second
 			log.Printf("Latched frames: %f/s last diff: %v", float64(s.latched)/float64(timeDiff), timeDiff)
+			time.Sleep(30 * time.Second)
 		}
 	}
 }
