@@ -104,14 +104,14 @@ func (aec *ArduinoErrorConfig) ToCppFile(filePath, name string) error {
 		errorVarName := errorInfo.Name
 		errorComment := ""
 		commentStart := " // "
-		if errorInfo.Param != "" {
-			errorComment += fmt.Sprintf("%sparam: %s", commentStart, errorInfo.Param)
-		}
 		if errorInfo.Character != "" {
+			errorComment += fmt.Sprintf("%scharacter: %s", commentStart, errorInfo.Character)
+		}
+		if errorInfo.Param != "" {
 			if errorComment != "" {
 				commentStart = ", "
 			}
-			errorComment += fmt.Sprintf("%scharacter: %s", commentStart, errorInfo.Character)
+			errorComment += fmt.Sprintf("%sparam: %s", commentStart, errorInfo.Param)
 		}
 		defines += fmt.Sprintf("const String Error%s = \"%s\";%s\n", ToCppVarName(errorVarName), errorKey, errorComment)
 	}

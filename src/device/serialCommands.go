@@ -90,14 +90,20 @@ func (s *serialDevice) read(wg *sync.WaitGroup) {
 func (s *serialDevice) printLatches(wg *sync.WaitGroup) {
 	defer wg.Done()
 	start := time.Now()
+	lastLapLatches := int64(0)
 	for {
 		select {
 		case <-s.latchEnd:
 			return
 		default:
-			timeDiff := time.Now().Sub(start) / time.Second
-			log.Printf("Latched frames: %f/s last diff: %v", float64(s.latched)/float64(timeDiff), timeDiff)
 			time.Sleep(30 * time.Second)
+			timeDiff := time.Now().Sub(start)
+			log.Printf("Latched frames: %f.2/s last lap: %d last diff: %v",
+				float64(s.latched)*float64(time.Second)/float64(timeDiff),
+				s.latched-lastLapLatches,
+				timeDiff,
+			)
+			lastLapLatches = s.latched
 		}
 	}
 }
@@ -107,7 +113,7 @@ func (s *serialDevice) printStats(wg *sync.WaitGroup) {
 
 	for stat := range s.stats {
 		if stat.event != latchType {
-			timeStamp := fmt.Sprintf("%02d.%06d", stat.timeStamp.Second(), stat.timeStamp.Nanosecond()/1000)
+			timeStamp := fmt.Sprintf("%02d.%06d", stat.timeStamp.Second(), stat.timeStamp.Nanosecond()/int(time.Microsecond))
 			log.Printf("%s %s: %s", stat.event, timeStamp, stat.message)
 		} else {
 			s.latched++

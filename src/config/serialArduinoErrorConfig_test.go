@@ -24,7 +24,7 @@ var defaultArduinoConfig = &ArduinoErrorConfig{
 	"Eulet": ArduinoErrorDescription{
 		Name:      "unknown letter",
 		Character: "letter",
-		Param:     "charType (0: undefined, 1: command, 2: hexnumber, 3: linebreak (return))",
+		Param:     "charType (D: undefined, C: command, H: hexnumber, R: return)",
 	},
 	"Eucmd": ArduinoErrorDescription{
 		Name:      "unknown command",

@@ -53,12 +53,12 @@ func (ae *arduinoError) Error() string {
 	param := ""
 	currentChar := ""
 	devider := ":"
-	if ae.param != "" {
-		param = fmt.Sprintf("%s %s: %s", devider, ae.description.Param, ae.param)
-	}
 	if ae.currentChar != "" {
-		devider = ","
 		currentChar = fmt.Sprintf("%s %s: %v", devider, ae.description.Character, ae.currentChar)
+	}
+	if ae.param != "" {
+		devider = ","
+		param = fmt.Sprintf("%s %s: %s", devider, ae.description.Param, ae.param)
 	}
 	return fmt.Sprintf("%s%s%s", ae.description.Name, param, currentChar)
 }
