@@ -1,8 +1,8 @@
 package config
 
 import (
-	"fmt"
 	"os"
+	"path"
 	"testing"
 
 	"github.com/buttairfly/goPanel/src/testhelper"
@@ -38,9 +38,9 @@ func TestNewMainConfig(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.desc, func(t *testing.T) {
-			expectedFile := fmt.Sprintf("%s%s", testFolder, c.expectedFile)
-			actualFile := fmt.Sprintf("%s%s", testFolder, c.actualFile)
-			panelFile := fmt.Sprintf("%s%s", testFolder, c.panelFile)
+			expectedFile := path.Join(testFolder, c.expectedFile)
+			actualFile := path.Join(testFolder, c.actualFile)
+			panelFile := path.Join(testFolder, c.panelFile)
 
 			skip := false
 			for _, tileConfigPath := range c.panelConfig.TileConfigPaths {

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image"
 	"os"
+	"path"
 	"testing"
 
 	"github.com/buttairfly/goPanel/src/testhelper"
@@ -142,8 +143,8 @@ func TestNewTileConfigSnakeMapFile(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.desc, func(t *testing.T) {
-			expectedFile := fmt.Sprintf("%stile.%s%s", testFolder, c.desc, c.expectedFile)
-			actualFile := fmt.Sprintf("%stile.%s_%s", testFolder, c.desc, c.actualFile)
+			expectedFile := path.Join(testFolder, fmt.Sprintf("tile.%s%s", c.desc, c.expectedFile))
+			actualFile := path.Join(testFolder, fmt.Sprintf("tile.%s_%s", c.desc, c.actualFile))
 			genConfig, err := NewTileConfigSnakeMapFile(c.generator)
 			require.NoError(t, err)
 			require.NotNil(t, genConfig)

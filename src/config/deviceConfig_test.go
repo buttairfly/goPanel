@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"path"
 	"testing"
 	"time"
 
@@ -53,8 +54,8 @@ func TestNewDeviceConfigFile(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.desc, func(t *testing.T) {
-			expectedFile := fmt.Sprintf("%sdevice.%s%s", testFolder, c.desc, c.expectedFile)
-			actualFile := fmt.Sprintf("%sdevice.%s_%s", testFolder, c.desc, c.actualFile)
+			expectedFile := path.Join(testFolder, fmt.Sprintf("device.%s%s", c.desc, c.expectedFile))
+			actualFile := path.Join(testFolder, fmt.Sprintf("device.%s_%s", c.desc, c.actualFile))
 
 			if testhelper.RecordCall() {
 				t.Logf("Write Device Config to file %+v %+v", c.deviceConfig, c.deviceConfig.SerialConfig)
