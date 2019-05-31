@@ -1,8 +1,9 @@
 # Binaries for programs and plugins
 gopanel
 
-#IntelliJ idea folder
-.idea
+#ide
+.idea/
+.vscode/
 
 # Test binary, build with `go test -c`
 *.test
