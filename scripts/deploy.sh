@@ -1,6 +1,8 @@
 #!/bin/bash
 
+PROJECT_DIR="$(dirname "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )")"
 BINARY="gopanel"
+
 VERSION=`git describe --always --dirty`
 DATE=`date -u +%FT%T%z`
 ENV='env GOOS=linux GOARCH=arm GOARM=5'
@@ -18,19 +20,15 @@ function COPY {
   rsync -acE --progress $1 $2
 }
 function BUILD {
-  return $(`${ENV} go build -ldflags "-X main.compileDate=${DATE} -X main.versionTag=${VERSION}" -o ${BINARY} ./cmd/${BINARY}`)
+  return $(`${ENV} go build -ldflags "-X main.compileDate=${DATE} -X main.versionTag=${VERSION}" -o ${PROJECT_DIR}/${BINARY} ${PROJECT_DIR}/cmd/${BINARY}`)
 }
 
 echo -e "${GREEN}${BINARY}${NC}: compiled at ${BLUE}${DATE}${NC} with version ${LIGHT_BLUE}${VERSION}${NC}"
 
 if BUILD; then
     echo -e "build  ${GREEN}${BINARY}${NC}"
-    if COPY ./${BINARY} pi@ledpix:~ ; then
-        COPY ./config/ pi@ledpix:~/config
-        echo -e "deploy ${GREEN}${BINARY}${NC}"
-        exit 0
-    elif COPY ./${BINARY} pi@ledpix.fritz.box:~ ; then
-        COPY ./config/ pi@ledpix.fritz.box:~/config
+    if COPY ${PROJECT_DIR}/${BINARY} pi@ledpix:~ ; then
+        COPY ${PROJECT_DIR}/config/ pi@ledpix:~/config
         echo -e "deploy ${GREEN}${BINARY}${NC}"
         exit 0
     else
