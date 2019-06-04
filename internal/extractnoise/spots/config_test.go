@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/buttairfly/goPanel/src/testhelper"
+	"github.com/buttairfly/goPanel/internal/testhelper"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
