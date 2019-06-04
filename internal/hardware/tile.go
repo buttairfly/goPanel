@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"image"
 
-	"github.com/buttairfly/goPanel/src/config"
+	"github.com/buttairfly/goPanel/internal/config"
 )
 
 // Tile hardware interface

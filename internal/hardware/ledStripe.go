@@ -3,7 +3,7 @@ package hardware
 import (
 	"log"
 
-	"github.com/buttairfly/goPanel/src/intmath"
+	"github.com/buttairfly/goPanel/internal/intmath"
 )
 
 // LedStripe interface

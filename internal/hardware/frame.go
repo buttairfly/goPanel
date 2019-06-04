@@ -5,7 +5,7 @@ import (
 	"image/color"
 	"log"
 
-	"github.com/buttairfly/goPanel/src/config"
+	"github.com/buttairfly/goPanel/internal/config"
 )
 
 // Frame is a hardware frame

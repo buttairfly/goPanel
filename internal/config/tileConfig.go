@@ -9,7 +9,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/buttairfly/goPanel/src/intmath"
+	"github.com/buttairfly/goPanel/internal/intmath"
 )
 
 // MapFormatString is the string to format the map[string]int led position mapping

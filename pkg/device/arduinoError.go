@@ -4,15 +4,17 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/buttairfly/goPanel/src/config"
+	"github.com/buttairfly/goPanel/internal/config"
 )
 
-type arduinoError struct {
+// ArduinoError is the error struct of an arduino error which implements error interface
+type ArduinoError struct {
 	description *config.ArduinoErrorDescription
 	param       string
 	currentChar string
 }
 
+// IsArduinoError checks wheather the line is an error and returns a boolean
 func IsArduinoError(line string) bool {
 	if line[0] == 'E' {
 		return true
@@ -20,7 +22,8 @@ func IsArduinoError(line string) bool {
 	return false
 }
 
-func NewArduinoError(serialConfig *config.ArduinoErrorConfig, line string) (*arduinoError, error) {
+// NewArduinoError looks up the error code received from the serial connection and returns the readable error
+func NewArduinoError(serialConfig *config.ArduinoErrorConfig, line string) (*ArduinoError, error) {
 	if !IsArduinoError(line) {
 		return nil, fmt.Errorf("No error line beginning in line: '%s'", line)
 	}
@@ -42,14 +45,14 @@ func NewArduinoError(serialConfig *config.ArduinoErrorConfig, line string) (*ard
 			}
 		}
 	}
-	return &arduinoError{
+	return &ArduinoError{
 		description: description,
 		param:       param,
 		currentChar: currentChar,
 	}, nil
 }
 
-func (ae *arduinoError) Error() string {
+func (ae *ArduinoError) Error() string {
 	param := ""
 	currentChar := ""
 	devider := ":"

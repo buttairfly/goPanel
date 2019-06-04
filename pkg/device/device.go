@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/buttairfly/goPanel/src/config"
-	"github.com/buttairfly/goPanel/src/hardware"
+	"github.com/buttairfly/goPanel/internal/config"
+	"github.com/buttairfly/goPanel/internal/hardware"
 )
 
 const (

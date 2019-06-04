@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"image"
 
-	"github.com/buttairfly/goPanel/src/intmath"
+	"github.com/buttairfly/goPanel/internal/intmath"
 )
 
 type direction int

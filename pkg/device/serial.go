@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/buttairfly/goPanel/src/config"
-	"github.com/buttairfly/goPanel/src/hardware"
+	"github.com/buttairfly/goPanel/internal/config"
+	"github.com/buttairfly/goPanel/internal/hardware"
 	"github.com/tarm/serial"
 )
 
