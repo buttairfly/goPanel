@@ -1,4 +1,4 @@
-package com
+package arduinocom
 
 import (
 	"fmt"
@@ -14,28 +14,50 @@ import (
 )
 
 // ArduinoCom is a serial communication with arduino friendly protocol
+//
+// Set numLed to 0, when arduinoCom does not use led length
 type ArduinoCom struct {
 	config     *config.SerialConfig
 	stream     *serial.Port
 	readActive chan bool
 	initDone   chan bool
 	stats      chan *stats
-	latchEnd   chan bool
 	latched    int64
+	paritySeed byte
+	numLed     int
 }
 
 // NewArduinoCom creates a new serial arduino communication
+//
+// Set numLed to 0 when not needed as configureable one time parameter
 func NewArduinoCom(numLed int, sc *config.SerialConfig) *ArduinoCom {
 	a := new(ArduinoCom)
 	a.config = sc
+	a.readActive = make(chan bool)
+	a.initDone = make(chan bool)
+	a.stats = make(chan *stats, 10)
 	return a
 }
 
+// Open opens port for aruduino serial connection
+func (a *ArduinoCom) Open() error {
+	var err error
+	a.stream, err = serial.OpenPort(a.config.StreamConfig.ToStreamSerialConfig())
+	return err
+}
+
+// Close removes serial arduino stream and all helper channels
+func (a *ArduinoCom) Close() error {
+	close(a.readActive)
+	close(a.stats)
+	return a.stream.Close()
+}
+
 // Init initializes a arduino serial
-func (a *ArduinoCom) Init(numLed int) {
+func (a *ArduinoCom) Init() {
 	defer func() {
 		if !a.config.Verbose {
-			a.sendInitComand("Q0fff\n")
+			a.sendInitComand("Q0fff")
 		}
 	}()
 
@@ -45,21 +67,21 @@ func (a *ArduinoCom) Init(numLed int) {
 			return
 		default:
 			a.stream.Flush()
-			a.sendInitComand("Q0000\n")
-			a.sendInitComand("V\n")
-			if numLed > 0 {
-				a.sendInitComand(fmt.Sprintf("I%04x\n", numLed))
+			a.sendInitComand("Q0000")
+			a.sendInitComand("V")
+			if a.numLed > 0 {
+				a.sendInitComand(fmt.Sprintf("I%04x", a.numLed))
+			} else {
+				close(a.initDone)
 			}
 		}
 	}
 }
 
-func (a *ArduinoCom) sendInitComand(command string) {
-	a.Write([]byte(command))
-	time.Sleep(a.config.InitSleepTime)
-}
-
-func (a *ArduinoCom) read(wg *sync.WaitGroup) {
+// Read is the function to handle arduinoCom reads
+//
+// Read prints ArduinoErrors, when neccesary and shows debug information when configured
+func (a *ArduinoCom) Read(wg *sync.WaitGroup) {
 	lastLine := ""
 	defer wg.Done()
 	defer log.Println(lastLine)
@@ -111,9 +133,28 @@ func (a *ArduinoCom) read(wg *sync.WaitGroup) {
 	}
 }
 
+func (a *ArduinoCom) Write(data string) (int, error) {
+	if a.config.Verbose {
+		log.Printf("Command %s", string(data))
+	}
+	n, err := a.stream.Write([]byte(data))
+	if err != nil {
+		log.Fatal(err)
+	}
+	return n, err
+}
+
+// CalcParityAndWrite calculates the parity and writes it to serial
+func (a *ArduinoCom) CalcParityAndWrite(command string) (int, error) {
+	return a.Write(CalcHexParity(command, a.paritySeed))
+}
+
+func (a *ArduinoCom) sendInitComand(command string) {
+	time.Sleep(a.config.InitSleepTime)
+}
+
 func (a *ArduinoCom) printStats(wg *sync.WaitGroup) {
 	defer wg.Done()
-
 	for stat := range a.stats {
 		if stat.event != latchType {
 			timeStamp := fmt.Sprintf("%02d.%06d", stat.timeStamp.Second(), stat.timeStamp.Nanosecond()/int(time.Microsecond))
@@ -132,17 +173,17 @@ func (a *ArduinoCom) checkInitDone(line string) {
 			if err != nil {
 				log.Print(err)
 			} else {
-				if int(initLed) == s.numLed {
-					close(s.initDone)
+				if int(initLed) == a.numLed {
+					close(a.initDone)
 				}
 			}
 		}
 	}
 }
 
-func (s *SerialCom) needsInit() bool {
+func (a *ArduinoCom) needsInit() bool {
 	select {
-	case <-s.initDone:
+	case <-a.initDone:
 		return false
 	default:
 		return true

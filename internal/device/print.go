@@ -30,7 +30,7 @@ func (pd *printDevice) Close() error {
 	return nil
 }
 
-func (pd *printDevice) Write(data []byte) (int, error) {
+func (pd *printDevice) Write(data string) (int, error) {
 	log.Printf("%+x", data)
 	if len(data) != pd.numPix {
 		return 0, fmt.Errorf(
@@ -47,7 +47,7 @@ func (pd *printDevice) Run(wg *sync.WaitGroup) {
 	defer wg.Done()
 	defer pd.Close()
 	for frame := range pd.input {
-		_, err := pd.Write(([]byte)(frame.ToLedStripe().GetBuffer()))
+		_, err := pd.Write(string(frame.ToLedStripe().GetBuffer()))
 		if err != nil {
 			log.Panic(err)
 		}

@@ -8,44 +8,34 @@ import (
 
 	"github.com/buttairfly/goPanel/internal/config"
 	"github.com/buttairfly/goPanel/internal/hardware"
-	"github.com/buttairfly/goPanel/pkg/com"
+	"github.com/buttairfly/goPanel/pkg/arduinocom"
 )
 
 type serialDevice struct {
-	serialCom  com.serialCom
-	numLed     int
-	input      <-chan hardware.Frame
-	latchEnd   chan bool
-	latched    int64
+	com      *arduinocom.ArduinoCom
+	numLed   int
+	input    <-chan hardware.Frame
+	latchEnd chan bool
+	latched  int64
 }
 
 // NewSerialDevice creates a new serial device
 func NewSerialDevice(numLed int, serialDeviceConfig *config.SerialConfig) LedDevice {
 	s := new(serialDevice)
-	s.config = serialDeviceConfig
+	s.com = arduinocom.NewArduinoCom(numLed, serialDeviceConfig)
 	return s
 }
 
 func (s *serialDevice) Open() error {
-	var err error
-	s.stream, err = serial.OpenPort(s.serialCom.config.StreamConfig.ToStreamSerialConfig())
-	return err
+	return s.com.Open()
 }
 
 func (s *serialDevice) Close() error {
-	return s.serialCom.stream.Close()
+	return s.com.Close()
 }
 
-func (s *serialDevice) Write(data []byte) (int, error) {
-	if s.serialCom.config.Verbose {
-		log.Printf("Command %s", string(data))
-	}
-	n, err := s.serialCom.stream.Write(data)
-	time.Sleep(s.config.CommandSleepTime)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return n, err
+func (s *serialDevice) Write(command string) (int, error) {
+	return s.com.CalcParityAndWrite(command)
 }
 
 func (s *serialDevice) SetInput(input <-chan hardware.Frame) {
@@ -55,16 +45,11 @@ func (s *serialDevice) SetInput(input <-chan hardware.Frame) {
 func (s *serialDevice) Run(wg *sync.WaitGroup) {
 	defer wg.Done()
 	defer s.Close()
-	defer close(s.readActive)
-	defer close(s.stats)
 	defer close(s.latchEnd)
 
-	s.readActive = make(chan bool)
-	s.initDone = make(chan bool)
 	s.latchEnd = make(chan bool)
-	s.stats = make(chan *stats, 10)
 	wg.Add(1)
-	go s.read(wg)
+	go s.Read(wg)
 	wg.Add(1)
 	go s.printStats(wg)
 	wg.Add(1)
@@ -134,17 +119,16 @@ func (s *serialDevice) printLatches(wg *sync.WaitGroup) {
 
 func (s *serialDevice) setPixel(pixel int, buffer []uint8) {
 	bufIndex := pixel * NumBytePerColor
-	command := fmt.Sprintf("P%04x%02x%02x%02x\n", pixel, buffer[bufIndex+0], buffer[bufIndex+1], buffer[bufIndex+2])
-	s.Write([]byte(command))
+	command := fmt.Sprintf("P%04x%02x%02x%02x", pixel, buffer[bufIndex+0], buffer[bufIndex+1], buffer[bufIndex+2])
+	s.Write(command)
 }
 
 func (s *serialDevice) shade(pixel int, buffer []uint8) {
-	command := fmt.Sprintf("S%04x%02x%02x%02x\n", pixel, buffer[0], buffer[1], buffer[2])
-	s.Write([]byte(command))
+	command := fmt.Sprintf("S%04x%02x%02x%02x", pixel, buffer[0], buffer[1], buffer[2])
+	s.Write(command)
 }
 
 func (s *serialDevice) latchFrame() {
-	command := "L\n"
-	s.Write([]byte(command))
+	command := "L"
+	s.Write(command)
 }
-

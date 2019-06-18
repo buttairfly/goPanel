@@ -1,4 +1,4 @@
-package com
+package arduinocom
 
 import "time"
 

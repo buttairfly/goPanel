@@ -1,4 +1,4 @@
-package com
+package arduinocom
 
 import (
 	"testing"
@@ -85,7 +85,7 @@ func TestCalcHexParity(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.desc, func(t *testing.T) {
-			assert.Equal(t, c.expected, CalcHexParityCommand(c.bareCommand, c.seed))
+			assert.Equal(t, c.expected, CalcHexParity(c.bareCommand, c.seed))
 		})
 	}
 }

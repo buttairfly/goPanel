@@ -1,12 +1,12 @@
-package com
+package arduinocom
 
 import (
 	"fmt"
 	"strings"
 )
 
-// CalcHexParityCommand takes a bare string command, calculated the parity and returns the full string with return line
-func CalcHexParityCommand(bareCommand string, seed byte) string {
+// CalcHexParity takes a bare string command, calculated the parity and returns the full string with return line
+func CalcHexParity(bareCommand string, seed byte) string {
 	parity := calcHexParityChar(bareCommand, seed)
 	return fmt.Sprintf("%s%s\n", bareCommand, parity)
 }

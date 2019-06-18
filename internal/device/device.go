@@ -19,7 +19,7 @@ const (
 type LedDevice interface {
 	Open() error
 	Run(wg *sync.WaitGroup)
-	Write(data []byte) (int, error)
+	Write(command string) (int, error)
 	Close() error
 	SetInput(<-chan hardware.Frame)
 	GetType() config.Type
