@@ -8,17 +8,13 @@ import (
 
 	"github.com/buttairfly/goPanel/internal/config"
 	"github.com/buttairfly/goPanel/internal/hardware"
-	"github.com/tarm/serial"
+	"github.com/buttairfly/goPanel/pkg/com"
 )
 
 type serialDevice struct {
-	config     *config.SerialConfig
-	stream     *serial.Port
+	serialCom  com.serialCom
 	numLed     int
 	input      <-chan hardware.Frame
-	readActive chan bool
-	initDone   chan bool
-	stats      chan *stats
 	latchEnd   chan bool
 	latched    int64
 }
@@ -27,25 +23,24 @@ type serialDevice struct {
 func NewSerialDevice(numLed int, serialDeviceConfig *config.SerialConfig) LedDevice {
 	s := new(serialDevice)
 	s.config = serialDeviceConfig
-	s.numLed = numLed
 	return s
 }
 
 func (s *serialDevice) Open() error {
 	var err error
-	s.stream, err = serial.OpenPort(s.config.StreamConfig.ToStreamSerialConfig())
+	s.stream, err = serial.OpenPort(s.serialCom.config.StreamConfig.ToStreamSerialConfig())
 	return err
 }
 
 func (s *serialDevice) Close() error {
-	return s.stream.Close()
+	return s.serialCom.stream.Close()
 }
 
 func (s *serialDevice) Write(data []byte) (int, error) {
-	if s.config.Verbose {
+	if s.serialCom.config.Verbose {
 		log.Printf("Command %s", string(data))
 	}
-	n, err := s.stream.Write(data)
+	n, err := s.serialCom.stream.Write(data)
 	time.Sleep(s.config.CommandSleepTime)
 	if err != nil {
 		log.Fatal(err)
@@ -115,3 +110,41 @@ func (s *serialDevice) Run(wg *sync.WaitGroup) {
 func (s *serialDevice) GetType() config.Type {
 	return config.Serial
 }
+
+func (s *serialDevice) printLatches(wg *sync.WaitGroup) {
+	defer wg.Done()
+	start := time.Now()
+	lastLapLatches := int64(0)
+	for {
+		select {
+		case <-s.latchEnd:
+			return
+		default:
+			time.Sleep(30 * time.Second)
+			timeDiff := time.Now().Sub(start)
+			log.Printf("Latched frames: %f.2/s last lap: %d last diff: %v",
+				float64(s.latched)*float64(time.Second)/float64(timeDiff),
+				s.latched-lastLapLatches,
+				timeDiff,
+			)
+			lastLapLatches = s.latched
+		}
+	}
+}
+
+func (s *serialDevice) setPixel(pixel int, buffer []uint8) {
+	bufIndex := pixel * NumBytePerColor
+	command := fmt.Sprintf("P%04x%02x%02x%02x\n", pixel, buffer[bufIndex+0], buffer[bufIndex+1], buffer[bufIndex+2])
+	s.Write([]byte(command))
+}
+
+func (s *serialDevice) shade(pixel int, buffer []uint8) {
+	command := fmt.Sprintf("S%04x%02x%02x%02x\n", pixel, buffer[0], buffer[1], buffer[2])
+	s.Write([]byte(command))
+}
+
+func (s *serialDevice) latchFrame() {
+	command := "L\n"
+	s.Write([]byte(command))
+}
+

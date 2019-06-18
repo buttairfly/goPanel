@@ -10,7 +10,7 @@ import (
 	"github.com/buttairfly/goPanel/internal/config"
 	"github.com/buttairfly/goPanel/internal/hardware"
 	"github.com/buttairfly/goPanel/internal/palette"
-	"github.com/buttairfly/goPanel/pkg/device"
+	"github.com/buttairfly/goPanel/internal/device"
 	"github.com/buttairfly/goPanel/pkg/version"
 )
 
