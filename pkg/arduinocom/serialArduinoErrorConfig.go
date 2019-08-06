@@ -1,4 +1,4 @@
-package config
+package arduinocom
 
 import (
 	"encoding/json"

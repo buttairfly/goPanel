@@ -9,7 +9,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/buttairfly/goPanel/internal/config"
 	"github.com/tarm/serial"
 )
 
@@ -17,7 +16,7 @@ import (
 //
 // Set numLed to 0, when arduinoCom does not use led length
 type ArduinoCom struct {
-	config     *config.SerialConfig
+	config     *SerialConfig
 	stream     *serial.Port
 	readActive chan bool
 	initDone   chan bool
@@ -30,7 +29,7 @@ type ArduinoCom struct {
 // NewArduinoCom creates a new serial arduino communication
 //
 // Set numLed to 0 when not needed as configureable one time parameter
-func NewArduinoCom(numLed int, sc *config.SerialConfig) *ArduinoCom {
+func NewArduinoCom(numLed int, sc *SerialConfig) *ArduinoCom {
 	a := new(ArduinoCom)
 	a.config = sc
 	a.readActive = make(chan bool)

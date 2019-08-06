@@ -6,7 +6,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/buttairfly/goPanel/internal/config"
 	"github.com/buttairfly/goPanel/internal/hardware"
 	"github.com/buttairfly/goPanel/pkg/arduinocom"
 )
@@ -20,7 +19,7 @@ type serialDevice struct {
 }
 
 // NewSerialDevice creates a new serial device
-func NewSerialDevice(numLed int, serialDeviceConfig *config.SerialConfig) LedDevice {
+func NewSerialDevice(numLed int, serialDeviceConfig *SerialConfig) LedDevice {
 	s := new(serialDevice)
 	s.com = arduinocom.NewArduinoCom(numLed, serialDeviceConfig)
 	return s
@@ -92,8 +91,8 @@ func (s *serialDevice) Run(wg *sync.WaitGroup) {
 	}
 }
 
-func (s *serialDevice) GetType() config.Type {
-	return config.Serial
+func (s *serialDevice) GetType() Type {
+	return Serial
 }
 
 func (s *serialDevice) printLatches(wg *sync.WaitGroup) {

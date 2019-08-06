@@ -8,6 +8,9 @@ import (
 	"io/ioutil"
 	"os"
 	"sort"
+
+	arduinocomconfig "github.com/buttairfly/goPanel/pkg/arduinocom/config"
+	deviceconfig "github.com/buttairfly/goPanel/internal/device/config"
 )
 
 // Config is the internal full config
@@ -16,9 +19,10 @@ type Config interface {
 	json.Unmarshaler
 
 	GetTileConfigs() TileConfigs
-	GetDeviceConfig() *DeviceConfig
+	GetDeviceConfig() *deviceconfig.DeviceConfig
 }
 
+// JSONFileReadWriter is the interface to write json to a file
 type JSONFileReadWriter interface {
 	FromFile(path string) error
 	FromReader(r io.Reader) error
@@ -27,7 +31,7 @@ type JSONFileReadWriter interface {
 
 type config struct {
 	TileConfigs  TileConfigs   `json:"tileConfigs"`
-	DeviceConfig *DeviceConfig `json:"deviceConfig"`
+	DeviceConfig *deviceconfig.DeviceConfig `json:"deviceConfig"`
 }
 
 // NewConfigFromPanelConfigPath generates a new internal config struct from panel config file
@@ -46,15 +50,15 @@ func NewConfigFromPanelConfigPath(folderOffset, path string) (Config, error) {
 	}
 	sort.Sort(tileConfigs)
 
-	var deviceConfig *DeviceConfig
-	deviceConfig, err = NewDeviceConfigFromPath(folderOffset + panelConfig.DeviceConfigPath)
+	var deviceConfig *deviceconfig.DeviceConfig
+	deviceConfig, err = deviceconfig.NewDeviceConfigFromPath(folderOffset + panelConfig.DeviceConfigPath)
 	if err != nil {
 		return nil, err
 	}
 
 	if deviceConfig.Type == Serial {
-		var arduinoErrorConfig *ArduinoErrorConfig
-		arduinoErrorConfig, err = NewArduinoErrorConfigFromPath(folderOffset + panelConfig.ArduinoErrorConfigPath)
+		var arduinoErrorConfig *arduinocomconfig.ArduinoErrorConfig
+		arduinoErrorConfig, err = arduinocomconfig.NewArduinoErrorConfigFromPath(folderOffset + panelConfig.ArduinoErrorConfigPath)
 		if err != nil {
 			return nil, err
 		}
@@ -80,7 +84,7 @@ func (c *config) GetTileConfigs() TileConfigs {
 	return c.TileConfigs
 }
 
-func (c *config) GetDeviceConfig() *DeviceConfig {
+func (c *config) GetDeviceConfig() *deviceconfig.DeviceConfig {
 	return c.DeviceConfig
 }
 

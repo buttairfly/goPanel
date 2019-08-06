@@ -7,7 +7,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/buttairfly/goPanel/internal/testhelper"
+	"github.com/buttairfly/goPanel/pkg/arduinocom"
+	"github.com/buttairfly/goPanel/pkg/testhelper"
+	
 	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -26,8 +28,8 @@ func TestNewDeviceConfigFile(t *testing.T) {
 			desc: "serial",
 			deviceConfig: &DeviceConfig{
 				Type: Serial,
-				SerialConfig: &SerialConfig{
-					StreamConfig: &StreamConfig{
+				SerialConfig: &arduinocom.SerialConfig{
+					StreamConfig: &arduinocom.StreamConfig{
 						Name:        "/dev/ttyUSB0",
 						Baud:        1152000,
 						ReadTimeout: 1 * time.Second,

@@ -3,13 +3,11 @@ package arduinocom
 import (
 	"fmt"
 	"strings"
-
-	"github.com/buttairfly/goPanel/internal/config"
 )
 
 // ArduinoError is the error struct of an arduino error which implements error interface
 type ArduinoError struct {
-	description *config.ArduinoErrorDescription
+	description *ArduinoErrorDescription
 	param       string
 	currentChar string
 }
@@ -23,7 +21,7 @@ func IsArduinoError(line string) bool {
 }
 
 // NewArduinoError looks up the error code received from the serial connection and returns the readable error
-func NewArduinoError(serialConfig *config.ArduinoErrorConfig, line string) (*ArduinoError, error) {
+func NewArduinoError(serialConfig *ArduinoErrorConfig, line string) (*ArduinoError, error) {
 	if !IsArduinoError(line) {
 		return nil, fmt.Errorf("No error line beginning in line: '%s'", line)
 	}
