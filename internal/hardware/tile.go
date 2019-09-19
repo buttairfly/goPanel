@@ -1,10 +1,7 @@
 package hardware
 
 import (
-	"fmt"
 	"image"
-
-	"github.com/buttairfly/goPanel/internal/config"
 )
 
 // Tile hardware interface
@@ -31,7 +28,7 @@ type tile struct {
 }
 
 // NewTile creates a new Tile
-func NewTile(tileConfig config.TileConfig, numPreviousLedsOnStripe int) Tile {
+func NewTile(tileConfig TileConfig, numPreviousLedsOnStripe int) Tile {
 	return &tile{
 		numPreviousLedsOnStripe: numPreviousLedsOnStripe,
 		connectionOrder:         tileConfig.GetConnectionOrder(),
@@ -75,8 +72,4 @@ func (t *tile) NumHardwarePixel() int {
 
 func (t *tile) FramePoint(tilePoint image.Point) image.Point {
 	return t.Bounds().Min.Add(tilePoint)
-}
-
-func tilePositionToString(pos int) string {
-	return fmt.Sprintf(config.MapFormatString, pos)
 }

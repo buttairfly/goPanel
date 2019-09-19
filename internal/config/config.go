@@ -9,29 +9,24 @@ import (
 	"os"
 	"sort"
 
-	arduinocomconfig "github.com/buttairfly/goPanel/pkg/arduinocom/config"
-	deviceconfig "github.com/buttairfly/goPanel/internal/device/config"
+	"github.com/buttairfly/goPanel/internal/device"
+	"github.com/buttairfly/goPanel/internal/hardware"
+	"github.com/buttairfly/goPanel/pkg/arduinocom"
+	"github.com/buttairfly/goPanel/pkg/common"
 )
 
 // Config is the internal full config
 type Config interface {
-	JSONFileReadWriter
+	common.JSONFileReadWriter
 	json.Unmarshaler
 
-	GetTileConfigs() TileConfigs
-	GetDeviceConfig() *deviceconfig.DeviceConfig
-}
-
-// JSONFileReadWriter is the interface to write json to a file
-type JSONFileReadWriter interface {
-	FromFile(path string) error
-	FromReader(r io.Reader) error
-	WriteToFile(path string) error
+	GetTileConfigs() hardware.TileConfigs
+	GetDeviceConfig() *device.DeviceConfig
 }
 
 type config struct {
-	TileConfigs  TileConfigs   `json:"tileConfigs"`
-	DeviceConfig *deviceconfig.DeviceConfig `json:"deviceConfig"`
+	TileConfigs  hardware.TileConfigs `json:"tileConfigs"`
+	DeviceConfig *device.DeviceConfig `json:"deviceConfig"`
 }
 
 // NewConfigFromPanelConfigPath generates a new internal config struct from panel config file
@@ -41,24 +36,24 @@ func NewConfigFromPanelConfigPath(folderOffset, path string) (Config, error) {
 		return nil, err
 	}
 
-	tileConfigs := make(tileConfigs, len(panelConfig.TileConfigPaths))
+	tileConfigs := make(hardware.TileConfigSlice, len(panelConfig.TileConfigPaths))
 	for i, tileConfigPath := range panelConfig.TileConfigPaths {
-		tileConfigs[i], err = NewTileConfigFromPath(folderOffset + tileConfigPath)
+		tileConfigs[i], err = hardware.NewTileConfigFromPath(folderOffset + tileConfigPath)
 		if err != nil {
 			return nil, err
 		}
 	}
 	sort.Sort(tileConfigs)
 
-	var deviceConfig *deviceconfig.DeviceConfig
-	deviceConfig, err = deviceconfig.NewDeviceConfigFromPath(folderOffset + panelConfig.DeviceConfigPath)
+	var deviceConfig *device.DeviceConfig
+	deviceConfig, err = device.NewDeviceConfigFromPath(folderOffset + panelConfig.DeviceConfigPath)
 	if err != nil {
 		return nil, err
 	}
 
-	if deviceConfig.Type == Serial {
-		var arduinoErrorConfig *arduinocomconfig.ArduinoErrorConfig
-		arduinoErrorConfig, err = arduinocomconfig.NewArduinoErrorConfigFromPath(folderOffset + panelConfig.ArduinoErrorConfigPath)
+	if deviceConfig.Type == device.Serial {
+		var arduinoErrorConfig *arduinocom.ArduinoErrorConfig
+		arduinoErrorConfig, err = arduinocom.NewArduinoErrorConfigFromPath(folderOffset + panelConfig.ArduinoErrorConfigPath)
 		if err != nil {
 			return nil, err
 		}
@@ -80,11 +75,11 @@ func newConfigFromPath(path string) (Config, error) {
 	return c, nil
 }
 
-func (c *config) GetTileConfigs() TileConfigs {
+func (c *config) GetTileConfigs() hardware.TileConfigs {
 	return c.TileConfigs
 }
 
-func (c *config) GetDeviceConfig() *deviceconfig.DeviceConfig {
+func (c *config) GetDeviceConfig() *device.DeviceConfig {
 	return c.DeviceConfig
 }
 
@@ -142,15 +137,15 @@ func (c *config) UnmarshalJSON(b []byte) error {
 			return err
 		}
 
-		c.TileConfigs = make(tileConfigs, len(rawMessagesTileConfigsJSON))
+		c.TileConfigs = make(hardware.TileConfigSlice, len(rawMessagesTileConfigsJSON))
 
 		for i, rawMessage := range rawMessagesTileConfigsJSON {
-			var tileConfig tileConfig
-			err = json.Unmarshal(*rawMessage, &tileConfig)
+			var tileConfig hardware.TileConfig
+			err = json.Unmarshal(*rawMessage, tileConfig)
 			if err != nil {
 				return err
 			}
-			c.TileConfigs.Set(i, &tileConfig)
+			c.TileConfigs.Set(i, tileConfig)
 		}
 		sort.Sort(c.TileConfigs)
 	} else {

@@ -20,7 +20,7 @@ type ArduinoCom struct {
 	stream     *serial.Port
 	readActive chan bool
 	initDone   chan bool
-	stats      chan *stats
+	stats      chan *Stat
 	latched    int64
 	paritySeed byte
 	numLed     int
@@ -34,8 +34,18 @@ func NewArduinoCom(numLed int, sc *SerialConfig) *ArduinoCom {
 	a.config = sc
 	a.readActive = make(chan bool)
 	a.initDone = make(chan bool)
-	a.stats = make(chan *stats, 10)
+	a.stats = make(chan *Stat, 10)
 	return a
+}
+
+// AddStat adds a stat on the channel
+func (a *ArduinoCom) AddStat(stat *Stat) {
+	a.stats <- stat
+}
+
+// Config reuturns the serial config
+func (a *ArduinoCom) Config() *SerialConfig {
+	return a.config
 }
 
 // Open opens port for aruduino serial connection
@@ -111,10 +121,10 @@ func (a *ArduinoCom) Read(wg *sync.WaitGroup) {
 			for _, line := range lines {
 				if len(line) > 0 {
 					a.checkInitDone(line)
-					stat := &stats{
-						event:     printType,
-						timeStamp: timeStamp,
-						message:   line,
+					stat := &Stat{
+						Event:     PrintStatType,
+						TimeStamp: timeStamp,
+						Message:   line,
 					}
 					if IsArduinoError(line) {
 						arduinoError, err := NewArduinoError(a.config.ArduinoErrorConfig, line)
@@ -122,10 +132,10 @@ func (a *ArduinoCom) Read(wg *sync.WaitGroup) {
 							log.Print(err)
 							continue
 						}
-						stat.event = ardoinoErrorType
-						stat.message = arduinoError.Error()
+						stat.Event = ArdoinoErrorStatType
+						stat.Message = arduinoError.Error()
 					}
-					a.stats <- stat
+					a.AddStat(stat)
 				}
 			}
 		}
@@ -152,12 +162,13 @@ func (a *ArduinoCom) sendInitComand(command string) {
 	time.Sleep(a.config.InitSleepTime)
 }
 
-func (a *ArduinoCom) printStats(wg *sync.WaitGroup) {
+// PrintStats prints all stats for running serial connection
+func (a *ArduinoCom) PrintStats(wg *sync.WaitGroup) {
 	defer wg.Done()
 	for stat := range a.stats {
-		if stat.event != latchType {
-			timeStamp := fmt.Sprintf("%02d.%06d", stat.timeStamp.Second(), stat.timeStamp.Nanosecond()/int(time.Microsecond))
-			log.Printf("%s %s: %s", stat.event, timeStamp, stat.message)
+		if stat.Event != LatchStatType {
+			timeStamp := fmt.Sprintf("%02d.%06d", stat.TimeStamp.Second(), stat.TimeStamp.Nanosecond()/int(time.Microsecond))
+			log.Printf("%s %s: %s", stat.Event, timeStamp, stat.Message)
 		} else {
 			a.latched++
 		}

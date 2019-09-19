@@ -19,7 +19,7 @@ type serialDevice struct {
 }
 
 // NewSerialDevice creates a new serial device
-func NewSerialDevice(numLed int, serialDeviceConfig *SerialConfig) LedDevice {
+func NewSerialDevice(numLed int, serialDeviceConfig *arduinocom.SerialConfig) LedDevice {
 	s := new(serialDevice)
 	s.com = arduinocom.NewArduinoCom(numLed, serialDeviceConfig)
 	return s
@@ -48,18 +48,18 @@ func (s *serialDevice) Run(wg *sync.WaitGroup) {
 
 	s.latchEnd = make(chan bool)
 	wg.Add(1)
-	go s.Read(wg)
+	go s.com.Read(wg)
 	wg.Add(1)
-	go s.printStats(wg)
+	go s.com.PrintStats(wg)
 	wg.Add(1)
 	go s.printLatches(wg)
 
-	latchDelay := s.config.LatchSleepTime
+	latchDelay := s.com.Config().LatchSleepTime
 	lastFrameTime := time.Now().Add(-latchDelay)
 
 	// initialize bitbanger with number of leds
 	time.Sleep(latchDelay)
-	s.init()
+	s.com.Init()
 
 	lastLedStripe := hardware.NewLedStripe(s.numLed)
 	for frame := range s.input {
@@ -68,11 +68,12 @@ func (s *serialDevice) Run(wg *sync.WaitGroup) {
 		if ledStripeCompare.HasChanged() {
 			now := time.Now()
 			sleepDuration := latchDelay - (now.Sub(lastFrameTime))
-			s.stats <- &stats{
-				event:     latchType,
-				timeStamp: now,
-				message:   fmt.Sprintf("%v", sleepDuration),
+			stat := &arduinocom.Stat{
+				Event:     arduinocom.LatchStatType,
+				TimeStamp: now,
+				Message:   fmt.Sprintf("%v", sleepDuration),
 			}
+			s.com.AddStat(stat)
 			if sleepDuration > 0 {
 				time.Sleep(sleepDuration)
 			}

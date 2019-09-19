@@ -1,4 +1,4 @@
-package config
+package hardware
 
 import (
 	"fmt"

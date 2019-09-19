@@ -4,8 +4,6 @@ import (
 	"image"
 	"image/color"
 	"log"
-
-	"github.com/buttairfly/goPanel/internal/config"
 )
 
 // Frame is a hardware frame
@@ -30,7 +28,7 @@ type frame struct {
 }
 
 // NewFrame return new Frame
-func NewFrame(tileConfigs config.TileConfigs) Frame {
+func NewFrame(tileConfigs TileConfigs) Frame {
 	frameBounds := image.ZR
 	tiles := make([]Tile, tileConfigs.Len())
 	numPreviousLedsOnStripe := 0

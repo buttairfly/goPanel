@@ -12,7 +12,7 @@ import (
 )
 
 func TestNewMainConfig(t *testing.T) {
-	const testFolder = "testdata/"
+	const testFolder = ""
 	cases := []struct {
 		desc         string
 		panelConfig  *PanelConfig
@@ -25,11 +25,11 @@ func TestNewMainConfig(t *testing.T) {
 			desc: "main_config",
 			panelConfig: &PanelConfig{
 				TileConfigPaths: []string{
-					"tile.snake_vertical_c0_20-0_10-10.config.json",
-					"tile.snake_vertical_c1_10-0_0-10.config.json",
+					"../../pkg/hardware/testdata/tile.snake_vertical_c0_20-0_10-10.config.json",
+					"../../pkg/hardware/testdata/tile.snake_vertical_c1_10-0_0-10.config.json",
 				},
-				DeviceConfigPath:       "device.serial.config.json",
-				ArduinoErrorConfigPath: "device.serial.arduino.error.config.json",
+				DeviceConfigPath:       "../device/testdata/device.serial.config.json",
+				ArduinoErrorConfigPath: "../device/testdata/device.serial.arduino.error.config.json",
 			},
 			panelFile:    "main.panel.config.json",
 			expectedFile: "main.composed.config.json",

@@ -1,4 +1,4 @@
-package config
+package device
 
 import (
 	"encoding/json"
@@ -7,7 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	arduinocomconfig "github.com/buttairfly/goPanel/pkg/arduinocom/config"
+	arduinocomconfig "github.com/buttairfly/goPanel/pkg/arduinocom"
 )
 
 // DeviceConfig is the config of the type of device

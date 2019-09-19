@@ -21,5 +21,6 @@ const String ErrorUnknownCommand = "Eucmd"; // character: current char, param: c
 const String ErrorNoInitialisationPossible = "Euini";
 const String ErrorUnknownLetter = "Eulet"; // character: letter, param: charType (D: undefined, C: command, H: hexnumber, R: return)
 const String ErrorUnknownReturn = "Euret"; // character: current char
+const String ErrorWrongParity = "Ewpar"; // character: last char
 
 #endif // device.serial.arduino.error.hpp

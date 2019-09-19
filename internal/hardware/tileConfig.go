@@ -1,4 +1,4 @@
-package config
+package hardware
 
 import (
 	"encoding/json"
@@ -10,6 +10,7 @@ import (
 	"os"
 
 	"github.com/buttairfly/goPanel/internal/intmath"
+	"github.com/buttairfly/goPanel/pkg/common"
 )
 
 // MapFormatString is the string to format the map[string]int led position mapping
@@ -17,7 +18,7 @@ const MapFormatString = "%2d"
 
 // TileConfig is the config of a tile or led module
 type TileConfig interface {
-	JSONFileReadWriter
+	common.JSONFileReadWriter
 	NumHardwarePixel() int
 	GetBounds() image.Rectangle
 	GetConnectionOrder() int

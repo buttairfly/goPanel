@@ -73,6 +73,10 @@ var defaultArduinoConfig = &ArduinoErrorConfig{
 		Character: "current char",
 		Param:     "current number of bytes",
 	},
+	"Ewpar": ArduinoErrorDescription{
+		Name:      "wrong parity",
+		Character: "last char",
+	},
 }
 
 func TestNewArduinoErrorConfigFile(t *testing.T) {
