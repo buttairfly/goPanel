@@ -12,7 +12,8 @@ import (
 )
 
 func TestNewMainConfig(t *testing.T) {
-	const testFolder = ""
+	gopath := os.Getenv("GOPATH")
+	testFolder := path.Join(gopath, "github.com/buttairfly/goPanel")
 	cases := []struct {
 		desc         string
 		panelConfig  *PanelConfig
@@ -25,11 +26,13 @@ func TestNewMainConfig(t *testing.T) {
 			desc: "main_config",
 			panelConfig: &PanelConfig{
 				TileConfigPaths: []string{
-					"../../pkg/hardware/testdata/tile.snake_vertical_c0_20-0_10-10.config.json",
-					"../../pkg/hardware/testdata/tile.snake_vertical_c1_10-0_0-10.config.json",
-				},
-				DeviceConfigPath:       "../device/testdata/device.serial.config.json",
-				ArduinoErrorConfigPath: "../device/testdata/device.serial.arduino.error.config.json",
+					"/internal/hardware/testdata/tile.snake_vertical_c0_20-0_10-10.config.json",
+					"/internal/hardware/testdata/tile.snake_vertical_c1_10-0_0-10.config.json",
+					/home/keks/code/go/github.com/buttairfly/goPanel/internal/hardware/testdata/tile.snake_vertical_c0_20-0_10-10.config.json
+
+				},/home/keks/go/github.com/buttairfly/goPanel/internal/hardware/testdata/tile.snake_vertical_c0_20-0_10-10.config.json
+				DeviceConfigPath:       "/internal/device/testdata/device.serial.config.json",
+				ArduinoErrorConfigPath: "/internal/device/testdata/device.serial.arduino.error.config.json",
 			},
 			panelFile:    "main.panel.config.json",
 			expectedFile: "main.composed.config.json",
