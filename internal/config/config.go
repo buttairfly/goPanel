@@ -125,7 +125,7 @@ func (c *config) UnmarshalJSON(b []byte) error {
 	if objMap["deviceConfig"] != nil {
 		err = json.Unmarshal(*objMap["deviceConfig"], &c.DeviceConfig)
 		if err != nil {
-			return err
+			return fmt.Errorf("deviceConfig error: %s", err)
 		}
 	} else {
 		return errors.New("No DeviceConfig in config file")
@@ -135,7 +135,7 @@ func (c *config) UnmarshalJSON(b []byte) error {
 		var rawMessagesTileConfigsJSON []*json.RawMessage
 		err = json.Unmarshal(*objMap["tileConfigs"], &rawMessagesTileConfigsJSON)
 		if err != nil {
-			return err
+			return fmt.Errorf("tileConfigs error: %s", err)
 		}
 
 		c.TileConfigs = make(hardware.TileConfigSlice, len(rawMessagesTileConfigsJSON))
@@ -144,7 +144,7 @@ func (c *config) UnmarshalJSON(b []byte) error {
 			var tileConfig hardware.TileConfig
 			err = json.Unmarshal(*rawMessage, tileConfig)
 			if err != nil {
-				return err
+				return fmt.Errorf("tileConfig %d\nrawMessage: %s\ntileConfig: %p\nerror: %s", i, *rawMessage, &tileConfig, err)
 			}
 			c.TileConfigs.Set(i, tileConfig)
 		}
