@@ -8,9 +8,9 @@ import (
 	"sync"
 
 	"github.com/buttairfly/goPanel/internal/config"
+	"github.com/buttairfly/goPanel/internal/device"
 	"github.com/buttairfly/goPanel/internal/hardware"
 	"github.com/buttairfly/goPanel/internal/palette"
-	"github.com/buttairfly/goPanel/internal/device"
 	"github.com/buttairfly/goPanel/pkg/version"
 )
 
@@ -24,10 +24,10 @@ func main() {
 
 	version.PrintProgramInfo(compileDate, versionTag)
 
-	panelConfigPtr := flag.String("config", "main.panel.config.json", "a string")
-	folderConfigPtr := flag.String("folder", "config/", "a string")
+	panelConfigPtr := flag.String("config", "config/main.panel.config.json", "a string")
+
 	flag.Parse()
-	mainConfig, err1 := config.NewConfigFromPanelConfigPath(*folderConfigPtr, *panelConfigPtr)
+	mainConfig, err1 := config.NewConfigFromPanelConfigPath(*panelConfigPtr)
 	if err1 != nil {
 		log.Fatal(err1)
 	}

@@ -300,6 +300,10 @@
 				"Euret": {
 					"name": "unknown return",
 					"character": "current char"
+				},
+				"Ewpar": {
+					"name": "wrong parity",
+					"character": "last char"
 				}
 			},
 			"verbose": false,

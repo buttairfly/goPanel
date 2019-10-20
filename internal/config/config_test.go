@@ -5,15 +5,20 @@ import (
 	"path"
 	"testing"
 
-	"github.com/buttairfly/goPanel/pkg/testhelper"
 	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/buttairfly/goPanel/pkg/testhelper"
 )
 
 func TestNewMainConfig(t *testing.T) {
 	gopath := os.Getenv("GOPATH")
-	testFolder := path.Join(gopath, "github.com/buttairfly/goPanel")
+	baseFolder := "src/github.com/buttairfly/goPanel"
+	testFolder := "testdata/"
+	configHardwareFolder := path.Join(gopath, baseFolder, "/internal/hardware", testFolder)
+	configDeviceFolder := path.Join(gopath, baseFolder, "/internal/device", testFolder)
+	configArduinocomFolder := path.Join(gopath, baseFolder, "/pkg/arduinocom", testFolder)
 	cases := []struct {
 		desc         string
 		panelConfig  *PanelConfig
@@ -25,14 +30,15 @@ func TestNewMainConfig(t *testing.T) {
 		{
 			desc: "main_config",
 			panelConfig: &PanelConfig{
-				TileConfigPaths: []string{
-					"/internal/hardware/testdata/tile.snake_vertical_c0_20-0_10-10.config.json",
-					"/internal/hardware/testdata/tile.snake_vertical_c1_10-0_0-10.config.json",
-					/home/keks/code/go/github.com/buttairfly/goPanel/internal/hardware/testdata/tile.snake_vertical_c0_20-0_10-10.config.json
-
-				},/home/keks/go/github.com/buttairfly/goPanel/internal/hardware/testdata/tile.snake_vertical_c0_20-0_10-10.config.json
-				DeviceConfigPath:       "/internal/device/testdata/device.serial.config.json",
-				ArduinoErrorConfigPath: "/internal/device/testdata/device.serial.arduino.error.config.json",
+				TileConfigPath:         configHardwareFolder,
+				DeviceConfigPath:       configDeviceFolder,
+				ArduinoErrorConfigPath: configArduinocomFolder,
+				TileConfigFiles: []string{
+					"tile.snake_vertical_c0_20-0_10-10.config.json",
+					"tile.snake_vertical_c1_10-0_0-10.config.json",
+				},
+				DeviceConfigFile:       "device.serial.config.json",
+				ArduinoErrorConfigFile: "device.serial.arduino.error.config.json",
 			},
 			panelFile:    "main.panel.config.json",
 			expectedFile: "main.composed.config.json",
@@ -45,31 +51,25 @@ func TestNewMainConfig(t *testing.T) {
 			actualFile := path.Join(testFolder, c.actualFile)
 			panelFile := path.Join(testFolder, c.panelFile)
 
-			skip := false
-			for _, tileConfigPath := range c.panelConfig.TileConfigPaths {
-				if _, err := os.Stat(testFolder + tileConfigPath); err != nil {
+			testFile := func(fullPath string) {
+				if _, err := os.Stat(fullPath); err != nil {
 					t.Log(err.Error())
-					skip = true
+					testhelper.FailAndSkip(t, "Re-Run: env TEST_RECORD=true go test ./...")
 				}
 			}
-			if _, err := os.Stat(testFolder + c.panelConfig.DeviceConfigPath); err != nil {
-				t.Log(err.Error())
-				skip = true
+
+			for _, tileConfigFile := range c.panelConfig.TileConfigFiles {
+				testFile(path.Join(c.panelConfig.TileConfigPath, tileConfigFile))
 			}
-			if _, err := os.Stat(testFolder + c.panelConfig.ArduinoErrorConfigPath); err != nil {
-				t.Log(err.Error())
-				skip = true
-			}
-			if skip {
-				testhelper.FailAndSkip(t, "Re-Run: env TEST_RECORD=true go test ./...")
-			}
+			testFile(path.Join(c.panelConfig.DeviceConfigPath, c.panelConfig.DeviceConfigFile))
+			testFile(path.Join(c.panelConfig.ArduinoErrorConfigPath, c.panelConfig.ArduinoErrorConfigFile))
 
 			if testhelper.RecordCall() {
 				t.Logf("Write Panel Config to file %v", panelFile)
 				require.NoError(t, c.panelConfig.WriteToFile(panelFile))
 			}
 
-			genConfig, err := NewConfigFromPanelConfigPath(testFolder, c.panelFile)
+			genConfig, err := NewConfigFromPanelConfigPath(panelFile)
 			require.NoError(t, err)
 			require.NotNil(t, genConfig)
 

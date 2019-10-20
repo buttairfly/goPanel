@@ -1,8 +1,11 @@
 {
-	"tileConfigPaths": [
+	"tileConfigPath": "/home/keks/code/go/src/github.com/buttairfly/goPanel/internal/hardware/testdata",
+	"deviceConfigPath": "/home/keks/code/go/src/github.com/buttairfly/goPanel/internal/device/testdata",
+	"arduinoErrorConfigPath": "/home/keks/code/go/src/github.com/buttairfly/goPanel/pkg/arduinocom/testdata",
+	"tileConfigFiles": [
 		"tile.snake_vertical_c0_20-0_10-10.config.json",
 		"tile.snake_vertical_c1_10-0_0-10.config.json"
 	],
-	"deviceConfigPath": "device.serial.config.json",
-	"arduinoErrorConfigPath": "device.serial.arduino.error.config.json"
+	"deviceConfigFile": "device.serial.config.json",
+	"arduinoErrorConfigFile": "device.serial.arduino.error.config.json"
 }

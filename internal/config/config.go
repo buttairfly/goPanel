@@ -7,6 +7,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"path"
 	"sort"
 
 	"github.com/buttairfly/goPanel/internal/device"
@@ -30,15 +31,15 @@ type config struct {
 }
 
 // NewConfigFromPanelConfigPath generates a new internal config struct from panel config file
-func NewConfigFromPanelConfigPath(folderOffset, path string) (Config, error) {
-	panelConfig, err := newPanelConfigFromPath(folderOffset, path)
+func NewConfigFromPanelConfigPath(file string) (Config, error) {
+	panelConfig, err := newPanelConfigFromPath(file)
 	if err != nil {
 		return nil, err
 	}
 
-	tileConfigs := make(hardware.TileConfigSlice, len(panelConfig.TileConfigPaths))
-	for i, tileConfigPath := range panelConfig.TileConfigPaths {
-		tileConfigs[i], err = hardware.NewTileConfigFromPath(folderOffset + tileConfigPath)
+	tileConfigs := make(hardware.TileConfigSlice, len(panelConfig.TileConfigFiles))
+	for i, tileConfigFile := range panelConfig.TileConfigFiles {
+		tileConfigs[i], err = hardware.NewTileConfigFromPath(path.Join(panelConfig.TileConfigPath, tileConfigFile))
 		if err != nil {
 			return nil, err
 		}
@@ -46,14 +47,14 @@ func NewConfigFromPanelConfigPath(folderOffset, path string) (Config, error) {
 	sort.Sort(tileConfigs)
 
 	var deviceConfig *device.DeviceConfig
-	deviceConfig, err = device.NewDeviceConfigFromPath(folderOffset + panelConfig.DeviceConfigPath)
+	deviceConfig, err = device.NewDeviceConfigFromPath(path.Join(panelConfig.DeviceConfigPath, panelConfig.DeviceConfigFile))
 	if err != nil {
 		return nil, err
 	}
 
 	if deviceConfig.Type == device.Serial {
 		var arduinoErrorConfig *arduinocom.ArduinoErrorConfig
-		arduinoErrorConfig, err = arduinocom.NewArduinoErrorConfigFromPath(folderOffset + panelConfig.ArduinoErrorConfigPath)
+		arduinoErrorConfig, err = arduinocom.NewArduinoErrorConfigFromPath(path.Join(panelConfig.ArduinoErrorConfigPath, panelConfig.ArduinoErrorConfigFile))
 		if err != nil {
 			return nil, err
 		}

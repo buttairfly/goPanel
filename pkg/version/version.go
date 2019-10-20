@@ -1,11 +1,10 @@
 package version
 
-
 import (
 	"log"
-	"time"
 	"os"
 	"strings"
+	"time"
 )
 
 // PrintProgramInfo starts a go routine to print program details in a regular manner into the log
