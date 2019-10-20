@@ -144,7 +144,7 @@ func (c *config) UnmarshalJSON(b []byte) error {
 			var tileConfig hardware.TileConfig
 			err = json.Unmarshal(*rawMessage, tileConfig)
 			if err != nil {
-				return fmt.Errorf("tileConfig %d\nrawMessage: %s\ntileConfig: %p\nerror: %s", i, *rawMessage, &tileConfig, err)
+				return fmt.Errorf("tileConfig %d\nrawMessage: %s\ntileConfig: %T\nerror: %s", i, *rawMessage, tileConfig, err)
 			}
 			c.TileConfigs.Set(i, tileConfig)
 		}
