@@ -6,11 +6,15 @@ import (
 	"os"
 	"testing"
 
-	"github.com/buttairfly/goPanel/pkg/testhelper"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/buttairfly/goPanel/pkg/filereadwriter"
+	"github.com/buttairfly/goPanel/pkg/testhelper"
 )
+
+var _ filereadwriter.Yaml = (*InputPictureConfig)(nil)
 
 func TestNewSpotsFromConfig(t *testing.T) {
 	const testFolder = "testdata/"
@@ -34,14 +38,17 @@ func TestNewSpotsFromConfig(t *testing.T) {
 			},
 			resultFile:     testFolder + "expected.spots",
 			actualFile:     testFolder + "actual.spots",
-			configFileName: testFolder + "20x10_spots.json",
+			configFileName: testFolder + "20x10_spots.yaml",
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.desc, func(t *testing.T) {
+
+			testhelper.FileExistsOrSkip(t, c.configFileName)
+
 			if testhelper.RecordCall() {
 				t.Logf("Write Config to file %v", c.configFileName)
-				require.NoError(t, c.config.WriteToFile(c.configFileName))
+				require.NoError(t, c.config.WriteToYamlFile(c.configFileName))
 			}
 			spots, err := NewSpotsFromConfig(c.configFileName)
 			data := []byte(spotsToStr(spots))

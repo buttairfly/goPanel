@@ -6,13 +6,17 @@ import (
 	"path"
 	"testing"
 
-	"github.com/buttairfly/goPanel/pkg/testhelper"
 	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/buttairfly/goPanel/pkg/filereadwriter"
+	"github.com/buttairfly/goPanel/pkg/testhelper"
 )
 
-var defaultArduinoConfig = &ArduinoErrorConfig{
+var _ filereadwriter.Yaml = (*ArduinoErrorConfig)(nil)
+
+var ledPanelArduinoConfig = &ArduinoErrorConfig{
 	"Encmd": ArduinoErrorDescription{
 		Name:      "no command",
 		Character: "command",
@@ -24,7 +28,7 @@ var defaultArduinoConfig = &ArduinoErrorConfig{
 	"Eulet": ArduinoErrorDescription{
 		Name:      "unknown letter",
 		Character: "letter",
-		Param:     "charType (D: undefined, C: command, H: hexnumber, R: return)",
+		Param:     "charType (D=undefined, C=command, H=hexnumber, R=return)",
 	},
 	"Eucmd": ArduinoErrorDescription{
 		Name:      "unknown command",
@@ -89,10 +93,10 @@ func TestNewArduinoErrorConfigFile(t *testing.T) {
 		err                error
 	}{
 		{
-			desc:               "serial.arduino.error",
-			arduinoErrorConfig: defaultArduinoConfig,
-			expectedFile:       ".config.json",
-			actualFile:         "actual.config.json",
+			desc:               "ledpanel.arduino.error",
+			arduinoErrorConfig: ledPanelArduinoConfig,
+			expectedFile:       ".config.yaml",
+			actualFile:         "actual.config.yaml",
 		},
 	}
 	for _, c := range cases {
@@ -102,14 +106,14 @@ func TestNewArduinoErrorConfigFile(t *testing.T) {
 
 			if testhelper.RecordCall() {
 				t.Logf("Write Serial Error Config to file %s %+v", expectedFile, c.arduinoErrorConfig)
-				require.NoError(t, c.arduinoErrorConfig.WriteToFile(expectedFile))
+				require.NoError(t, c.arduinoErrorConfig.WriteToYamlFile(expectedFile))
 			}
 
 			readConfig, err2 := NewArduinoErrorConfigFromPath(expectedFile)
 			require.NoError(t, err2)
 			t.Log(cmp.Diff(readConfig, c.arduinoErrorConfig))
 			assert.True(t, cmp.Equal(readConfig, c.arduinoErrorConfig), "error read and generated serial error config are not equal")
-			assert.Equal(t, c.err, c.arduinoErrorConfig.WriteToFile(actualFile), "error occurred in file write")
+			assert.Equal(t, c.err, c.arduinoErrorConfig.WriteToYamlFile(actualFile), "error occurred in file write")
 			defer os.Remove(actualFile)
 			testhelper.Diff(t, expectedFile, actualFile)
 		})
@@ -126,8 +130,8 @@ func TestNewArduinoErrorCPlusPlusFile(t *testing.T) {
 		err                error
 	}{
 		{
-			desc:               "serial.arduino.error",
-			arduinoErrorConfig: defaultArduinoConfig,
+			desc:               "ledpanel.arduino.error",
+			arduinoErrorConfig: ledPanelArduinoConfig,
 			expectedFile:       ".hpp",
 			actualFile:         "actual.hpp",
 		},

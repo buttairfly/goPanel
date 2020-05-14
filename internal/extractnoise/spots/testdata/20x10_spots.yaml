@@ -1,0 +1,10 @@
+offset:
+  x: 10
+  "y": 10
+tileWidth: 10
+tileHeight: 10
+tileSpots:
+- x: 5
+  "y": 5
+height: 10
+width: 20

@@ -1,0 +1,16 @@
+type: serial
+serialConfig:
+  streamconfig:
+    name: /dev/ttyUSB0
+    baud: 1152000
+    size: 8
+    readtimeout: 1s
+    parity: 0
+    stopbits: 0
+  arduinoerrorconfig: null
+  verbose: false
+  readbuffersize: 1024
+  initsleeptime: 20ms
+  latchsleeptime: 10.5ms
+  commandsleeptime: 100µs
+

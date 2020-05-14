@@ -7,13 +7,16 @@ import (
 	"testing"
 	"time"
 
-	"github.com/buttairfly/goPanel/pkg/arduinocom"
-	"github.com/buttairfly/goPanel/pkg/testhelper"
-
 	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/buttairfly/goPanel/pkg/arduinocom"
+	"github.com/buttairfly/goPanel/pkg/filereadwriter"
+	"github.com/buttairfly/goPanel/pkg/testhelper"
 )
+
+var _ filereadwriter.Yaml = (*DeviceConfig)(nil)
 
 func TestNewDeviceConfigFile(t *testing.T) {
 	const testFolder = "testdata/"
@@ -42,16 +45,16 @@ func TestNewDeviceConfigFile(t *testing.T) {
 					CommandSleepTime: 100 * time.Microsecond,
 				},
 			},
-			expectedFile: ".config.json",
-			actualFile:   "actual.config.json",
+			expectedFile: ".config.yaml",
+			actualFile:   "actual.config.yaml",
 		},
 		{
 			desc: "print",
 			deviceConfig: &DeviceConfig{
 				Type: Print,
 			},
-			expectedFile: ".config.json",
-			actualFile:   "actual.config.json",
+			expectedFile: ".config.yaml",
+			actualFile:   "actual.config.yaml",
 		},
 	}
 	for _, c := range cases {
@@ -59,16 +62,18 @@ func TestNewDeviceConfigFile(t *testing.T) {
 			expectedFile := path.Join(testFolder, fmt.Sprintf("device.%s%s", c.desc, c.expectedFile))
 			actualFile := path.Join(testFolder, fmt.Sprintf("device.%s_%s", c.desc, c.actualFile))
 
+			testhelper.FileExistsOrSkip(t, expectedFile)
+
 			if testhelper.RecordCall() {
 				t.Logf("Write Device Config to file %+v %+v", c.deviceConfig, c.deviceConfig.SerialConfig)
-				require.NoError(t, c.deviceConfig.WriteToFile(expectedFile))
+				require.NoError(t, c.deviceConfig.WriteToYamlFile(expectedFile))
 			}
 
 			readConfig, err2 := NewDeviceConfigFromPath(expectedFile)
 			require.NoError(t, err2)
 			t.Log(cmp.Diff(readConfig, c.deviceConfig))
 			assert.True(t, cmp.Equal(readConfig, c.deviceConfig), "error read and generated device config are not equal")
-			assert.Equal(t, c.err, c.deviceConfig.WriteToFile(actualFile), "error occurred in file write")
+			assert.Equal(t, c.err, c.deviceConfig.WriteToYamlFile(actualFile), "error occurred in file write")
 			defer os.Remove(actualFile)
 			testhelper.Diff(t, expectedFile, actualFile)
 		})

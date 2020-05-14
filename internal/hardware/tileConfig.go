@@ -1,7 +1,6 @@
 package hardware
 
 import (
-	"encoding/json"
 	"fmt"
 	"image"
 	"io"
@@ -9,8 +8,10 @@ import (
 	"log"
 	"os"
 
+	"gopkg.in/yaml.v2"
+
 	"github.com/buttairfly/goPanel/internal/intmath"
-	"github.com/buttairfly/goPanel/pkg/common"
+	"github.com/buttairfly/goPanel/pkg/filereadwriter"
 )
 
 // MapFormatString is the string to format the map[string]int led position mapping
@@ -18,7 +19,7 @@ const MapFormatString = "%2d"
 
 // TileConfig is the config of a tile or led module
 type TileConfig interface {
-	common.JSONFileReadWriter
+	filereadwriter.Yaml
 	NumHardwarePixel() int
 	GetBounds() image.Rectangle
 	GetConnectionOrder() int
@@ -26,15 +27,15 @@ type TileConfig interface {
 }
 
 type tileConfig struct {
-	ConnectionOrder int             `json:"connectionOrder"`
-	Bounds          image.Rectangle `json:"bounds"`
-	LedStripeMap    map[string]int  `json:"ledStripeMap"`
+	ConnectionOrder int             `yaml:"connectionOrder"`
+	Bounds          image.Rectangle `yaml:"bounds"`
+	LedStripeMap    map[string]int  `yaml:"ledStripeMap"`
 }
 
 // NewTileConfigFromPath creates a new tile from config file path
 func NewTileConfigFromPath(path string) (TileConfig, error) {
 	tc := new(tileConfig)
-	err := tc.FromFile(path)
+	err := tc.FromYamlFile(path)
 	if err != nil {
 		return nil, err
 	}
@@ -67,34 +68,37 @@ func (tc *tileConfig) NumHardwarePixel() int {
 	return numHardwarePixel
 }
 
-// FromFile reads the config from a file at path
-func (tc *tileConfig) FromFile(path string) error {
+// FromYamlFile reads the config from a file at path
+func (tc *tileConfig) FromYamlFile(path string) error {
 	f, err := os.Open(path)
 	if err != nil {
-		return fmt.Errorf("can not read Config file %v. error: %v", path, err)
+		return fmt.Errorf("can not read tileConfig file %v. error: %v", path, err)
 	}
 	defer f.Close()
-	return tc.FromReader(f)
+	return tc.FromYamlReader(f)
 }
 
-// FromReader decodes the config from io.Reader
-func (tc *tileConfig) FromReader(r io.Reader) error {
-	dec := json.NewDecoder(r)
+// FromYamlReader decodes the config from io.Reader
+func (tc *tileConfig) FromYamlReader(r io.Reader) error {
+	dec := yaml.NewDecoder(r)
+
+	log.Print("tileconfig fromReader")
 	err := dec.Decode(&*tc)
 	if err != nil {
-		return fmt.Errorf("can not decode json. error: %v", err)
+		return fmt.Errorf("can not decode tileConfig yaml. error: %v", err)
 	}
 	return nil
 }
 
-// WriteToFile writes the config to a file at path
-func (tc *tileConfig) WriteToFile(path string) error {
-	jsonConfig, err := json.MarshalIndent(tc, "", "\t")
+// WriteToYamlFile writes the config to a file at path
+func (tc *tileConfig) WriteToYamlFile(path string) error {
+	yamlConfig, err := yaml.Marshal(tc)
 	if err != nil {
 		return err
 	}
-	jsonConfig = append(jsonConfig, byte('\n'))
-	return ioutil.WriteFile(path, jsonConfig, 0622)
+
+	yamlConfig = append(yamlConfig, byte('\n'))
+	return ioutil.WriteFile(path, yamlConfig, 0622)
 }
 
 // Bounds retruns the tile image rectangle

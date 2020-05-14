@@ -34,15 +34,15 @@ func TestNewMainConfig(t *testing.T) {
 				DeviceConfigPath:       configDeviceFolder,
 				ArduinoErrorConfigPath: configArduinocomFolder,
 				TileConfigFiles: []string{
-					"tile.snake_vertical_c0_20-0_10-10.config.json",
-					"tile.snake_vertical_c1_10-0_0-10.config.json",
+					"tile.snake_vertical_c0_20-0_10-10.config.yaml",
+					"tile.snake_vertical_c1_10-0_0-10.config.yaml",
 				},
-				DeviceConfigFile:       "device.serial.config.json",
-				ArduinoErrorConfigFile: "device.serial.arduino.error.config.json",
+				DeviceConfigFile:       "device.serial.config.yaml",
+				ArduinoErrorConfigFile: "device.ledpanel.arduino.error.config.yaml",
 			},
-			panelFile:    "main.panel.config.json",
-			expectedFile: "main.composed.config.json",
-			actualFile:   "actual.config.json",
+			panelFile:    "main.panel.config.yaml",
+			expectedFile: "main.composed.config.yaml",
+			actualFile:   "actual.config.yaml",
 		},
 	}
 	for _, c := range cases {
@@ -51,18 +51,11 @@ func TestNewMainConfig(t *testing.T) {
 			actualFile := path.Join(testFolder, c.actualFile)
 			panelFile := path.Join(testFolder, c.panelFile)
 
-			testFile := func(fullPath string) {
-				if _, err := os.Stat(fullPath); err != nil {
-					t.Log(err.Error())
-					testhelper.FailAndSkip(t, "Re-Run: env TEST_RECORD=true go test ./...")
-				}
-			}
-
 			for _, tileConfigFile := range c.panelConfig.TileConfigFiles {
-				testFile(path.Join(c.panelConfig.TileConfigPath, tileConfigFile))
+				testhelper.FileExistsOrSkip(t, path.Join(c.panelConfig.TileConfigPath, tileConfigFile))
 			}
-			testFile(path.Join(c.panelConfig.DeviceConfigPath, c.panelConfig.DeviceConfigFile))
-			testFile(path.Join(c.panelConfig.ArduinoErrorConfigPath, c.panelConfig.ArduinoErrorConfigFile))
+			testhelper.FileExistsOrSkip(t, path.Join(c.panelConfig.DeviceConfigPath, c.panelConfig.DeviceConfigFile))
+			testhelper.FileExistsOrSkip(t, path.Join(c.panelConfig.ArduinoErrorConfigPath, c.panelConfig.ArduinoErrorConfigFile))
 
 			if testhelper.RecordCall() {
 				t.Logf("Write Panel Config to file %v", panelFile)
@@ -75,17 +68,18 @@ func TestNewMainConfig(t *testing.T) {
 
 			if testhelper.RecordCall() {
 				t.Logf("Write Main Composed Config to file %v", expectedFile)
-				require.NoError(t, genConfig.WriteToFile(expectedFile))
+				require.NoError(t, genConfig.WriteToYamlFile(expectedFile))
 			}
 
 			readConfig, err2 := newConfigFromPath(expectedFile)
+			t.Logf("expectedFile %v", expectedFile)
 			require.NoError(t, err2)
 			require.NotNil(t, readConfig)
 
 			t.Log(cmp.Diff(readConfig, genConfig))
 			assert.True(t, cmp.Equal(readConfig, genConfig), "error read and generated main config are not equal")
 
-			assert.Equal(t, c.err, genConfig.WriteToFile(actualFile), "error occurred in actual file write")
+			assert.Equal(t, c.err, genConfig.WriteToYamlFile(actualFile), "error occurred in actual file write")
 			defer os.Remove(actualFile)
 			testhelper.Diff(t, expectedFile, actualFile)
 		})

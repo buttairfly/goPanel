@@ -1,27 +1,30 @@
 package spots
 
 import (
-	"encoding/json"
 	"fmt"
 	"image"
 	"io"
 	"io/ioutil"
 	"os"
 	"sort"
+
+	"gopkg.in/yaml.v2"
 )
 
+// InputPictureConfig configures the mapping for incoming pictures
 type InputPictureConfig struct {
-	Offset     image.Point   `json:"offset"`
-	TileWidth  int           `json:"tileWidth"`
-	TileHeight int           `json:"tileHeight"`
-	TileSpots  []image.Point `json:"tileSpots"`
-	Height     int           `json:"height"`
-	Width      int           `json:"width"`
+	Offset     image.Point   `yaml:"offset"`
+	TileWidth  int           `yaml:"tileWidth"`
+	TileHeight int           `yaml:"tileHeight"`
+	TileSpots  []image.Point `yaml:"tileSpots"`
+	Height     int           `yaml:"height"`
+	Width      int           `yaml:"width"`
 }
 
+// NewSpotsFromConfig creates a new InputPictureConfig from config file
 func NewSpotsFromConfig(path string) (Spots, error) {
 	var ipc InputPictureConfig
-	err := ipc.FromFile(path)
+	err := ipc.FromYamlFile(path)
 	if err != nil {
 		return nil, err
 	}
@@ -29,8 +32,9 @@ func NewSpotsFromConfig(path string) (Spots, error) {
 	return spots, nil
 }
 
-func (ipc *InputPictureConfig) FromReader(r io.Reader) error {
-	dec := json.NewDecoder(r)
+// FromYamlReader decodes the config from io.Reader
+func (ipc *InputPictureConfig) FromYamlReader(r io.Reader) error {
+	dec := yaml.NewDecoder(r)
 	err := dec.Decode(&*ipc)
 	if err != nil {
 		return fmt.Errorf("can not decode json. error: %v", err)
@@ -38,23 +42,26 @@ func (ipc *InputPictureConfig) FromReader(r io.Reader) error {
 	return nil
 }
 
-func (ipc *InputPictureConfig) FromFile(path string) error {
+// FromYamlFile reads the config from a file at path
+func (ipc *InputPictureConfig) FromYamlFile(path string) error {
 	f, err := os.Open(path)
 	if err != nil {
 		return fmt.Errorf("can not read Config file %v. error: %v", path, err)
 	}
 	defer f.Close()
-	return ipc.FromReader(f)
+	return ipc.FromYamlReader(f)
 }
 
-func (ipc *InputPictureConfig) WriteToFile(path string) error {
-	jsonConfig, err := json.MarshalIndent(ipc, "", "\t")
+// WriteToYamlFile writes the config to a file at path
+func (ipc *InputPictureConfig) WriteToYamlFile(path string) error {
+	jsonConfig, err := yaml.Marshal(ipc)
 	if err != nil {
 		return err
 	}
 	return ioutil.WriteFile(path, jsonConfig, 0622)
 }
 
+// ToSpots transforms a InputPictureConfig to spots stuct
 func (ipc *InputPictureConfig) ToSpots() Spots {
 	points := make([]image.Point, ipc.Height*ipc.Width*len(ipc.TileSpots))
 	i := 0

@@ -1,7 +1,6 @@
 package arduinocom
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -10,6 +9,8 @@ import (
 	"runtime"
 	"sort"
 	"strings"
+
+	"gopkg.in/yaml.v2"
 )
 
 // ArduinoErrorConfig is the arduino config error map
@@ -18,49 +19,49 @@ type ArduinoErrorConfig map[string]ArduinoErrorDescription
 // ArduinoErrorDescription is the description of an single arduino error and
 // its parameters
 type ArduinoErrorDescription struct {
-	Name      string `json:"name"`
-	Param     string `json:"param,omitempty"`
-	Character string `json:"character,omitempty"`
+	Name      string `yaml:"name"`
+	Param     string `yaml:"param,omitempty"`
+	Character string `yaml:"character,omitempty"`
 }
 
 // NewArduinoErrorConfigFromPath reads a ArduinoErrorConfig from file
 func NewArduinoErrorConfigFromPath(path string) (*ArduinoErrorConfig, error) {
 	aec := new(ArduinoErrorConfig)
-	err := aec.FromFile(path)
+	err := aec.FromYamlFile(path)
 	if err != nil {
 		return nil, err
 	}
 	return aec, nil
 }
 
-// FromFile reads the config from a file at path
-func (aec *ArduinoErrorConfig) FromFile(path string) error {
+// FromYamlFile reads the config from a file at path
+func (aec *ArduinoErrorConfig) FromYamlFile(path string) error {
 	f, err := os.Open(path)
 	if err != nil {
-		return fmt.Errorf("can not read Config file %v. error: %v", path, err)
+		return fmt.Errorf("can not read ArduinoErrorConfig file %v. error: %v", path, err)
 	}
 	defer f.Close()
-	return aec.FromReader(f)
+	return aec.FromYamlReader(f)
 }
 
-// FromReader decodes the config from io.Reader
-func (aec *ArduinoErrorConfig) FromReader(r io.Reader) error {
-	dec := json.NewDecoder(r)
+// FromYamlReader decodes the config from io.Reader
+func (aec *ArduinoErrorConfig) FromYamlReader(r io.Reader) error {
+	dec := yaml.NewDecoder(r)
 	err := dec.Decode(&*aec)
 	if err != nil {
-		return fmt.Errorf("can not decode json. error: %v", err)
+		return fmt.Errorf("can not decode ArduinoErrorConfig yaml. error: %v", err)
 	}
 	return nil
 }
 
-// WriteToFile writes the config to a file at path
-func (aec *ArduinoErrorConfig) WriteToFile(path string) error {
-	jsonConfig, err := json.MarshalIndent(aec, "", "\t")
+// WriteToYamlFile writes the config to a file at path
+func (aec *ArduinoErrorConfig) WriteToYamlFile(path string) error {
+	yamlConfig, err := yaml.Marshal(aec)
 	if err != nil {
 		return err
 	}
-	jsonConfig = append(jsonConfig, byte('\n'))
-	return ioutil.WriteFile(path, jsonConfig, 0622)
+	yamlConfig = append(yamlConfig, byte('\n'))
+	return ioutil.WriteFile(path, yamlConfig, 0622)
 }
 
 // GetDescription returns the ArduinoErrorDescription for the key or an error on unknown key
