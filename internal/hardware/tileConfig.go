@@ -11,30 +11,21 @@ import (
 	"gopkg.in/yaml.v2"
 
 	"github.com/buttairfly/goPanel/internal/intmath"
-	"github.com/buttairfly/goPanel/pkg/filereadwriter"
 )
 
 // MapFormatString is the string to format the map[string]int led position mapping
 const MapFormatString = "%2d"
 
-// TileConfig is the config of a tile or led module
-type TileConfig interface {
-	filereadwriter.Yaml
-	NumHardwarePixel() int
-	GetBounds() image.Rectangle
-	GetConnectionOrder() int
-	GetLedStripeMap() map[string]int
-}
-
-type tileConfig struct {
+// TileConfig is a struct of a config of one led panel tile
+type TileConfig struct {
 	ConnectionOrder int             `yaml:"connectionOrder"`
 	Bounds          image.Rectangle `yaml:"bounds"`
 	LedStripeMap    map[string]int  `yaml:"ledStripeMap"`
 }
 
 // NewTileConfigFromPath creates a new tile from config file path
-func NewTileConfigFromPath(path string) (TileConfig, error) {
-	tc := new(tileConfig)
+func NewTileConfigFromPath(path string) (*TileConfig, error) {
+	tc := new(TileConfig)
 	err := tc.FromYamlFile(path)
 	if err != nil {
 		return nil, err
@@ -43,7 +34,7 @@ func NewTileConfigFromPath(path string) (TileConfig, error) {
 }
 
 // NumHardwarePixel counts the number of actual valid hardware pixels in the config
-func (tc *tileConfig) NumHardwarePixel() int {
+func (tc *TileConfig) NumHardwarePixel() int {
 	maxX := tc.Bounds.Dx()
 	maxY := tc.Bounds.Dy()
 	maxPixel := maxX * maxY
@@ -69,7 +60,7 @@ func (tc *tileConfig) NumHardwarePixel() int {
 }
 
 // FromYamlFile reads the config from a file at path
-func (tc *tileConfig) FromYamlFile(path string) error {
+func (tc *TileConfig) FromYamlFile(path string) error {
 	f, err := os.Open(path)
 	if err != nil {
 		return fmt.Errorf("can not read tileConfig file %v. error: %v", path, err)
@@ -79,10 +70,8 @@ func (tc *tileConfig) FromYamlFile(path string) error {
 }
 
 // FromYamlReader decodes the config from io.Reader
-func (tc *tileConfig) FromYamlReader(r io.Reader) error {
+func (tc *TileConfig) FromYamlReader(r io.Reader) error {
 	dec := yaml.NewDecoder(r)
-
-	log.Print("tileconfig fromReader")
 	err := dec.Decode(&*tc)
 	if err != nil {
 		return fmt.Errorf("can not decode tileConfig yaml. error: %v", err)
@@ -91,7 +80,7 @@ func (tc *tileConfig) FromYamlReader(r io.Reader) error {
 }
 
 // WriteToYamlFile writes the config to a file at path
-func (tc *tileConfig) WriteToYamlFile(path string) error {
+func (tc *TileConfig) WriteToYamlFile(path string) error {
 	yamlConfig, err := yaml.Marshal(tc)
 	if err != nil {
 		return err
@@ -101,18 +90,18 @@ func (tc *tileConfig) WriteToYamlFile(path string) error {
 	return ioutil.WriteFile(path, yamlConfig, 0622)
 }
 
-// Bounds retruns the tile image rectangle
-func (tc *tileConfig) GetBounds() image.Rectangle {
+// GetBounds retruns the tile image rectangle
+func (tc *TileConfig) GetBounds() image.Rectangle {
 	return tc.Bounds
 }
 
 // GetConnectionOrder retruns the tile connection order
-func (tc *tileConfig) GetConnectionOrder() int {
+func (tc *TileConfig) GetConnectionOrder() int {
 	return tc.ConnectionOrder
 }
 
 // GetLedStripeMap retruns the tile led stripe map
-func (tc *tileConfig) GetLedStripeMap() map[string]int {
+func (tc *TileConfig) GetLedStripeMap() map[string]int {
 	return tc.LedStripeMap
 }
 

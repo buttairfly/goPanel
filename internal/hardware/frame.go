@@ -32,7 +32,7 @@ func NewFrame(tileConfigs TileConfigs) Frame {
 	frameBounds := image.ZR
 	tiles := make([]Tile, tileConfigs.Len())
 	numPreviousLedsOnStripe := 0
-	for i, tileConfig := range tileConfigs.GetSlice() {
+	for i, tileConfig := range tileConfigs {
 		frameBounds = frameBounds.Union(tileConfig.GetBounds())
 		tiles[i] = NewTile(tileConfig, numPreviousLedsOnStripe)
 		numPreviousLedsOnStripe += tileConfig.NumHardwarePixel()

@@ -28,7 +28,7 @@ type tile struct {
 }
 
 // NewTile creates a new Tile
-func NewTile(tileConfig TileConfig, numPreviousLedsOnStripe int) Tile {
+func NewTile(tileConfig *TileConfig, numPreviousLedsOnStripe int) Tile {
 	return &tile{
 		numPreviousLedsOnStripe: numPreviousLedsOnStripe,
 		connectionOrder:         tileConfig.GetConnectionOrder(),

@@ -142,7 +142,7 @@ func TestNewArduinoErrorCPlusPlusFile(t *testing.T) {
 			actualFile := path.Join(testFolder, fmt.Sprintf("device.%s_%s", c.desc, c.actualFile))
 
 			if testhelper.RecordCall() {
-				t.Logf("Write Serial Error hpp to file %s %+v", expectedFile, c.arduinoErrorConfig.ToCppFile(expectedFile, expectedFile))
+				t.Logf("Write Serial Error hpp to file %s %+v", expectedFile, c.arduinoErrorConfig)
 				require.NoError(t, c.arduinoErrorConfig.ToCppFile(expectedFile, expectedFile))
 			}
 

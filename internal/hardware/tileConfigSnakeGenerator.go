@@ -28,7 +28,7 @@ type TileConfigSnakeGenerator struct {
 }
 
 // NewTileConfigSnakeMapFile creates a new snake tile config
-func NewTileConfigSnakeMapFile(g TileConfigSnakeGenerator) (TileConfig, error) {
+func NewTileConfigSnakeMapFile(g TileConfigSnakeGenerator) (*TileConfig, error) {
 	tileBoundsInFrame := image.Rectangle{
 		Min: g.startPoint,
 		Max: g.endPoint,
@@ -95,7 +95,7 @@ func NewTileConfigSnakeMapFile(g TileConfigSnakeGenerator) (TileConfig, error) {
 			pos++
 		}
 	}
-	return &tileConfig{
+	return &TileConfig{
 		ConnectionOrder: g.connectionOrder,
 		Bounds:          boundsInFrame,
 		LedStripeMap:    ledStripeMap,

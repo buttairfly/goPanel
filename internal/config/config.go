@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"os"
 	"path"
 	"sort"
@@ -20,7 +19,6 @@ import (
 // Config is the internal full config
 type Config interface {
 	filereadwriter.Yaml
-	//yaml.Unmarshaler
 
 	GetTileConfigs() hardware.TileConfigs
 	GetDeviceConfig() *device.DeviceConfig
@@ -38,7 +36,7 @@ func NewConfigFromPanelConfigPath(file string) (Config, error) {
 		return nil, err
 	}
 
-	tileConfigs := make(hardware.TileConfigSlice, len(panelConfig.TileConfigFiles))
+	tileConfigs := make(hardware.TileConfigs, len(panelConfig.TileConfigFiles))
 	for i, tileConfigFile := range panelConfig.TileConfigFiles {
 		tileConfigs[i], err = hardware.NewTileConfigFromPath(path.Join(panelConfig.TileConfigPath, tileConfigFile))
 		if err != nil {
@@ -98,8 +96,6 @@ func (c *config) FromYamlFile(path string) error {
 // FromYamlReader decodes the config from io.Reader
 func (c *config) FromYamlReader(r io.Reader) error {
 	dec := yaml.NewDecoder(r)
-
-	log.Print("config FromReader")
 	err := dec.Decode(&*c)
 	if err != nil {
 		return fmt.Errorf("can not decode main config yaml. error: %v", err)
@@ -116,47 +112,3 @@ func (c *config) WriteToYamlFile(path string) error {
 	yamlConfig = append(yamlConfig, byte('\n'))
 	return ioutil.WriteFile(path, yamlConfig, 0622)
 }
-
-/*
-// UnmarshalYaml unmarshals a yaml file
-func (c *config) UnmarshalYAML(b []byte) error {
-	var objMap yaml.MapSlice
-	err := yaml.Unmarshal(b, &objMap)
-	if err != nil {
-		return err
-	}
-
-	if objMap["deviceConfig"] != nil {
-		err = yaml.Unmarshal(*objMap["deviceConfig"], &c.DeviceConfig)
-		if err != nil {
-			return fmt.Errorf("deviceConfig error: %s", err)
-		}
-	} else {
-		return fmt.Errorf("No DeviceConfig in config file")
-	}
-
-	if objMap["tileConfigs"] != nil {
-		var rawMessagesTileConfigsYaml []*yaml.RawMessage
-		err = yaml.Unmarshal(*objMap["tileConfigs"], &rawMessagesTileConfigsYaml)
-		if err != nil {
-			return fmt.Errorf("tileConfigs error: %s", err)
-		}
-
-		c.TileConfigs = make(hardware.TileConfigSlice, len(rawMessagesTileConfigsYaml))
-
-		for i, rawMessage := range rawMessagesTileConfigsYaml {
-			var tileConfig hardware.TileConfig
-			err = yaml.Unmarshal(*rawMessage, tileConfig)
-			if err != nil {
-				return fmt.Errorf("tileConfig %d\nrawMessage: %s\ntileConfig: %T\nerror: %s", i, *rawMessage, tileConfig, err)
-			}
-			c.TileConfigs.Set(i, tileConfig)
-		}
-		sort.Sort(c.TileConfigs)
-	} else {
-		return errors.New("No TileConfigs in main config file")
-	}
-	return nil
-}
-
-*/

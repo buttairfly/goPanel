@@ -42,19 +42,19 @@ func (dc *DeviceConfig) FromYamlReader(r io.Reader) error {
 	dec := yaml.NewDecoder(r)
 	err := dec.Decode(&*dc)
 	if err != nil {
-		return fmt.Errorf("can not decode json. error: %v", err)
+		return fmt.Errorf("can not decode yaml. error: %v", err)
 	}
 	return nil
 }
 
 // WriteToYamlFile writes the config to a file at path
 func (dc *DeviceConfig) WriteToYamlFile(path string) error {
-	jsonConfig, err := yaml.Marshal(dc)
+	yamlConfig, err := yaml.Marshal(dc)
 	if err != nil {
 		return err
 	}
-	jsonConfig = append(jsonConfig, byte('\n'))
-	return ioutil.WriteFile(path, jsonConfig, 0622)
+	yamlConfig = append(yamlConfig, byte('\n'))
+	return ioutil.WriteFile(path, yamlConfig, 0622)
 }
 
 // Type is a LedDevice type
