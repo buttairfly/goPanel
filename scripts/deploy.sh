@@ -26,10 +26,11 @@ function BUILD {
 echo -e "${GREEN}${BINARY}${NC}: compiled at ${BLUE}${DATE}${NC} with version ${LIGHT_BLUE}${VERSION}${NC}"
 
 if BUILD; then
-    echo -e "build  ${GREEN}${BINARY}${NC}"
+    echo -e "build  ${BLUE}${BINARY}${NC}"
     if COPY ${PROJECT_DIR}/${BINARY} pi@ledpix:~ ; then
+        echo -e "deploy ${BLUE}${BINARY}${NC}"
         COPY ${PROJECT_DIR}/config/ pi@ledpix:~/config
-        echo -e "deploy ${GREEN}${BINARY}${NC}"
+        echo -e "deploy ${BLUE}config folder${NC}"
         exit 0
     else
         echo -e "deploy ${RED}failed${NC}"

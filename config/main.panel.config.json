@@ -1,8 +1,0 @@
-{
-	"tileConfigPaths": [
-		"tile.snake_vertical_c0_20-0_10-10.config.json",
-		"tile.snake_vertical_c1_10-0_0-10.config.json"
-	],
-	"deviceConfigPath": "device.serial.config.json",
-	"arduinoErrorConfigPath": "device.serial.arduino.error.config.json"
-}
