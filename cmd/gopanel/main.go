@@ -34,7 +34,7 @@ func main() {
 		sugar.Fatalf("Could not load mainConfig %e", err1)
 	}
 
-	frame := hardware.NewFrame(mainConfig.TileConfigs)
+	frame := hardware.NewFrame(mainConfig.TileConfigs, logger)
 
 	pixelDevice, err := device.NewLedDevice(
 		mainConfig.DeviceConfig,

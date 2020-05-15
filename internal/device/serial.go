@@ -64,7 +64,7 @@ func (s *serialDevice) Run(wg *sync.WaitGroup) {
 	time.Sleep(latchDelay)
 	s.com.Init()
 
-	lastLedStripe := hardware.NewLedStripe(s.numLed, logger)
+	lastLedStripe := hardware.NewLedStripe(s.numLed, s.logger)
 	for frame := range s.input {
 		ledStripe := frame.ToLedStripe()
 		ledStripeCompare := ledStripe.Compare(lastLedStripe)

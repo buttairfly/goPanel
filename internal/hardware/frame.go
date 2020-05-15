@@ -26,10 +26,11 @@ type frame struct {
 	tiles            []Tile
 	sumHardwarePixel int
 	width, height    int
+	logger           *zap.Logger
 }
 
 // NewFrame return new Frame
-func NewFrame(tileConfigs TileConfigs) Frame {
+func NewFrame(tileConfigs TileConfigs, logger *zap.Logger) Frame {
 	frameBounds := image.ZR
 	tiles := make([]Tile, tileConfigs.Len())
 	numPreviousLedsOnStripe := 0
@@ -45,6 +46,7 @@ func NewFrame(tileConfigs TileConfigs) Frame {
 		sumHardwarePixel: numPreviousLedsOnStripe,
 		width:            frameBounds.Dx(),
 		height:           frameBounds.Dy(),
+		logger:           logger,
 	}
 }
 
@@ -81,7 +83,7 @@ func NewCopyFrameFromImage(other Frame, pictureToCopy *image.RGBA, logger *zap.L
 }
 
 func (f *frame) ToLedStripe() LedStripe {
-	ledStripe := NewLedStripe(f.sumHardwarePixel)
+	ledStripe := NewLedStripe(f.sumHardwarePixel, f.logger)
 	buffer := ledStripe.GetBuffer()
 	for _, tile := range f.tiles {
 		for x := 0; x < tile.GetWidth(); x++ {
