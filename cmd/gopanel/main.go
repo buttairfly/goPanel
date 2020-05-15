@@ -29,7 +29,7 @@ func main() {
 	panelConfigPtr := flag.String("config", "config/main.panel.config.yaml", "path to config")
 
 	flag.Parse()
-	mainConfig, err1 := config.NewConfigFromPanelConfigPath(*panelConfigPtr, logger)
+	mainConfig, err1 := config.NewMainConfigFromPanelConfigPath(*panelConfigPtr, logger)
 	if err1 != nil {
 		sugar.Fatalf("Could not load mainConfig %e", err1)
 	}
@@ -39,6 +39,7 @@ func main() {
 	pixelDevice, err := device.NewLedDevice(
 		mainConfig.DeviceConfig,
 		frame.GetSumHardwarePixel(),
+		logger,
 	)
 	if err != nil {
 		sugar.Fatalf("Could not load pixelDevice %e", err)
@@ -69,7 +70,7 @@ func main() {
 					mainPicture.Set(x, y, color)
 				}
 			}
-			colorFrame := hardware.NewCopyFrameFromImage(frame, mainPicture)
+			colorFrame := hardware.NewCopyFrameFromImage(frame, mainPicture, logger)
 			inputChan <- colorFrame
 		}
 	}

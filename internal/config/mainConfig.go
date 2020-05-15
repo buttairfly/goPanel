@@ -21,8 +21,8 @@ type MainConfig struct {
 	DeviceConfig *device.DeviceConfig `yaml:"deviceConfig"`
 }
 
-// NewConfigFromPanelConfigPath generates a new internal config struct from panel config file
-func NewConfigFromPanelConfigPath(file string, logger *zap.Logger) (*MainConfig, error) {
+// NewMainConfigFromPanelConfigPath generates a new internal MainConfig struct from PanelConfig file
+func NewMainConfigFromPanelConfigPath(file string, logger *zap.Logger) (*MainConfig, error) {
 	panelConfig, err := newPanelConfigFromPath(file, logger)
 	if err != nil {
 		return nil, err

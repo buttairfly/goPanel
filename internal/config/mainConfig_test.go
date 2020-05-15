@@ -69,7 +69,7 @@ func TestNewMainConfig(t *testing.T) {
 				require.NoError(t, c.panelConfig.WriteToYamlFile(panelFile))
 			}
 
-			genConfig, err := NewConfigFromPanelConfigPath(panelFile, logger)
+			genConfig, err := NewMainConfigFromPanelConfigPath(panelFile, logger)
 			require.NoError(t, err)
 			require.NotNil(t, genConfig)
 

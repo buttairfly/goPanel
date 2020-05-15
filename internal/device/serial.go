@@ -2,9 +2,10 @@ package device
 
 import (
 	"fmt"
-	"log"
 	"sync"
 	"time"
+
+	"go.uber.org/zap"
 
 	"github.com/buttairfly/goPanel/internal/hardware"
 	"github.com/buttairfly/goPanel/pkg/arduinocom"
@@ -16,12 +17,14 @@ type serialDevice struct {
 	input    <-chan hardware.Frame
 	latchEnd chan bool
 	latched  int64
+	logger   *zap.Logger
 }
 
 // NewSerialDevice creates a new serial device
-func NewSerialDevice(numLed int, serialDeviceConfig *arduinocom.SerialConfig) LedDevice {
+func NewSerialDevice(numLed int, serialDeviceConfig *arduinocom.SerialConfig, logger *zap.Logger) LedDevice {
 	s := new(serialDevice)
-	s.com = arduinocom.NewArduinoCom(numLed, serialDeviceConfig)
+	s.com = arduinocom.NewArduinoCom(numLed, serialDeviceConfig, logger)
+	s.logger = logger
 	return s
 }
 
@@ -61,7 +64,7 @@ func (s *serialDevice) Run(wg *sync.WaitGroup) {
 	time.Sleep(latchDelay)
 	s.com.Init()
 
-	lastLedStripe := hardware.NewLedStripe(s.numLed)
+	lastLedStripe := hardware.NewLedStripe(s.numLed, logger)
 	for frame := range s.input {
 		ledStripe := frame.ToLedStripe()
 		ledStripeCompare := ledStripe.Compare(lastLedStripe)
@@ -107,7 +110,7 @@ func (s *serialDevice) printLatches(wg *sync.WaitGroup) {
 		default:
 			time.Sleep(30 * time.Second)
 			timeDiff := time.Now().Sub(start)
-			log.Printf("Latched frames: %f.2/s last lap: %d last diff: %v",
+			s.logger.Sugar().Infof("Latched frames: %f.2/s last lap: %d last diff: %v",
 				float64(s.latched)*float64(time.Second)/float64(timeDiff),
 				s.latched-lastLapLatches,
 				timeDiff,

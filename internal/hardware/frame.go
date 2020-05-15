@@ -3,7 +3,8 @@ package hardware
 import (
 	"image"
 	"image/color"
-	"log"
+
+	"go.uber.org/zap"
 )
 
 // Frame is a hardware frame
@@ -61,9 +62,9 @@ func NewCopyFrameWithEmptyImage(other Frame) Frame {
 
 // NewCopyFrameFromImage creates a new Frame with the reference of Tiles
 // and copies the other image contents into the frame
-func NewCopyFrameFromImage(other Frame, pictureToCopy *image.RGBA) Frame {
+func NewCopyFrameFromImage(other Frame, pictureToCopy *image.RGBA, logger *zap.Logger) Frame {
 	if !other.Bounds().Eq(pictureToCopy.Bounds()) {
-		log.Fatalf("Can not copy picture (%v) with different bounds as frame (%v)",
+		logger.Sugar().Fatalf("Can not copy picture (%v) with different bounds as frame (%v)",
 			other.Bounds(),
 			pictureToCopy.Bounds(),
 		)

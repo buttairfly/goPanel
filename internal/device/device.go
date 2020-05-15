@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"sync"
 
+	"go.uber.org/zap"
+
 	"github.com/buttairfly/goPanel/internal/hardware"
 )
 
@@ -25,13 +27,13 @@ type LedDevice interface {
 }
 
 // NewLedDevice creates a new Led device
-func NewLedDevice(deviceConfig *DeviceConfig, length int) (LedDevice, error) {
+func NewLedDevice(deviceConfig *DeviceConfig, length int, logger *zap.Logger) (LedDevice, error) {
 	var pixelDevice LedDevice
 	switch deviceConfig.Type {
 	case Print:
-		pixelDevice = NewPrintDevice(length)
+		pixelDevice = NewPrintDevice(length, logger)
 	case Serial:
-		pixelDevice = NewSerialDevice(length, deviceConfig.SerialConfig)
+		pixelDevice = NewSerialDevice(length, deviceConfig.SerialConfig, logger)
 	default:
 		return nil, fmt.Errorf("unkown led device type: %v", deviceConfig.Type)
 	}

@@ -1,7 +1,7 @@
 package hardware
 
 import (
-	"log"
+	"go.uber.org/zap"
 
 	"github.com/buttairfly/goPanel/internal/intmath"
 )
@@ -17,6 +17,7 @@ type LedStripe interface {
 type ledStripe struct {
 	buffer      []uint8
 	pixelLength int
+	logger      *zap.Logger
 }
 
 func (l *ledStripe) GetBuffer() []uint8 {
@@ -28,7 +29,7 @@ func (l *ledStripe) GetPixelLength() int {
 }
 
 // NewLedStripe creates a new led stripe buffer
-func NewLedStripe(numLed int) LedStripe {
+func NewLedStripe(numLed int, logger *zap.Logger) LedStripe {
 	bufferCap := numLed * NumBytePixel
 	buffer := make([]uint8, bufferCap, bufferCap)
 	return &ledStripe{
@@ -40,7 +41,7 @@ func NewLedStripe(numLed int) LedStripe {
 func (l *ledStripe) GetColorMap() map[string][]int {
 	colorMap := make(map[string][]int)
 	for i := 1; i < l.pixelLength; i++ {
-		pix := NewPixelFromSlice(l.buffer, i)
+		pix := NewPixelFromSlice(l.buffer, i, l.logger)
 		if posSlice, ok := colorMap[pix.Hex()]; ok {
 			colorMap[pix.Hex()] = append(posSlice, i)
 		} else {
@@ -54,7 +55,10 @@ func (l *ledStripe) GetColorMap() map[string][]int {
 
 func (l *ledStripe) Compare(other LedStripe) *LedStripeCompare {
 	if l.pixelLength != other.GetPixelLength() || len(l.buffer) != len(l.GetBuffer()) {
-		log.Fatal("Pixel length is not equal", l, other)
+		l.logger.Fatal("pixel length is not equal",
+			zap.Int("thisStripe", l.GetPixelLength()),
+			zap.Int("otherStripe", other.GetPixelLength()),
+		)
 		return nil
 	}
 	change := false
@@ -72,7 +76,7 @@ func (l *ledStripe) Compare(other LedStripe) *LedStripeCompare {
 			var err error
 			fullColor, err = NewPixelFromHex(maxColorHex)
 			if err != nil {
-				log.Fatal(err)
+				l.logger.Fatal("pixel from hex", zap.Error(err))
 			}
 		}
 		change = true
@@ -80,9 +84,9 @@ func (l *ledStripe) Compare(other LedStripe) *LedStripeCompare {
 	otherDiffPixels := make([]int, 0, l.pixelLength)
 	oPix := fullColor
 	for i := 0; i < l.pixelLength; i++ {
-		lPix := NewPixelFromSlice(l.buffer, i)
+		lPix := NewPixelFromSlice(l.buffer, i, l.logger)
 		if fullColor == nil {
-			oPix = NewPixelFromSlice(other.GetBuffer(), i)
+			oPix = NewPixelFromSlice(other.GetBuffer(), i, l.logger)
 		}
 		if !lPix.Equals(oPix) {
 			change = true

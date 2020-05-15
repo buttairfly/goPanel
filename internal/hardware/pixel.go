@@ -3,7 +3,8 @@ package hardware
 import (
 	"fmt"
 	"image/color"
-	"log"
+
+	"go.uber.org/zap"
 )
 
 // Red Green Blue an numBytePixel as constants
@@ -51,12 +52,13 @@ func NewPixelFromInt(c int) Pixel {
 }
 
 // NewPixelFromSlice creates a new rgb byte struct from uint8 slice
-func NewPixelFromSlice(s []uint8, pos int) Pixel {
+func NewPixelFromSlice(s []uint8, pos int, logger *zap.Logger) Pixel {
 	pixPos := pos * NumBytePixel
-	if len(s) < pixPos+NumBytePixel-1 {
-		log.Fatalf("no correct byteslice %d with offset %d", len(s), pixPos+NumBytePixel-1)
+	pixPosEnd := pixPos + NumBytePixel
+	if len(s) < pixPosEnd-1 {
+		logger.Sugar().Fatalf("no correct byteslice %d with offset %d", len(s), pixPosEnd-1)
 	}
-	p := pixel(s[pixPos : pixPos+NumBytePixel])
+	p := pixel(s[pixPos:pixPosEnd])
 	return &p
 }
 

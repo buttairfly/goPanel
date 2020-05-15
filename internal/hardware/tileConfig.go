@@ -5,7 +5,6 @@ import (
 	"image"
 	"io"
 	"io/ioutil"
-	"log"
 	"os"
 
 	"go.uber.org/zap"
@@ -55,7 +54,12 @@ func (tc *TileConfig) NumHardwarePixel() int {
 		}
 	}
 	if maxStripePos > numHardwarePixel-1 {
-		log.Printf("numHardwarePixel (%d) of tile %d is not within max stripe pos %d", numHardwarePixel, tc.ConnectionOrder, maxStripePos)
+		zap.L().Sugar().Infof(
+			"numHardwarePixel (%d) of tile %d is not within max stripe pos %d",
+			numHardwarePixel,
+			tc.ConnectionOrder,
+			maxStripePos,
+		)
 	}
 	return numHardwarePixel
 }

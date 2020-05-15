@@ -1,11 +1,13 @@
 package intmath
 
-import "log"
+import (
+	"go.uber.org/zap"
+)
 
 // Rescale maps a value x on a in scale to out scale
 func Rescale(x, inMin, inMax, outMin, outMax int) int {
 	if (inMax - inMin) == 0 {
-		log.Printf("Error: input range is zero, return 0")
+		zap.L().Error("input range is zero, return 0")
 		return 0
 	}
 	return (x-inMin)*(outMax-outMin)/(inMax-inMin) + outMin

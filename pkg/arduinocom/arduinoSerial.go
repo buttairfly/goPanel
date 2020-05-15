@@ -3,13 +3,13 @@ package arduinocom
 import (
 	"fmt"
 	"io"
-	"log"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/tarm/serial"
+	"go.uber.org/zap"
 )
 
 // ArduinoCom is a serial communication with arduino friendly protocol
@@ -24,17 +24,21 @@ type ArduinoCom struct {
 	latched    int64
 	paritySeed byte
 	numLed     int
+	logger     *zap.Logger
+	comLogger  *zap.Logger
 }
 
 // NewArduinoCom creates a new serial arduino communication
 //
 // Set numLed to 0 when not needed as configureable one time parameter
-func NewArduinoCom(numLed int, sc *SerialConfig) *ArduinoCom {
+func NewArduinoCom(numLed int, sc *SerialConfig, logger *zap.Logger) *ArduinoCom {
 	a := new(ArduinoCom)
 	a.config = sc
 	a.readActive = make(chan bool)
 	a.initDone = make(chan bool)
 	a.stats = make(chan *Stat, 10)
+	a.logger = logger
+	a.comLogger = logger // todo update to have a specific comLogger
 	return a
 }
 
@@ -93,7 +97,7 @@ func (a *ArduinoCom) Init() {
 func (a *ArduinoCom) Read(wg *sync.WaitGroup) {
 	lastLine := ""
 	defer wg.Done()
-	defer log.Println(lastLine)
+	defer a.logger.Info("lastLine", zap.String("read", lastLine))
 
 	buf := make([]byte, a.config.ReadBufferSize)
 	for {
@@ -107,7 +111,7 @@ func (a *ArduinoCom) Read(wg *sync.WaitGroup) {
 				if err == io.EOF {
 					continue
 				}
-				log.Fatal(err)
+				a.logger.Fatal("stream read", zap.Error(err))
 			}
 			read := lastLine + string(buf[:n])
 			lines := strings.Split(read, "\n")
@@ -129,7 +133,7 @@ func (a *ArduinoCom) Read(wg *sync.WaitGroup) {
 					if IsArduinoError(line) {
 						arduinoError, err := NewArduinoError(a.config.ArduinoErrorConfig, line)
 						if err != nil {
-							log.Print(err)
+							a.logger.Warn("arduino", zap.Error(err))
 							continue
 						}
 						stat.Event = ArdoinoErrorStatType
@@ -144,11 +148,11 @@ func (a *ArduinoCom) Read(wg *sync.WaitGroup) {
 
 func (a *ArduinoCom) Write(data string) (int, error) {
 	if a.config.Verbose {
-		log.Printf("Command %s", string(data))
+		a.logger.Info("verbose", zap.String("command", data))
 	}
 	n, err := a.stream.Write([]byte(data))
 	if err != nil {
-		log.Fatal(err)
+		a.logger.Fatal("stream write", zap.Error(err))
 	}
 	return n, err
 }
@@ -167,8 +171,13 @@ func (a *ArduinoCom) PrintStats(wg *sync.WaitGroup) {
 	defer wg.Done()
 	for stat := range a.stats {
 		if stat.Event != LatchStatType {
-			timeStamp := fmt.Sprintf("%02d.%06d", stat.TimeStamp.Second(), stat.TimeStamp.Nanosecond()/int(time.Microsecond))
-			log.Printf("%s %s: %s", stat.Event, timeStamp, stat.Message)
+			//timeStamp := fmt.Sprintf("%02d.%06d", stat.TimeStamp.Second(), stat.TimeStamp.Nanosecond()/int(time.Microsecond))
+			a.logger.Info(
+				"stats logger",
+				zap.String("event", string(stat.Event)),
+				zap.Time("eventTine", stat.TimeStamp),
+				zap.String("Message", stat.Message),
+			)
 		} else {
 			a.latched++
 		}
@@ -181,7 +190,7 @@ func (a *ArduinoCom) checkInitDone(line string) {
 		if len(parts) == 2 && parts[0] == "Init" {
 			initLed, err := strconv.ParseInt(parts[1], 16, 16)
 			if err != nil {
-				log.Print(err)
+				a.logger.Warn("not initialized", zap.Error(err))
 			} else {
 				if int(initLed) == a.numLed {
 					close(a.initDone)
