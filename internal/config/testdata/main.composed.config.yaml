@@ -224,9 +224,7 @@ deviceConfig:
       name: /dev/ttyUSB0
       baud: 1152000
       size: 8
-      readtimeout: 1s
-      parity: 0
-      stopbits: 0
+      readTimeout: 1s
     arduinoerrorconfig:
       Elati:
         name: latch timeout
@@ -282,4 +280,3 @@ deviceConfig:
     initsleeptime: 20ms
     latchsleeptime: 10.5ms
     commandsleeptime: 100µs
-

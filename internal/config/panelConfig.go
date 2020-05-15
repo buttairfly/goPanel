@@ -2,10 +2,11 @@ package config
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
+
+	"go.uber.org/zap"
 )
 
 // PanelConfig is the global panel config
@@ -18,34 +19,36 @@ type PanelConfig struct {
 	ArduinoErrorConfigFile string   `json:"arduinoErrorConfigFile,omitempty"`
 }
 
-func newPanelConfigFromPath(file string) (*PanelConfig, error) {
+func newPanelConfigFromPath(file string, logger *zap.Logger) (*PanelConfig, error) {
 	pc := new(PanelConfig)
-	err := pc.FromFile(file)
+	err := pc.FromYamlFile(file, logger)
 	return pc, err
 }
 
-// FromFile reads the config from a file at path
-func (pc *PanelConfig) FromFile(path string) error {
+// FromYamlFile reads the config from a file at path
+func (pc *PanelConfig) FromYamlFile(path string, logger *zap.Logger) error {
 	f, err := os.Open(path)
 	if err != nil {
-		return fmt.Errorf("can not read Config file %v. error: %v", path, err)
+		logger.Error("can not read panelConfig file", zap.String("configPath", path), zap.Error(err))
+		return err
 	}
 	defer f.Close()
-	return pc.FromReader(f)
+	return pc.FromYamlReader(f, logger)
 }
 
-// FromReader decodes the config from io.Reader
-func (pc *PanelConfig) FromReader(r io.Reader) error {
+// FromYamlReader decodes the config from io.Reader
+func (pc *PanelConfig) FromYamlReader(r io.Reader, logger *zap.Logger) error {
 	dec := json.NewDecoder(r)
 	err := dec.Decode(&*pc)
 	if err != nil {
-		return fmt.Errorf("can not decode json. error: %v", err)
+		logger.Error("can not decode panelConfig yaml", zap.Error(err))
+		return err
 	}
 	return nil
 }
 
-// WriteToFile writes the config to a file at path
-func (pc *PanelConfig) WriteToFile(path string) error {
+// WriteToYamlFile writes the config to a file at path
+func (pc *PanelConfig) WriteToYamlFile(path string) error {
 	jsonConfig, err := json.MarshalIndent(pc, "", "\t")
 	if err != nil {
 		return err

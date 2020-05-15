@@ -1,13 +1,13 @@
 package spots
 
 import (
-	"fmt"
 	"image"
 	"io"
 	"io/ioutil"
 	"os"
 	"sort"
 
+	"go.uber.org/zap"
 	"gopkg.in/yaml.v2"
 )
 
@@ -22,9 +22,9 @@ type InputPictureConfig struct {
 }
 
 // NewSpotsFromConfig creates a new InputPictureConfig from config file
-func NewSpotsFromConfig(path string) (Spots, error) {
+func NewSpotsFromConfig(path string, logger *zap.Logger) (Spots, error) {
 	var ipc InputPictureConfig
-	err := ipc.FromYamlFile(path)
+	err := ipc.FromYamlFile(path, logger)
 	if err != nil {
 		return nil, err
 	}
@@ -32,24 +32,26 @@ func NewSpotsFromConfig(path string) (Spots, error) {
 	return spots, nil
 }
 
+// FromYamlFile reads the config from a file at path
+func (ipc *InputPictureConfig) FromYamlFile(path string, logger *zap.Logger) error {
+	f, err := os.Open(path)
+	if err != nil {
+		logger.Error("can not read InputPictureConfig file", zap.String("configPath", path), zap.Error(err))
+		return err
+	}
+	defer f.Close()
+	return ipc.FromYamlReader(f, logger)
+}
+
 // FromYamlReader decodes the config from io.Reader
-func (ipc *InputPictureConfig) FromYamlReader(r io.Reader) error {
+func (ipc *InputPictureConfig) FromYamlReader(r io.Reader, logger *zap.Logger) error {
 	dec := yaml.NewDecoder(r)
 	err := dec.Decode(&*ipc)
 	if err != nil {
-		return fmt.Errorf("can not decode json. error: %v", err)
+		logger.Error("can not decode InputPictureConfig yaml", zap.Error(err))
+		return err
 	}
 	return nil
-}
-
-// FromYamlFile reads the config from a file at path
-func (ipc *InputPictureConfig) FromYamlFile(path string) error {
-	f, err := os.Open(path)
-	if err != nil {
-		return fmt.Errorf("can not read Config file %v. error: %v", path, err)
-	}
-	defer f.Close()
-	return ipc.FromYamlReader(f)
 }
 
 // WriteToYamlFile writes the config to a file at path

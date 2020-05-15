@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 
+	"go.uber.org/zap"
 	"gopkg.in/yaml.v2"
 
 	"github.com/buttairfly/goPanel/internal/intmath"
@@ -24,9 +25,9 @@ type TileConfig struct {
 }
 
 // NewTileConfigFromPath creates a new tile from config file path
-func NewTileConfigFromPath(path string) (*TileConfig, error) {
+func NewTileConfigFromPath(path string, logger *zap.Logger) (*TileConfig, error) {
 	tc := new(TileConfig)
-	err := tc.FromYamlFile(path)
+	err := tc.FromYamlFile(path, logger)
 	if err != nil {
 		return nil, err
 	}
@@ -60,21 +61,23 @@ func (tc *TileConfig) NumHardwarePixel() int {
 }
 
 // FromYamlFile reads the config from a file at path
-func (tc *TileConfig) FromYamlFile(path string) error {
+func (tc *TileConfig) FromYamlFile(path string, logger *zap.Logger) error {
 	f, err := os.Open(path)
 	if err != nil {
-		return fmt.Errorf("can not read tileConfig file %v. error: %v", path, err)
+		logger.Error("can not read TileConfig file", zap.String("configPath", path), zap.Error(err))
+		return err
 	}
 	defer f.Close()
-	return tc.FromYamlReader(f)
+	return tc.FromYamlReader(f, logger)
 }
 
 // FromYamlReader decodes the config from io.Reader
-func (tc *TileConfig) FromYamlReader(r io.Reader) error {
+func (tc *TileConfig) FromYamlReader(r io.Reader, logger *zap.Logger) error {
 	dec := yaml.NewDecoder(r)
 	err := dec.Decode(&*tc)
 	if err != nil {
-		return fmt.Errorf("can not decode tileConfig yaml. error: %v", err)
+		logger.Error("can not decode TileConfig yaml", zap.Error(err))
+		return err
 	}
 	return nil
 }

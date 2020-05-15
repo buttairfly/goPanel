@@ -10,6 +10,7 @@ import (
 	"sort"
 	"strings"
 
+	"go.uber.org/zap"
 	"gopkg.in/yaml.v2"
 )
 
@@ -25,9 +26,9 @@ type ArduinoErrorDescription struct {
 }
 
 // NewArduinoErrorConfigFromPath reads a ArduinoErrorConfig from file
-func NewArduinoErrorConfigFromPath(path string) (*ArduinoErrorConfig, error) {
+func NewArduinoErrorConfigFromPath(path string, logger *zap.Logger) (*ArduinoErrorConfig, error) {
 	aec := new(ArduinoErrorConfig)
-	err := aec.FromYamlFile(path)
+	err := aec.FromYamlFile(path, logger)
 	if err != nil {
 		return nil, err
 	}
@@ -35,21 +36,23 @@ func NewArduinoErrorConfigFromPath(path string) (*ArduinoErrorConfig, error) {
 }
 
 // FromYamlFile reads the config from a file at path
-func (aec *ArduinoErrorConfig) FromYamlFile(path string) error {
+func (aec *ArduinoErrorConfig) FromYamlFile(path string, logger *zap.Logger) error {
 	f, err := os.Open(path)
 	if err != nil {
-		return fmt.Errorf("can not read ArduinoErrorConfig file %v. error: %v", path, err)
+		logger.Error("can not read ArduinoErrorConfig file", zap.String("configPath", path), zap.Error(err))
+		return err
 	}
 	defer f.Close()
-	return aec.FromYamlReader(f)
+	return aec.FromYamlReader(f, logger)
 }
 
 // FromYamlReader decodes the config from io.Reader
-func (aec *ArduinoErrorConfig) FromYamlReader(r io.Reader) error {
+func (aec *ArduinoErrorConfig) FromYamlReader(r io.Reader, logger *zap.Logger) error {
 	dec := yaml.NewDecoder(r)
 	err := dec.Decode(&*aec)
 	if err != nil {
-		return fmt.Errorf("can not decode ArduinoErrorConfig yaml. error: %v", err)
+		logger.Error("can not decode ArduinoErrorConfig yaml", zap.Error(err))
+		return err
 	}
 	return nil
 }

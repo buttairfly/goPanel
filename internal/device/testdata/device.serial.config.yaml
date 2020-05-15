@@ -4,9 +4,7 @@ serialConfig:
     name: /dev/ttyUSB0
     baud: 1152000
     size: 8
-    readtimeout: 1s
-    parity: 0
-    stopbits: 0
+    readTimeout: 1s
   arduinoerrorconfig: null
   verbose: false
   readbuffersize: 1024

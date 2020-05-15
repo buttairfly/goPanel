@@ -9,6 +9,7 @@ import (
 	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
 
 	"github.com/buttairfly/goPanel/pkg/filereadwriter"
 	"github.com/buttairfly/goPanel/pkg/testhelper"
@@ -17,6 +18,9 @@ import (
 var _ filereadwriter.Yaml = (*InputPictureConfig)(nil)
 
 func TestNewSpotsFromConfig(t *testing.T) {
+	logger, _ := zap.NewDevelopment()
+	defer logger.Sync()
+
 	const testFolder = "testdata/"
 	cases := []struct {
 		desc           string
@@ -50,7 +54,7 @@ func TestNewSpotsFromConfig(t *testing.T) {
 				t.Logf("Write Config to file %v", c.configFileName)
 				require.NoError(t, c.config.WriteToYamlFile(c.configFileName))
 			}
-			spots, err := NewSpotsFromConfig(c.configFileName)
+			spots, err := NewSpotsFromConfig(c.configFileName, logger)
 			data := []byte(spotsToStr(spots))
 			if testhelper.RecordCall() {
 				t.Logf("Write result to file %v", c.resultFile)

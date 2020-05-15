@@ -10,11 +10,18 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
 
+	"github.com/buttairfly/goPanel/pkg/filereadwriter"
 	"github.com/buttairfly/goPanel/pkg/testhelper"
 )
 
+var _ filereadwriter.Yaml = (*TileConfig)(nil)
+
 func TestNewTileConfigSnakeMapFile(t *testing.T) {
+	logger, _ := zap.NewDevelopment()
+	defer logger.Sync()
+
 	const testFolder = "testdata/"
 	cases := []struct {
 		desc         string
@@ -153,7 +160,11 @@ func TestNewTileConfigSnakeMapFile(t *testing.T) {
 			assert.Equal(t, c.numPixel, genConfig.NumHardwarePixel(), "error not enough pixel NumHardwarePixel")
 			assert.Equal(t, c.numPixel, len(genConfig.GetLedStripeMap()), "error not enough pixel GetLedStripeMap")
 			assert.Equal(t, c.generator.connectionOrder, genConfig.GetConnectionOrder(), "error not correct connection order")
-			assert.Equal(t, image.Rectangle{Min: c.generator.startPoint, Max: c.generator.endPoint}.Canon(), genConfig.GetBounds(), "error not correct bounds")
+			assert.Equal(
+				t,
+				image.Rectangle{Min: c.generator.startPoint, Max: c.generator.endPoint}.Canon(), genConfig.GetBounds(),
+				"error not correct bounds",
+			)
 
 			testhelper.FileExistsOrSkip(t, expectedFile)
 
@@ -162,7 +173,7 @@ func TestNewTileConfigSnakeMapFile(t *testing.T) {
 				require.NoError(t, genConfig.WriteToYamlFile(expectedFile))
 			}
 
-			readConfig, err2 := NewTileConfigFromPath(expectedFile)
+			readConfig, err2 := NewTileConfigFromPath(expectedFile, logger)
 			require.NoError(t, err2)
 
 			t.Log(cmp.Diff(readConfig, genConfig))

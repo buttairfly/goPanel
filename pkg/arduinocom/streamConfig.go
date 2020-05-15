@@ -10,20 +10,20 @@ import (
 
 // StreamConfig holds all config values needed for the serial stream tarm package
 type StreamConfig struct {
-	Name        string          `json:"name"`
-	Baud        int             `json:"baud"`
-	Size        byte            `json:"size"`
-	ReadTimeout time.Duration   `json:"readTimeout,omitempty"`
-	Parity      serial.Parity   `json:"parity,omitempty"`
-	StopBits    serial.StopBits `json:"stopBits,omitempty"`
+	Name        string          `json:"name" yaml:"name"`
+	Baud        int             `json:"baud" yaml:"baud"`
+	Size        byte            `json:"size" yaml:"size"`
+	ReadTimeout time.Duration   `json:"readTimeout,omitempty" yaml:"readTimeout,omitempty"`
+	Parity      serial.Parity   `json:"parity,omitempty" yaml:"parity,omitempty"`
+	StopBits    serial.StopBits `json:"stopBits,omitempty" yaml:"stopBits,omitempty"`
 }
 type aliasStreamConfig struct {
-	Name        string          `json:"name"`
-	Baud        int             `json:"baud"`
-	Size        byte            `json:"size"`
-	ReadTimeout string          `json:"readTimeout,omitempty"`
-	Parity      serial.Parity   `json:"parity,omitempty"`
-	StopBits    serial.StopBits `json:"stopBits,omitempty"`
+	Name        string          `json:"name" yaml:"name"`
+	Baud        int             `json:"baud" yaml:"baud"`
+	Size        byte            `json:"size" yaml:"size"`
+	ReadTimeout string          `json:"readTimeout,omitempty" yaml:"readTimeout,omitempty"`
+	Parity      serial.Parity   `json:"parity,omitempty" yaml:"parity,omitempty"`
+	StopBits    serial.StopBits `json:"stopBits,omitempty" yaml:"stopBits,omitempty"`
 }
 
 // UnmarshalJSON unmarshals JSONDuration

@@ -9,6 +9,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
 
 	"github.com/buttairfly/goPanel/pkg/filereadwriter"
 	"github.com/buttairfly/goPanel/pkg/testhelper"
@@ -84,6 +85,9 @@ var ledPanelArduinoConfig = &ArduinoErrorConfig{
 }
 
 func TestNewArduinoErrorConfigFile(t *testing.T) {
+	logger, _ := zap.NewDevelopment()
+	defer logger.Sync()
+
 	const testFolder = "testdata/"
 	cases := []struct {
 		desc               string
@@ -109,7 +113,7 @@ func TestNewArduinoErrorConfigFile(t *testing.T) {
 				require.NoError(t, c.arduinoErrorConfig.WriteToYamlFile(expectedFile))
 			}
 
-			readConfig, err2 := NewArduinoErrorConfigFromPath(expectedFile)
+			readConfig, err2 := NewArduinoErrorConfigFromPath(expectedFile, logger)
 			require.NoError(t, err2)
 			t.Log(cmp.Diff(readConfig, c.arduinoErrorConfig))
 			assert.True(t, cmp.Equal(readConfig, c.arduinoErrorConfig), "error read and generated serial error config are not equal")

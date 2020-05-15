@@ -4,13 +4,13 @@ import (
 	"flag"
 	"image"
 	"image/color"
-	"log"
 	"sync"
 
 	"github.com/buttairfly/goPanel/internal/config"
 	"github.com/buttairfly/goPanel/internal/device"
 	"github.com/buttairfly/goPanel/internal/hardware"
 	"github.com/buttairfly/goPanel/internal/palette"
+	"github.com/buttairfly/goPanel/pkg/log"
 	"github.com/buttairfly/goPanel/pkg/version"
 )
 
@@ -20,26 +20,28 @@ var (
 )
 
 func main() {
-	log.SetFlags(log.Ldate | log.Ltime | log.Lmicroseconds | log.Llongfile | log.LUTC)
+	logger := log.NewZapDevelopLogger()
+	defer logger.Sync()
+	sugar := logger.Sugar()
 
-	version.PrintProgramInfo(compileDate, versionTag)
+	version.PrintProgramInfo(compileDate, versionTag, logger)
 
-	panelConfigPtr := flag.String("config", "config/main.panel.config.json", "a string")
+	panelConfigPtr := flag.String("config", "config/main.panel.config.yaml", "path to config")
 
 	flag.Parse()
-	mainConfig, err1 := config.NewConfigFromPanelConfigPath(*panelConfigPtr)
+	mainConfig, err1 := config.NewConfigFromPanelConfigPath(*panelConfigPtr, logger)
 	if err1 != nil {
-		log.Fatal(err1)
+		sugar.Fatalf("Could not load mainConfig %e", err1)
 	}
 
-	frame := hardware.NewFrame(mainConfig.GetTileConfigs())
+	frame := hardware.NewFrame(mainConfig.TileConfigs)
 
 	pixelDevice, err := device.NewLedDevice(
-		mainConfig.GetDeviceConfig(),
+		mainConfig.DeviceConfig,
 		frame.GetSumHardwarePixel(),
 	)
 	if err != nil {
-		log.Fatal(err)
+		sugar.Fatalf("Could not load pixelDevice %e", err)
 	}
 	defer pixelDevice.Close()
 

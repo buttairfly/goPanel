@@ -8,11 +8,18 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
 
+	"github.com/buttairfly/goPanel/pkg/filereadwriter"
 	"github.com/buttairfly/goPanel/pkg/testhelper"
 )
 
+var _ filereadwriter.Yaml = (*MainConfig)(nil)
+
 func TestNewMainConfig(t *testing.T) {
+	logger, _ := zap.NewDevelopment()
+	defer logger.Sync()
+
 	gopath := os.Getenv("GOPATH")
 	baseFolder := "src/github.com/buttairfly/goPanel"
 	testFolder := "testdata/"
@@ -59,10 +66,10 @@ func TestNewMainConfig(t *testing.T) {
 
 			if testhelper.RecordCall() {
 				t.Logf("Write Panel Config to file %v", panelFile)
-				require.NoError(t, c.panelConfig.WriteToFile(panelFile))
+				require.NoError(t, c.panelConfig.WriteToYamlFile(panelFile))
 			}
 
-			genConfig, err := NewConfigFromPanelConfigPath(panelFile)
+			genConfig, err := NewConfigFromPanelConfigPath(panelFile, logger)
 			require.NoError(t, err)
 			require.NotNil(t, genConfig)
 
@@ -71,7 +78,7 @@ func TestNewMainConfig(t *testing.T) {
 				require.NoError(t, genConfig.WriteToYamlFile(expectedFile))
 			}
 
-			readConfig, err2 := newConfigFromPath(expectedFile)
+			readConfig, err2 := newConfigFromPath(expectedFile, logger)
 			require.NoError(t, err2)
 			require.NotNil(t, readConfig)
 

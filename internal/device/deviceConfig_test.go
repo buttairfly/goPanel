@@ -10,6 +10,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
 
 	"github.com/buttairfly/goPanel/pkg/arduinocom"
 	"github.com/buttairfly/goPanel/pkg/filereadwriter"
@@ -19,6 +20,9 @@ import (
 var _ filereadwriter.Yaml = (*DeviceConfig)(nil)
 
 func TestNewDeviceConfigFile(t *testing.T) {
+	logger, _ := zap.NewDevelopment()
+	defer logger.Sync()
+
 	const testFolder = "testdata/"
 	cases := []struct {
 		desc         string
@@ -69,7 +73,7 @@ func TestNewDeviceConfigFile(t *testing.T) {
 				require.NoError(t, c.deviceConfig.WriteToYamlFile(expectedFile))
 			}
 
-			readConfig, err2 := NewDeviceConfigFromPath(expectedFile)
+			readConfig, err2 := NewDeviceConfigFromPath(expectedFile, logger)
 			require.NoError(t, err2)
 			t.Log(cmp.Diff(readConfig, c.deviceConfig))
 			assert.True(t, cmp.Equal(readConfig, c.deviceConfig), "error read and generated device config are not equal")

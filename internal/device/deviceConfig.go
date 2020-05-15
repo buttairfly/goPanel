@@ -1,11 +1,11 @@
 package device
 
 import (
-	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
 
+	"go.uber.org/zap"
 	"gopkg.in/yaml.v2"
 
 	"github.com/buttairfly/goPanel/pkg/arduinocom"
@@ -18,9 +18,9 @@ type DeviceConfig struct {
 }
 
 // NewDeviceConfigFromPath returns a new DeviceConfig or error
-func NewDeviceConfigFromPath(path string) (*DeviceConfig, error) {
+func NewDeviceConfigFromPath(path string, logger *zap.Logger) (*DeviceConfig, error) {
 	dc := new(DeviceConfig)
-	err := dc.FromYamlFile(path)
+	err := dc.FromYamlFile(path, logger)
 	if err != nil {
 		return nil, err
 	}
@@ -28,21 +28,23 @@ func NewDeviceConfigFromPath(path string) (*DeviceConfig, error) {
 }
 
 // FromYamlFile reads the config from a file at path
-func (dc *DeviceConfig) FromYamlFile(path string) error {
+func (dc *DeviceConfig) FromYamlFile(path string, logger *zap.Logger) error {
 	f, err := os.Open(path)
 	if err != nil {
-		return fmt.Errorf("can not read Config file %v. error: %v", path, err)
+		logger.Error("can not read DeviceConfig file", zap.String("configPath", path), zap.Error(err))
+		return err
 	}
 	defer f.Close()
-	return dc.FromYamlReader(f)
+	return dc.FromYamlReader(f, logger)
 }
 
 // FromYamlReader decodes the config from io.Reader
-func (dc *DeviceConfig) FromYamlReader(r io.Reader) error {
+func (dc *DeviceConfig) FromYamlReader(r io.Reader, logger *zap.Logger) error {
 	dec := yaml.NewDecoder(r)
 	err := dec.Decode(&*dc)
 	if err != nil {
-		return fmt.Errorf("can not decode yaml. error: %v", err)
+		logger.Error("can not decode DeviceConfig yaml", zap.Error(err))
+		return err
 	}
 	return nil
 }

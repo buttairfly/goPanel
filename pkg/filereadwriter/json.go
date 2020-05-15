@@ -1,10 +1,14 @@
 package filereadwriter
 
-import "io"
+import (
+	"io"
+
+	"go.uber.org/zap"
+)
 
 // JSON is the interface to write and read json to/frpm a file
 type JSON interface {
-	FromJsonFile(path string) error
-	FromJsonReader(r io.Reader) error
+	FromJsonFile(path string, logger *zap.Logger) error
+	FromJsonReader(r io.Reader, logger *zap.Logger) error
 	WriteToJsonFile(path string) error
 }
