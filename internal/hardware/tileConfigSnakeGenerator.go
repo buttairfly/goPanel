@@ -39,12 +39,12 @@ func NewTileConfigSnakeMapFile(g TileConfigSnakeGenerator) (*TileConfig, error) 
 	bounds := image.Rectangle{Min: tileStart, Max: tileEnd}.Canon()
 	if !((tileStart.X == 0 || tileStart.X == bounds.Dx()) &&
 		(tileStart.Y == 0 || tileStart.Y == bounds.Dy())) {
-		return nil, fmt.Errorf("Tile start point %s is not a corner of tile bounds %s, %d , %d",
+		return nil, fmt.Errorf("tile start point %s is not a corner of tile bounds %s, %d , %d",
 			tileStart, bounds, bounds.Dx(), bounds.Dy())
 	}
 	if !((tileEnd.X == 0 || tileEnd.X == bounds.Dx()) &&
 		(tileEnd.Y == 0 || tileEnd.Y == bounds.Dy())) {
-		return nil, fmt.Errorf("TIle end point %s is not a corner of tile bounds %s",
+		return nil, fmt.Errorf("tile end point %s is not a corner of tile bounds %s",
 			tileEnd, bounds)
 	}
 
@@ -89,7 +89,7 @@ func NewTileConfigSnakeMapFile(g TileConfigSnakeGenerator) (*TileConfig, error) 
 			mapKey := tilePointxyToString(x, y, stride)
 			prevValue, ok := ledStripeMap[mapKey]
 			if ok {
-				return nil, fmt.Errorf("Duplicate stripe map x: %d, y: %d, pos: %d, mapKey: %s, prevValue: %d", x, y, pos, mapKey, prevValue)
+				return nil, fmt.Errorf("duplicate stripe map x: %d, y: %d, pos: %d, mapKey: %s, prevValue: %d", x, y, pos, mapKey, prevValue)
 			}
 			ledStripeMap[mapKey] = pos
 			pos++

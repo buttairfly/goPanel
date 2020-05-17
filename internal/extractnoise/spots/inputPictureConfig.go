@@ -56,11 +56,11 @@ func (ipc *InputPictureConfig) FromYamlReader(r io.Reader, logger *zap.Logger) e
 
 // WriteToYamlFile writes the config to a filePath
 func (ipc *InputPictureConfig) WriteToYamlFile(filePath string) error {
-	jsonConfig, err := yaml.Marshal(ipc)
+	yamlConfig, err := yaml.Marshal(ipc)
 	if err != nil {
 		return err
 	}
-	return ioutil.WriteFile(filePath, jsonConfig, 0622)
+	return ioutil.WriteFile(filePath, yamlConfig, 0622)
 }
 
 // ToSpots transforms a InputPictureConfig to spots stuct
