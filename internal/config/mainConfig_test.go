@@ -78,7 +78,7 @@ func TestNewMainConfig(t *testing.T) {
 				require.NoError(t, genConfig.WriteToYamlFile(expectedFile))
 			}
 
-			readConfig, err2 := newConfigFromPath(expectedFile, logger)
+			readConfig, err2 := NewMainConfigFromPath(expectedFile, logger)
 			require.NoError(t, err2)
 			require.NotNil(t, readConfig)
 

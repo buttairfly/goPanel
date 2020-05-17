@@ -22,9 +22,9 @@ type InputPictureConfig struct {
 }
 
 // NewSpotsFromConfig creates a new InputPictureConfig from config file
-func NewSpotsFromConfig(path string, logger *zap.Logger) (Spots, error) {
+func NewSpotsFromConfig(filePath string, logger *zap.Logger) (Spots, error) {
 	var ipc InputPictureConfig
-	err := ipc.FromYamlFile(path, logger)
+	err := ipc.FromYamlFile(filePath, logger)
 	if err != nil {
 		return nil, err
 	}
@@ -32,11 +32,11 @@ func NewSpotsFromConfig(path string, logger *zap.Logger) (Spots, error) {
 	return spots, nil
 }
 
-// FromYamlFile reads the config from a file at path
-func (ipc *InputPictureConfig) FromYamlFile(path string, logger *zap.Logger) error {
-	f, err := os.Open(path)
+// FromYamlFile reads the config from a filePath
+func (ipc *InputPictureConfig) FromYamlFile(filePath string, logger *zap.Logger) error {
+	f, err := os.Open(filePath)
 	if err != nil {
-		logger.Error("can not read InputPictureConfig file", zap.String("configPath", path), zap.Error(err))
+		logger.Error("can not read InputPictureConfig file", zap.String("configPath", filePath), zap.Error(err))
 		return err
 	}
 	defer f.Close()
@@ -54,13 +54,13 @@ func (ipc *InputPictureConfig) FromYamlReader(r io.Reader, logger *zap.Logger) e
 	return nil
 }
 
-// WriteToYamlFile writes the config to a file at path
-func (ipc *InputPictureConfig) WriteToYamlFile(path string) error {
+// WriteToYamlFile writes the config to a filePath
+func (ipc *InputPictureConfig) WriteToYamlFile(filePath string) error {
 	jsonConfig, err := yaml.Marshal(ipc)
 	if err != nil {
 		return err
 	}
-	return ioutil.WriteFile(path, jsonConfig, 0622)
+	return ioutil.WriteFile(filePath, jsonConfig, 0622)
 }
 
 // ToSpots transforms a InputPictureConfig to spots stuct

@@ -23,10 +23,10 @@ type TileConfig struct {
 	LedStripeMap    map[string]int  `yaml:"ledStripeMap"`
 }
 
-// NewTileConfigFromPath creates a new tile from config file path
-func NewTileConfigFromPath(path string, logger *zap.Logger) (*TileConfig, error) {
+// NewTileConfigFromPath creates a new tile from config filePath
+func NewTileConfigFromPath(filePath string, logger *zap.Logger) (*TileConfig, error) {
 	tc := new(TileConfig)
-	err := tc.FromYamlFile(path, logger)
+	err := tc.FromYamlFile(filePath, logger)
 	if err != nil {
 		return nil, err
 	}
@@ -64,11 +64,11 @@ func (tc *TileConfig) NumHardwarePixel() int {
 	return numHardwarePixel
 }
 
-// FromYamlFile reads the config from a file at path
-func (tc *TileConfig) FromYamlFile(path string, logger *zap.Logger) error {
-	f, err := os.Open(path)
+// FromYamlFile reads the config from a filePath
+func (tc *TileConfig) FromYamlFile(filePath string, logger *zap.Logger) error {
+	f, err := os.Open(filePath)
 	if err != nil {
-		logger.Error("can not read TileConfig file", zap.String("configPath", path), zap.Error(err))
+		logger.Error("can not read TileConfig file", zap.String("configPath", filePath), zap.Error(err))
 		return err
 	}
 	defer f.Close()
@@ -86,15 +86,15 @@ func (tc *TileConfig) FromYamlReader(r io.Reader, logger *zap.Logger) error {
 	return nil
 }
 
-// WriteToYamlFile writes the config to a file at path
-func (tc *TileConfig) WriteToYamlFile(path string) error {
+// WriteToYamlFile writes the config to a filePath
+func (tc *TileConfig) WriteToYamlFile(filePath string) error {
 	yamlConfig, err := yaml.Marshal(tc)
 	if err != nil {
 		return err
 	}
 
 	yamlConfig = append(yamlConfig, byte('\n'))
-	return ioutil.WriteFile(path, yamlConfig, 0622)
+	return ioutil.WriteFile(filePath, yamlConfig, 0622)
 }
 
 // GetBounds retruns the tile image rectangle

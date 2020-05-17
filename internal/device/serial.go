@@ -110,10 +110,10 @@ func (s *serialDevice) printLatches(wg *sync.WaitGroup) {
 		default:
 			time.Sleep(30 * time.Second)
 			timeDiff := time.Now().Sub(start)
-			s.logger.Sugar().Infof("Latched frames: %f.2/s last lap: %d last diff: %v",
-				float64(s.latched)*float64(time.Second)/float64(timeDiff),
-				s.latched-lastLapLatches,
-				timeDiff,
+			s.logger.Info("latch summary",
+				zap.String("frames", fmt.Sprintf("%f.2/s", float64(s.latched)*float64(time.Second)/float64(timeDiff))),
+				zap.Int64("lastLap", s.latched-lastLapLatches),
+				zap.Duration("lastDiff", timeDiff),
 			)
 			lastLapLatches = s.latched
 		}

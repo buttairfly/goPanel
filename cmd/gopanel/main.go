@@ -6,6 +6,8 @@ import (
 	"image/color"
 	"sync"
 
+	"go.uber.org/zap"
+
 	"github.com/buttairfly/goPanel/internal/config"
 	"github.com/buttairfly/goPanel/internal/device"
 	"github.com/buttairfly/goPanel/internal/hardware"
@@ -22,16 +24,15 @@ var (
 func main() {
 	logger := log.NewZapDevelopLogger()
 	defer logger.Sync()
-	sugar := logger.Sugar()
 
 	version.PrintProgramInfo(compileDate, versionTag, logger)
 
-	panelConfigPtr := flag.String("config", "config/main.panel.config.yaml", "path to config")
+	mainConfigPath := *(flag.String("config", "config/main.composed.config.yaml", "path to config"))
 
 	flag.Parse()
-	mainConfig, err1 := config.NewMainConfigFromPanelConfigPath(*panelConfigPtr, logger)
+	mainConfig, err1 := config.NewMainConfigFromPath(mainConfigPath, logger)
 	if err1 != nil {
-		sugar.Fatalf("Could not load mainConfig %e", err1)
+		logger.Fatal("could not load mainConfig %e", zap.Error(err1))
 	}
 
 	frame := hardware.NewFrame(mainConfig.TileConfigs, logger)
@@ -42,7 +43,7 @@ func main() {
 		logger,
 	)
 	if err != nil {
-		sugar.Fatalf("Could not load pixelDevice %e", err)
+		logger.Fatal("could not load pixelDevice", zap.Error(err))
 	}
 	defer pixelDevice.Close()
 
@@ -74,5 +75,4 @@ func main() {
 			inputChan <- colorFrame
 		}
 	}
-
 }

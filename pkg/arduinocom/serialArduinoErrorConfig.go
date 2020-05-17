@@ -26,20 +26,20 @@ type ArduinoErrorDescription struct {
 }
 
 // NewArduinoErrorConfigFromPath reads a ArduinoErrorConfig from file
-func NewArduinoErrorConfigFromPath(path string, logger *zap.Logger) (*ArduinoErrorConfig, error) {
+func NewArduinoErrorConfigFromPath(filePath string, logger *zap.Logger) (*ArduinoErrorConfig, error) {
 	aec := new(ArduinoErrorConfig)
-	err := aec.FromYamlFile(path, logger)
+	err := aec.FromYamlFile(filePath, logger)
 	if err != nil {
 		return nil, err
 	}
 	return aec, nil
 }
 
-// FromYamlFile reads the config from a file at path
-func (aec *ArduinoErrorConfig) FromYamlFile(path string, logger *zap.Logger) error {
-	f, err := os.Open(path)
+// FromYamlFile reads the config from a filePath
+func (aec *ArduinoErrorConfig) FromYamlFile(filePath string, logger *zap.Logger) error {
+	f, err := os.Open(filePath)
 	if err != nil {
-		logger.Error("can not read ArduinoErrorConfig file", zap.String("configPath", path), zap.Error(err))
+		logger.Error("can not read ArduinoErrorConfig file", zap.String("configPath", filePath), zap.Error(err))
 		return err
 	}
 	defer f.Close()
@@ -57,14 +57,14 @@ func (aec *ArduinoErrorConfig) FromYamlReader(r io.Reader, logger *zap.Logger) e
 	return nil
 }
 
-// WriteToYamlFile writes the config to a file at path
-func (aec *ArduinoErrorConfig) WriteToYamlFile(path string) error {
+// WriteToYamlFile writes the config to a filePath
+func (aec *ArduinoErrorConfig) WriteToYamlFile(filePath string) error {
 	yamlConfig, err := yaml.Marshal(aec)
 	if err != nil {
 		return err
 	}
 	yamlConfig = append(yamlConfig, byte('\n'))
-	return ioutil.WriteFile(path, yamlConfig, 0622)
+	return ioutil.WriteFile(filePath, yamlConfig, 0622)
 }
 
 // GetDescription returns the ArduinoErrorDescription for the key or an error on unknown key
@@ -76,7 +76,7 @@ func (aec *ArduinoErrorConfig) GetDescription(errorCode string) (*ArduinoErrorDe
 	return &description, nil
 }
 
-// ToCppFile returns a []byte string to write to a file
+// ToCppFile returns a []byte string to write to a filePath
 func (aec *ArduinoErrorConfig) ToCppFile(filePath, name string) error {
 	_, thisFile, _, _ := runtime.Caller(0)
 	_, thisFileName := path.Split(thisFile)

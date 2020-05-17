@@ -66,7 +66,7 @@ func NewCopyFrameWithEmptyImage(other Frame) Frame {
 // and copies the other image contents into the frame
 func NewCopyFrameFromImage(other Frame, pictureToCopy *image.RGBA, logger *zap.Logger) Frame {
 	if !other.Bounds().Eq(pictureToCopy.Bounds()) {
-		logger.Sugar().Fatalf("Can not copy picture (%v) with different bounds as frame (%v)",
+		logger.Sugar().Fatalf("can not copy picture (%v) with different bounds as frame (%v)",
 			other.Bounds(),
 			pictureToCopy.Bounds(),
 		)

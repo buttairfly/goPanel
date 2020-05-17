@@ -22,8 +22,8 @@ type MainConfig struct {
 }
 
 // NewMainConfigFromPanelConfigPath generates a new internal MainConfig struct from PanelConfig file
-func NewMainConfigFromPanelConfigPath(file string, logger *zap.Logger) (*MainConfig, error) {
-	panelConfig, err := newPanelConfigFromPath(file, logger)
+func NewMainConfigFromPanelConfigPath(filePath string, logger *zap.Logger) (*MainConfig, error) {
+	panelConfig, err := newPanelConfigFromPath(filePath, logger)
 	if err != nil {
 		return nil, err
 	}
@@ -67,20 +67,21 @@ func NewMainConfigFromPanelConfigPath(file string, logger *zap.Logger) (*MainCon
 	}, nil
 }
 
-func newConfigFromPath(path string, logger *zap.Logger) (*MainConfig, error) {
+// NewMainConfigFromPath gets a MainConfig from filePath
+func NewMainConfigFromPath(filePath string, logger *zap.Logger) (*MainConfig, error) {
 	c := new(MainConfig)
-	err := c.FromYamlFile(path, logger)
+	err := c.FromYamlFile(filePath, logger)
 	if err != nil {
 		return nil, err
 	}
 	return c, nil
 }
 
-// FromYamlFile reads the config from a file at path
-func (c *MainConfig) FromYamlFile(path string, logger *zap.Logger) error {
-	f, err := os.Open(path)
+// FromYamlFile reads the config from filePath
+func (c *MainConfig) FromYamlFile(filePath string, logger *zap.Logger) error {
+	f, err := os.Open(filePath)
 	if err != nil {
-		logger.Error("can not read config file", zap.String("configPath", path), zap.Error(err))
+		logger.Error("can not read config file", zap.String("configPath", filePath), zap.Error(err))
 		return err
 	}
 	defer f.Close()
@@ -98,11 +99,11 @@ func (c *MainConfig) FromYamlReader(r io.Reader, logger *zap.Logger) error {
 	return nil
 }
 
-// WriteToYamlFile writes the config to a file at path
-func (c *MainConfig) WriteToYamlFile(path string) error {
+// WriteToYamlFile writes the config to filePath
+func (c *MainConfig) WriteToYamlFile(filePath string) error {
 	yamlConfig, err := yaml.Marshal(c)
 	if err != nil {
 		return err
 	}
-	return ioutil.WriteFile(path, yamlConfig, 0622)
+	return ioutil.WriteFile(filePath, yamlConfig, 0622)
 }

@@ -12,7 +12,7 @@ func FailAndSkip(t *testing.T, args ...interface{}) {
 	t.SkipNow()
 }
 
-// FileExistsOrSkip tests if a file is available or skips the test
+// FileExistsOrSkip tests if a file at fullPath is available or skips the test
 func FileExistsOrSkip(t *testing.T, fullPath string) {
 	if !RecordCall() {
 		if _, err := os.Stat(fullPath); err != nil {

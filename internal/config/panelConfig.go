@@ -1,12 +1,12 @@
 package config
 
 import (
-	"encoding/json"
 	"io"
 	"io/ioutil"
 	"os"
 
 	"go.uber.org/zap"
+	"gopkg.in/yaml.v2"
 )
 
 // PanelConfig is the global panel config
@@ -19,17 +19,17 @@ type PanelConfig struct {
 	ArduinoErrorConfigFile string   `json:"arduinoErrorConfigFile,omitempty"`
 }
 
-func newPanelConfigFromPath(file string, logger *zap.Logger) (*PanelConfig, error) {
+func newPanelConfigFromPath(filePath string, logger *zap.Logger) (*PanelConfig, error) {
 	pc := new(PanelConfig)
-	err := pc.FromYamlFile(file, logger)
+	err := pc.FromYamlFile(filePath, logger)
 	return pc, err
 }
 
-// FromYamlFile reads the config from a file at path
-func (pc *PanelConfig) FromYamlFile(path string, logger *zap.Logger) error {
-	f, err := os.Open(path)
+// FromYamlFile reads the config from filePath
+func (pc *PanelConfig) FromYamlFile(filePath string, logger *zap.Logger) error {
+	f, err := os.Open(filePath)
 	if err != nil {
-		logger.Error("can not read panelConfig file", zap.String("configPath", path), zap.Error(err))
+		logger.Error("can not read panelConfig file", zap.String("configPath", filePath), zap.Error(err))
 		return err
 	}
 	defer f.Close()
@@ -38,7 +38,7 @@ func (pc *PanelConfig) FromYamlFile(path string, logger *zap.Logger) error {
 
 // FromYamlReader decodes the config from io.Reader
 func (pc *PanelConfig) FromYamlReader(r io.Reader, logger *zap.Logger) error {
-	dec := json.NewDecoder(r)
+	dec := yaml.NewDecoder(r)
 	err := dec.Decode(&*pc)
 	if err != nil {
 		logger.Error("can not decode panelConfig yaml", zap.Error(err))
@@ -47,12 +47,12 @@ func (pc *PanelConfig) FromYamlReader(r io.Reader, logger *zap.Logger) error {
 	return nil
 }
 
-// WriteToYamlFile writes the config to a file at path
-func (pc *PanelConfig) WriteToYamlFile(path string) error {
-	jsonConfig, err := json.MarshalIndent(pc, "", "\t")
+// WriteToYamlFile writes the config to filePath
+func (pc *PanelConfig) WriteToYamlFile(filePath string) error {
+	jsonConfig, err := yaml.Marshal(pc)
 	if err != nil {
 		return err
 	}
 	jsonConfig = append(jsonConfig, byte('\n'))
-	return ioutil.WriteFile(path, jsonConfig, 0622)
+	return ioutil.WriteFile(filePath, jsonConfig, 0622)
 }

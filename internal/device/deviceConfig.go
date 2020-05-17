@@ -18,20 +18,20 @@ type DeviceConfig struct {
 }
 
 // NewDeviceConfigFromPath returns a new DeviceConfig or error
-func NewDeviceConfigFromPath(path string, logger *zap.Logger) (*DeviceConfig, error) {
+func NewDeviceConfigFromPath(filePath string, logger *zap.Logger) (*DeviceConfig, error) {
 	dc := new(DeviceConfig)
-	err := dc.FromYamlFile(path, logger)
+	err := dc.FromYamlFile(filePath, logger)
 	if err != nil {
 		return nil, err
 	}
 	return dc, nil
 }
 
-// FromYamlFile reads the config from a file at path
-func (dc *DeviceConfig) FromYamlFile(path string, logger *zap.Logger) error {
-	f, err := os.Open(path)
+// FromYamlFile reads the config from filePath
+func (dc *DeviceConfig) FromYamlFile(filePath string, logger *zap.Logger) error {
+	f, err := os.Open(filePath)
 	if err != nil {
-		logger.Error("can not read DeviceConfig file", zap.String("configPath", path), zap.Error(err))
+		logger.Error("can not read DeviceConfig file", zap.String("configPath", filePath), zap.Error(err))
 		return err
 	}
 	defer f.Close()
@@ -49,14 +49,14 @@ func (dc *DeviceConfig) FromYamlReader(r io.Reader, logger *zap.Logger) error {
 	return nil
 }
 
-// WriteToYamlFile writes the config to a file at path
-func (dc *DeviceConfig) WriteToYamlFile(path string) error {
+// WriteToYamlFile writes the config to filePath
+func (dc *DeviceConfig) WriteToYamlFile(filePath string) error {
 	yamlConfig, err := yaml.Marshal(dc)
 	if err != nil {
 		return err
 	}
 	yamlConfig = append(yamlConfig, byte('\n'))
-	return ioutil.WriteFile(path, yamlConfig, 0622)
+	return ioutil.WriteFile(filePath, yamlConfig, 0622)
 }
 
 // Type is a LedDevice type
