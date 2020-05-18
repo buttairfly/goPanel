@@ -23,22 +23,22 @@ func TestCalcHexParityChar(t *testing.T) {
 			expected: "f",
 		},
 		{
-			desc:        "2char_command_0",
-			bareCommand: "I01",
+			desc:        "1char_version_command",
+			bareCommand: "V",
 			seed:        0xa5,
-			expected:    "3",
+			expected:    "c",
 		},
 		{
-			desc:        "2char_command_1",
-			bareCommand: "I01",
-			seed:        0xa5,
-			expected:    "3",
-		},
-		{
-			desc:        "4char_command_0",
+			desc:        "5char_init_command_0",
 			bareCommand: "I0000",
 			seed:        0xa5,
 			expected:    "2",
+		},
+		{
+			desc:        "5char_init_command_200",
+			bareCommand: "I00c8",
+			seed:        0xa5,
+			expected:    "c",
 		},
 	}
 	for _, c := range cases {
@@ -65,22 +65,22 @@ func TestCalcHexParity(t *testing.T) {
 			expected: "f\n",
 		},
 		{
-			desc:        "2char_command_0",
-			bareCommand: "I01",
+			desc:        "1char_version_command",
+			bareCommand: "V",
 			seed:        0xa5,
-			expected:    "I013\n",
+			expected:    "Vc\n",
 		},
 		{
-			desc:        "2char_command_1",
-			bareCommand: "I01",
-			seed:        0xa5,
-			expected:    "I013\n",
-		},
-		{
-			desc:        "4char_command_0",
+			desc:        "5char_init_command_0",
 			bareCommand: "I0000",
 			seed:        0xa5,
 			expected:    "I00002\n",
+		},
+		{
+			desc:        "5char_init_command_200",
+			bareCommand: "I00c8",
+			seed:        0xa5,
+			expected:    "I00c8c\n",
 		},
 	}
 	for _, c := range cases {
