@@ -176,7 +176,7 @@ func (a *ArduinoCom) PrintStats(wg *sync.WaitGroup) {
 		if stat.Event != LatchStatType {
 			a.logger.Info(
 				"stats logger",
-				zap.String("event", string(stat.Event)),
+				zap.String("arduino", string(stat.Event)),
 				zap.String("eventTine", fmt.Sprintf("%02d.%06d", stat.TimeStamp.Second(), stat.TimeStamp.Nanosecond()/int(time.Microsecond))),
 				zap.String("message", stat.Message),
 			)
