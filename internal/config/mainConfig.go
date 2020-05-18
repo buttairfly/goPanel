@@ -27,6 +27,8 @@ func NewMainConfigFromPanelConfigPath(filePath string, logger *zap.Logger) (*Mai
 	if err != nil {
 		return nil, err
 	}
+	pc, _ := yaml.Marshal(panelConfig)
+	logger.Info("panelConfig", zap.String("panelConfig", string(pc)), zap.String("filePath", filePath))
 
 	tileConfigs := make(hardware.TileConfigs, len(panelConfig.TileConfigFiles))
 	for i, tileConfigFile := range panelConfig.TileConfigFiles {

@@ -93,7 +93,6 @@ func (tc *TileConfig) WriteToYamlFile(filePath string) error {
 		return err
 	}
 
-	yamlConfig = append(yamlConfig, byte('\n'))
 	return ioutil.WriteFile(filePath, yamlConfig, 0622)
 }
 

@@ -11,4 +11,3 @@ serialConfig:
   initsleeptime: 20ms
   latchsleeptime: 10.5ms
   commandsleeptime: 100µs
-

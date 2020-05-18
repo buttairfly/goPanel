@@ -65,7 +65,7 @@ func TestNewMainConfig(t *testing.T) {
 			testhelper.FileExistsOrSkip(t, path.Join(c.panelConfig.ArduinoErrorConfigPath, c.panelConfig.ArduinoErrorConfigFile))
 
 			if testhelper.RecordCall() {
-				t.Logf("Write Panel Config to file %v", panelFile)
+				t.Logf("write PanelConfig to file %v", panelFile)
 				require.NoError(t, c.panelConfig.WriteToYamlFile(panelFile))
 			}
 
@@ -74,7 +74,7 @@ func TestNewMainConfig(t *testing.T) {
 			require.NotNil(t, genConfig)
 
 			if testhelper.RecordCall() {
-				t.Logf("Write Main Composed Config to file %v", expectedFile)
+				t.Logf("write MainConfig to file %v", expectedFile)
 				require.NoError(t, genConfig.WriteToYamlFile(expectedFile))
 			}
 

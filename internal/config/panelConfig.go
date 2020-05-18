@@ -49,10 +49,9 @@ func (pc *PanelConfig) FromYamlReader(r io.Reader, logger *zap.Logger) error {
 
 // WriteToYamlFile writes the config to filePath
 func (pc *PanelConfig) WriteToYamlFile(filePath string) error {
-	jsonConfig, err := yaml.Marshal(pc)
+	yamlConfig, err := yaml.Marshal(pc)
 	if err != nil {
 		return err
 	}
-	jsonConfig = append(jsonConfig, byte('\n'))
-	return ioutil.WriteFile(filePath, jsonConfig, 0622)
+	return ioutil.WriteFile(filePath, yamlConfig, 0622)
 }

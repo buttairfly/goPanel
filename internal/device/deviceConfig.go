@@ -55,7 +55,6 @@ func (dc *DeviceConfig) WriteToYamlFile(filePath string) error {
 	if err != nil {
 		return err
 	}
-	yamlConfig = append(yamlConfig, byte('\n'))
 	return ioutil.WriteFile(filePath, yamlConfig, 0622)
 }
 
