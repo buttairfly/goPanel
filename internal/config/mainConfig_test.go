@@ -16,6 +16,8 @@ import (
 
 var _ filereadwriter.Yaml = (*MainConfig)(nil)
 
+const mainConfigFile = "main.composed.config.yaml"
+
 func TestNewMainConfig(t *testing.T) {
 	logger, _ := zap.NewDevelopment()
 	defer logger.Sync()
@@ -48,7 +50,7 @@ func TestNewMainConfig(t *testing.T) {
 				ArduinoErrorConfigFile: "device.ledpanel.arduino.error.config.yaml",
 			},
 			panelFile:    "main.panel.config.yaml",
-			expectedFile: "main.composed.config.yaml",
+			expectedFile: mainConfigFile,
 			actualFile:   "actual.config.yaml",
 		},
 	}
@@ -90,4 +92,14 @@ func TestNewMainConfig(t *testing.T) {
 			testhelper.Diff(t, expectedFile, actualFile)
 		})
 	}
+}
+
+func TestChangedMainConfig(t *testing.T) {
+	gopath := os.Getenv("GOPATH")
+	baseFolder := "src/github.com/buttairfly/goPanel/config"
+	testFolder := "testdata/"
+	src := path.Join(testFolder, mainConfigFile)
+	dst := path.Join(gopath, baseFolder, mainConfigFile)
+
+	assert.NoError(t, testhelper.CopyFile(src, dst))
 }
