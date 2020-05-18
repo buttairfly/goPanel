@@ -125,6 +125,7 @@ func (a *ArduinoCom) Read(wg *sync.WaitGroup) {
 			}
 			for _, line := range lines {
 				if len(line) > 0 {
+					a.logger.Info("arduinoRead", zap.String("line", line))
 					a.checkInitDone(line)
 					stat := &Stat{
 						Event:     PrintStatType,

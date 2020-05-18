@@ -14,7 +14,7 @@ type ArduinoError struct {
 
 // IsArduinoError checks wheather the line is an error and returns a boolean
 func IsArduinoError(line string) bool {
-	if len(line) == 0 || line[0] == 'E' {
+	if line[0] == 'E' {
 		return true
 	}
 	return false
