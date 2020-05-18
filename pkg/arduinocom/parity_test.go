@@ -40,6 +40,12 @@ func TestCalcHexParityChar(t *testing.T) {
 			seed:        0xa5,
 			expected:    "c",
 		},
+		{
+			desc:        "5char_init_command_200_without_seed",
+			bareCommand: "I00c8",
+			seed:        0,
+			expected:    "3",
+		},
 	}
 	for _, c := range cases {
 		t.Run(c.desc, func(t *testing.T) {
@@ -81,6 +87,12 @@ func TestCalcHexParity(t *testing.T) {
 			bareCommand: "I00c8",
 			seed:        0xa5,
 			expected:    "I00c8c\n",
+		},
+		{
+			desc:        "5char_init_command_200_without_seed",
+			bareCommand: "I00c8",
+			seed:        0,
+			expected:    "I00c83\n",
 		},
 	}
 	for _, c := range cases {
