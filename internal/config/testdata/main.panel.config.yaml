@@ -1,8 +1,8 @@
-tileconfigpath: /home/keks/code/go/src/github.com/buttairfly/goPanel/internal/hardware/testdata
-deviceconfigpath: /home/keks/code/go/src/github.com/buttairfly/goPanel/internal/device/testdata
-arduinoerrorconfigpath: /home/keks/code/go/src/github.com/buttairfly/goPanel/pkg/arduinocom/testdata
-tileconfigfiles:
+tileConfigPath: /home/keks/code/go/src/github.com/buttairfly/goPanel/internal/hardware/testdata
+deviceConfigPath: /home/keks/code/go/src/github.com/buttairfly/goPanel/internal/device/testdata
+arduinoErrorConfigPath: /home/keks/code/go/src/github.com/buttairfly/goPanel/pkg/arduinocom/testdata
+tileConfigFiles:
 - tile.snake_vertical_c0_20-0_10-10.config.yaml
 - tile.snake_vertical_c1_10-0_0-10.config.yaml
-deviceconfigfile: device.serial.config.yaml
-arduinoerrorconfigfile: device.ledpanel.arduino.error.config.yaml
+deviceConfigFile: device.serial.config.yaml
+arduinoErrorConfigFile: device.ledpanel.arduino.error.config.yaml

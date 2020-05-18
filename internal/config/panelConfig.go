@@ -11,12 +11,12 @@ import (
 
 // PanelConfig is the global panel config
 type PanelConfig struct {
-	TileConfigPath         string   `json:"tileConfigPath"`
-	DeviceConfigPath       string   `json:"deviceConfigPath"`
-	ArduinoErrorConfigPath string   `json:"arduinoErrorConfigPath,omitempty"`
-	TileConfigFiles        []string `json:"tileConfigFiles"`
-	DeviceConfigFile       string   `json:"deviceConfigFile"`
-	ArduinoErrorConfigFile string   `json:"arduinoErrorConfigFile,omitempty"`
+	TileConfigPath         string   `json:"tileConfigPath" yaml:"tileConfigPath"`
+	DeviceConfigPath       string   `json:"deviceConfigPath" yaml:"deviceConfigPath"`
+	ArduinoErrorConfigPath string   `json:"arduinoErrorConfigPath,omitempty" yaml:"arduinoErrorConfigPath,omitempty"`
+	TileConfigFiles        []string `json:"tileConfigFiles" yaml:"tileConfigFiles"`
+	DeviceConfigFile       string   `json:"deviceConfigFile" yaml:"deviceConfigFile"`
+	ArduinoErrorConfigFile string   `json:"arduinoErrorConfigFile,omitempty" yaml:"arduinoErrorConfigFile,omitempty"`
 }
 
 func newPanelConfigFromPath(filePath string, logger *zap.Logger) (*PanelConfig, error) {
