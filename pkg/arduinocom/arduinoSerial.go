@@ -37,6 +37,7 @@ func NewArduinoCom(numLed int, sc *SerialConfig, logger *zap.Logger) *ArduinoCom
 	a.readActive = make(chan bool)
 	a.initDone = make(chan bool)
 	a.stats = make(chan *Stat, 10)
+	a.numLed = numLed
 	a.logger = logger
 	a.comLogger = logger // todo update to have a specific comLogger
 	return a
@@ -171,12 +172,11 @@ func (a *ArduinoCom) PrintStats(wg *sync.WaitGroup) {
 	defer wg.Done()
 	for stat := range a.stats {
 		if stat.Event != LatchStatType {
-			//timeStamp := fmt.Sprintf("%02d.%06d", stat.TimeStamp.Second(), stat.TimeStamp.Nanosecond()/int(time.Microsecond))
 			a.logger.Info(
 				"stats logger",
 				zap.String("event", string(stat.Event)),
-				zap.Time("eventTine", stat.TimeStamp),
-				zap.String("Message", stat.Message),
+				zap.String("eventTine", fmt.Sprintf("%02d.%06d", stat.TimeStamp.Second(), stat.TimeStamp.Nanosecond()/int(time.Microsecond))),
+				zap.String("message", stat.Message),
 			)
 		} else {
 			a.latched++
@@ -193,7 +193,10 @@ func (a *ArduinoCom) checkInitDone(line string) {
 				a.logger.Warn("not initialized", zap.Error(err))
 			} else {
 				if int(initLed) == a.numLed {
+					a.logger.Info("initialized", zap.Int("numLed", a.numLed))
 					close(a.initDone)
+				} else {
+					a.logger.Warn("not initizalized: ", zap.Int("numLed", a.numLed), zap.Int("initLed", int(initLed)))
 				}
 			}
 		}

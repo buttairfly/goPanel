@@ -35,6 +35,7 @@ func NewLedStripe(numLed int, logger *zap.Logger) LedStripe {
 	return &ledStripe{
 		buffer:      buffer,
 		pixelLength: numLed,
+		logger:      logger,
 	}
 }
 
@@ -53,10 +54,12 @@ func (l *ledStripe) GetColorMap() map[string][]int {
 	return colorMap
 }
 
-func (l *ledStripe) Compare(other LedStripe) *LedStripeCompare {
+func (l *ledStripe) Compare(
+	other LedStripe,
+) *LedStripeCompare {
 	if l.pixelLength != other.GetPixelLength() || len(l.buffer) != len(l.GetBuffer()) {
 		l.logger.Fatal("pixel length is not equal",
-			zap.Int("thisStripe", l.GetPixelLength()),
+			zap.Int("thisStripe", l.pixelLength),
 			zap.Int("otherStripe", other.GetPixelLength()),
 		)
 		return nil

@@ -1,35 +1,36 @@
 package arduinocom
 
 import (
-	"encoding/json"
 	"fmt"
 	"time"
+
+	"gopkg.in/yaml.v2"
 )
 
 // SerialConfig is the serial config
 type SerialConfig struct {
-	StreamConfig       *StreamConfig       `json:"streamConfig"`
-	ArduinoErrorConfig *ArduinoErrorConfig `json:"arduinoErrorConfig,omitempty"`
-	Verbose            bool                `json:"verbose"`
-	ReadBufferSize     int                 `json:"readBufferSize"`
-	InitSleepTime      time.Duration       `json:"initSleepTime,omitempty"`
-	LatchSleepTime     time.Duration       `json:"latchSleepTime,omitempty"`
-	CommandSleepTime   time.Duration       `json:"commandSleepTime,omitempty"`
+	StreamConfig       *StreamConfig       `yaml:"streamConfig"`
+	ArduinoErrorConfig *ArduinoErrorConfig `yaml:"arduinoErrorConfig,omitempty"`
+	Verbose            bool                `yaml:"verbose"`
+	ReadBufferSize     int                 `yaml:"readBufferSize"`
+	InitSleepTime      time.Duration       `yaml:"initSleepTime,omitempty"`
+	LatchSleepTime     time.Duration       `yaml:"latchSleepTime,omitempty"`
+	CommandSleepTime   time.Duration       `yaml:"commandSleepTime,omitempty"`
 }
 type aliasSerialConfig struct {
-	StreamConfig       *StreamConfig       `json:"streamConfig"`
-	ArduinoErrorConfig *ArduinoErrorConfig `json:"arduinoErrorConfig,omitempty"`
-	Verbose            bool                `json:"verbose"`
-	ReadBufferSize     int                 `json:"readBufferSize"`
-	InitSleepTime      string              `json:"initSleepTime,omitempty"`
-	LatchSleepTime     string              `json:"latchSleepTime,omitempty"`
-	CommandSleepTime   string              `json:"commandSleepTime,omitempty"`
+	StreamConfig       *StreamConfig       `yaml:"streamConfig"`
+	ArduinoErrorConfig *ArduinoErrorConfig `yaml:"arduinoErrorConfig,omitempty"`
+	Verbose            bool                `yaml:"verbose"`
+	ReadBufferSize     int                 `yaml:"readBufferSize"`
+	InitSleepTime      string              `yaml:"initSleepTime,omitempty"`
+	LatchSleepTime     string              `yaml:"latchSleepTime,omitempty"`
+	CommandSleepTime   string              `yaml:"commandSleepTime,omitempty"`
 }
 
-// UnmarshalJSON unmarshals JSONDuration
-func (sc *SerialConfig) UnmarshalJSON(b []byte) error {
+// UnmarshalYAML unmarshals YAMLDuration
+func (sc *SerialConfig) UnmarshalYAML(b []byte) error {
 	var tmp aliasSerialConfig
-	err := json.Unmarshal(b, &tmp)
+	err := yaml.Unmarshal(b, &tmp)
 	if err != nil {
 		return err
 	}
@@ -57,9 +58,9 @@ func (sc *SerialConfig) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-// MarshalJSON marshals SerialConfig to json or error
-func (sc *SerialConfig) MarshalJSON() ([]byte, error) {
-	return json.Marshal(&aliasSerialConfig{
+// MarshalYAML marshals SerialConfig to yaml or error
+func (sc *SerialConfig) MarshalYAML() ([]byte, error) {
+	return yaml.Marshal(&aliasSerialConfig{
 		StreamConfig:       sc.StreamConfig,
 		ArduinoErrorConfig: sc.ArduinoErrorConfig,
 		Verbose:            sc.Verbose,

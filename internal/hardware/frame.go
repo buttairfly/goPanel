@@ -79,6 +79,7 @@ func NewCopyFrameFromImage(other Frame, pictureToCopy *image.RGBA, logger *zap.L
 		sumHardwarePixel: other.GetSumHardwarePixel(),
 		width:            other.GetWidth(),
 		height:           other.GetHeight(),
+		logger:           logger,
 	}
 }
 

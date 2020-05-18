@@ -24,6 +24,7 @@ type serialDevice struct {
 func NewSerialDevice(numLed int, serialDeviceConfig *arduinocom.SerialConfig, logger *zap.Logger) LedDevice {
 	s := new(serialDevice)
 	s.com = arduinocom.NewArduinoCom(numLed, serialDeviceConfig, logger)
+	s.numLed = numLed
 	s.logger = logger
 	return s
 }
@@ -64,6 +65,7 @@ func (s *serialDevice) Run(wg *sync.WaitGroup) {
 	time.Sleep(latchDelay)
 	s.com.Init()
 
+	s.logger.Sugar().Infof("numLed lastledStripe %d", s.numLed)
 	lastLedStripe := hardware.NewLedStripe(s.numLed, s.logger)
 	for frame := range s.input {
 		ledStripe := frame.ToLedStripe()

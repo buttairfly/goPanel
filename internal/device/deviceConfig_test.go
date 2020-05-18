@@ -43,7 +43,7 @@ func TestNewDeviceConfigFile(t *testing.T) {
 						Size:        8,
 					},
 					ReadBufferSize:   1024,
-					Verbose:          false,
+					Verbose:          true,
 					InitSleepTime:    20 * time.Millisecond,
 					LatchSleepTime:   10500 * time.Microsecond,
 					CommandSleepTime: 100 * time.Microsecond,
