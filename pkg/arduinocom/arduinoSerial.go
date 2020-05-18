@@ -165,6 +165,7 @@ func (a *ArduinoCom) CalcParityAndWrite(command string) (int, error) {
 }
 
 func (a *ArduinoCom) sendInitComand(command string) {
+	a.CalcParityAndWrite(command)
 	time.Sleep(a.config.InitSleepTime)
 }
 
