@@ -2,8 +2,6 @@ package hardware
 
 import (
 	"go.uber.org/zap"
-
-	"github.com/buttairfly/goPanel/internal/intmath"
 )
 
 // LedStripe interface
@@ -64,41 +62,48 @@ func (l *ledStripe) Compare(
 		)
 		return nil
 	}
-	change := false
-	fullColor := Pixel(nil)
-	colorMap := l.GetColorMap()
-	maxColor := 0
-	maxColorHex := ""
-	for hexColor, posSlice := range colorMap {
-		maxColor = intmath.Max(maxColor, len(posSlice))
-		maxColorHex = hexColor
-	}
-	if maxColor > l.pixelLength/2 {
-		_, ok := colorMap[maxColorHex]
-		if ok {
-			var err error
-			fullColor, err = NewPixelFromHex(maxColorHex)
-			if err != nil {
-				l.logger.Fatal("pixel from hex", zap.Error(err))
+	/*
+		change := false
+		fullColor := Pixel(nil)
+		colorMap := l.GetColorMap()
+		maxColor := 0
+		maxColorHex := ""
+		for hexColor, posSlice := range colorMap {
+			maxColor = intmath.Max(maxColor, len(posSlice))
+			maxColorHex = hexColor
+		}
+		if maxColor > l.pixelLength/2 {
+			_, ok := colorMap[maxColorHex]
+			if ok {
+				var err error
+				fullColor, err = NewPixelFromHex(maxColorHex)
+				if err != nil {
+					l.logger.Fatal("pixel from hex", zap.Error(err))
+				}
+			}
+			change = true
+		}
+		otherDiffPixels := make([]int, 0, l.pixelLength-maxColor+1)
+		oPix := fullColor
+		for i := 0; i < l.pixelLength; i++ {
+			lPix := NewPixelFromSlice(l.buffer, i, l.logger)
+			if fullColor == nil {
+				oPix = NewPixelFromSlice(other.GetBuffer(), i, l.logger)
+			}
+			if !lPix.Equals(oPix) {
+				change = true
+				otherDiffPixels = append(otherDiffPixels, i)
 			}
 		}
-		change = true
-	}
-	otherDiffPixels := make([]int, 0, l.pixelLength)
-	oPix := fullColor
-	for i := 0; i < l.pixelLength; i++ {
-		lPix := NewPixelFromSlice(l.buffer, i, l.logger)
-		if fullColor == nil {
-			oPix = NewPixelFromSlice(other.GetBuffer(), i, l.logger)
+		return &LedStripeCompare{
+			change:          change,
+			fullColor:       fullColor,
+			otherDiffPixels: otherDiffPixels,
 		}
-		if !lPix.Equals(oPix) {
-			change = true
-			otherDiffPixels = append(otherDiffPixels, i)
-		}
-	}
+	*/
+	// very dumb approach
 	return &LedStripeCompare{
-		change:          change,
-		fullColor:       fullColor,
-		otherDiffPixels: otherDiffPixels,
+		change:    true,
+		fullFrame: true,
 	}
 }

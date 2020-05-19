@@ -83,15 +83,19 @@ func (s *serialDevice) Run(wg *sync.WaitGroup) {
 				time.Sleep(sleepDuration)
 			}
 			lastFrameTime = now
-			fullColor := ledStripeCompare.GetFullColor()
-			if fullColor != nil {
-				s.shade(s.numLed, fullColor.Slice())
-			}
-			for _, pixelIndex := range ledStripeCompare.GetOtherDiffPixels() {
-				s.setPixel(pixelIndex, ledStripe.GetBuffer())
+			if ledStripeCompare.IsFullFrame() {
+				s.rawFrame(s.numLed, ledStripe.GetBuffer())
+			} else {
+				fullColor := ledStripeCompare.GetFullColor()
+				if fullColor != nil {
+					s.shade(s.numLed, fullColor.Slice())
+				}
+				for _, pixelIndex := range ledStripeCompare.GetOtherDiffPixels() {
+					s.setPixel(pixelIndex, ledStripe.GetBuffer())
+				}
+				s.latchFrame()
 			}
 
-			s.latchFrame()
 			lastLedStripe = ledStripe
 		}
 	}
@@ -130,6 +134,15 @@ func (s *serialDevice) setPixel(pixel int, buffer []uint8) {
 
 func (s *serialDevice) shade(pixel int, buffer []uint8) {
 	command := fmt.Sprintf("S%04x%02x%02x%02x", pixel, buffer[0], buffer[1], buffer[2])
+	s.Write(command)
+}
+
+func (s *serialDevice) rawFrame(pixel int, frameBuffer []uint8) {
+	frameString := ""
+	for p := 0; p < pixel; p += NumBytePerColor {
+		frameString += fmt.Sprintf("%02x%02x%02x", frameBuffer[p], frameBuffer[p+1], frameBuffer[p+2])
+	}
+	command := fmt.Sprintf("R%04x%s", pixel, frameString)
 	s.Write(command)
 }
 
