@@ -276,6 +276,7 @@ deviceConfig:
         name: wrong parity
         character: last char
     verbose: true
+    verboseArduino: false
     readBufferSize: 1024
     paritySeed: 165
     initSleepTime: 20ms

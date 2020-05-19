@@ -6,6 +6,7 @@ serialConfig:
     size: 8
     readTimeout: 1s
   verbose: true
+  verboseArduino: false
   readBufferSize: 1024
   paritySeed: 165
   initSleepTime: 20ms

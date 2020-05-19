@@ -9,6 +9,7 @@ type SerialConfig struct {
 	StreamConfig       *StreamConfig       `yaml:"streamConfig"`
 	ArduinoErrorConfig *ArduinoErrorConfig `yaml:"arduinoErrorConfig,omitempty"`
 	Verbose            bool                `yaml:"verbose"`
+	VerboseArduino     bool                `yaml:"verboseArduino"`
 	ReadBufferSize     int                 `yaml:"readBufferSize"`
 	ParitySeed         byte                `yaml:"paritySeed"`
 	InitSleepTime      time.Duration       `yaml:"initSleepTime,omitempty"`

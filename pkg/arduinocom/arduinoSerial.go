@@ -71,7 +71,7 @@ func (a *ArduinoCom) Close() error {
 // Init initializes a arduino serial
 func (a *ArduinoCom) Init() {
 	defer func() {
-		if !a.config.Verbose {
+		if !a.config.VerboseArduino {
 			a.sendInitComand("Q0fff")
 		}
 	}()
