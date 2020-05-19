@@ -277,6 +277,7 @@ deviceConfig:
         character: last char
     verbose: true
     readBufferSize: 1024
+    paritySeed: 165
     initSleepTime: 20ms
     latchSleepTime: 10.5ms
     commandSleepTime: 100µs

@@ -38,6 +38,7 @@ func NewArduinoCom(numLed int, sc *SerialConfig, logger *zap.Logger) *ArduinoCom
 	a.initDone = make(chan bool)
 	a.stats = make(chan *Stat, 10)
 	a.numLed = numLed
+	a.paritySeed = sc.ParitySeed
 	a.logger = logger
 	a.comLogger = logger // todo update to have a specific comLogger
 	return a
