@@ -29,6 +29,12 @@ func TestCalcHexParityChar(t *testing.T) {
 			expected:    "c",
 		},
 		{
+			desc:        "1char_latch_command",
+			bareCommand: "L",
+			seed:        0xa5,
+			expected:    "7",
+		},
+		{
 			desc:        "5char_init_command_0",
 			bareCommand: "I0000",
 			seed:        0xa5,
@@ -45,6 +51,12 @@ func TestCalcHexParityChar(t *testing.T) {
 			bareCommand: "I00c8",
 			seed:        0,
 			expected:    "3",
+		},
+		{
+			desc:        "bchar_set_color_command_200_yellow",
+			bareCommand: "S00c8ff6a00",
+			seed:        0xa5,
+			expected:    "5",
 		},
 	}
 	for _, c := range cases {
