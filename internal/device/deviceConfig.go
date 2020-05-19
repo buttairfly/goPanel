@@ -11,15 +11,15 @@ import (
 	"github.com/buttairfly/goPanel/pkg/arduinocom"
 )
 
-// DeviceConfig is the config of the type of device
-type DeviceConfig struct {
+// LedDeviceConfig is the config of the type of device
+type LedDeviceConfig struct {
 	Type         Type                     `yaml:"type"`
 	SerialConfig *arduinocom.SerialConfig `yaml:"serialConfig,omitempty"`
 }
 
-// NewDeviceConfigFromPath returns a new DeviceConfig or error
-func NewDeviceConfigFromPath(filePath string, logger *zap.Logger) (*DeviceConfig, error) {
-	dc := new(DeviceConfig)
+// NewDeviceConfigFromPath returns a new LedDeviceConfig or error
+func NewDeviceConfigFromPath(filePath string, logger *zap.Logger) (*LedDeviceConfig, error) {
+	dc := new(LedDeviceConfig)
 	err := dc.FromYamlFile(filePath, logger)
 	if err != nil {
 		return nil, err
@@ -28,10 +28,10 @@ func NewDeviceConfigFromPath(filePath string, logger *zap.Logger) (*DeviceConfig
 }
 
 // FromYamlFile reads the config from filePath
-func (dc *DeviceConfig) FromYamlFile(filePath string, logger *zap.Logger) error {
+func (dc *LedDeviceConfig) FromYamlFile(filePath string, logger *zap.Logger) error {
 	f, err := os.Open(filePath)
 	if err != nil {
-		logger.Error("can not read DeviceConfig file", zap.String("configPath", filePath), zap.Error(err))
+		logger.Error("can not read LedDeviceConfig file", zap.String("configPath", filePath), zap.Error(err))
 		return err
 	}
 	defer f.Close()
@@ -39,18 +39,18 @@ func (dc *DeviceConfig) FromYamlFile(filePath string, logger *zap.Logger) error 
 }
 
 // FromYamlReader decodes the config from io.Reader
-func (dc *DeviceConfig) FromYamlReader(r io.Reader, logger *zap.Logger) error {
+func (dc *LedDeviceConfig) FromYamlReader(r io.Reader, logger *zap.Logger) error {
 	dec := yaml.NewDecoder(r)
 	err := dec.Decode(&*dc)
 	if err != nil {
-		logger.Error("can not decode DeviceConfig yaml", zap.Error(err))
+		logger.Error("can not decode LedDeviceConfig yaml", zap.Error(err))
 		return err
 	}
 	return nil
 }
 
 // WriteToYamlFile writes the config to filePath
-func (dc *DeviceConfig) WriteToYamlFile(filePath string) error {
+func (dc *LedDeviceConfig) WriteToYamlFile(filePath string) error {
 	yamlConfig, err := yaml.Marshal(dc)
 	if err != nil {
 		return err

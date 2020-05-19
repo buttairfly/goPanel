@@ -17,7 +17,7 @@ import (
 	"github.com/buttairfly/goPanel/pkg/testhelper"
 )
 
-var _ filereadwriter.Yaml = (*DeviceConfig)(nil)
+var _ filereadwriter.Yaml = (*LedDeviceConfig)(nil)
 
 func TestNewDeviceConfigFile(t *testing.T) {
 	logger, _ := zap.NewDevelopment()
@@ -25,15 +25,15 @@ func TestNewDeviceConfigFile(t *testing.T) {
 
 	const testFolder = "testdata/"
 	cases := []struct {
-		desc         string
-		deviceConfig *DeviceConfig
-		expectedFile string
-		actualFile   string
-		err          error
+		desc            string
+		ledDeviceConfig *LedDeviceConfig
+		expectedFile    string
+		actualFile      string
+		err             error
 	}{
 		{
 			desc: "serial",
-			deviceConfig: &DeviceConfig{
+			ledDeviceConfig: &LedDeviceConfig{
 				Type: Serial,
 				SerialConfig: &arduinocom.SerialConfig{
 					StreamConfig: &arduinocom.StreamConfig{
@@ -56,7 +56,7 @@ func TestNewDeviceConfigFile(t *testing.T) {
 		},
 		{
 			desc: "print",
-			deviceConfig: &DeviceConfig{
+			ledDeviceConfig: &LedDeviceConfig{
 				Type: Print,
 			},
 			expectedFile: ".config.yaml",
@@ -71,15 +71,15 @@ func TestNewDeviceConfigFile(t *testing.T) {
 			testhelper.FileExistsOrSkip(t, expectedFile)
 
 			if testhelper.RecordCall() {
-				t.Logf("Write Device Config to file %+v %+v", c.deviceConfig, c.deviceConfig.SerialConfig)
-				require.NoError(t, c.deviceConfig.WriteToYamlFile(expectedFile))
+				t.Logf("Write Device Config to file %+v %+v", c.ledDeviceConfig, c.ledDeviceConfig.SerialConfig)
+				require.NoError(t, c.ledDeviceConfig.WriteToYamlFile(expectedFile))
 			}
 
 			readConfig, err2 := NewDeviceConfigFromPath(expectedFile, logger)
 			require.NoError(t, err2)
-			t.Log(cmp.Diff(readConfig, c.deviceConfig))
-			assert.True(t, cmp.Equal(readConfig, c.deviceConfig), "error read and generated device config are not equal")
-			assert.Equal(t, c.err, c.deviceConfig.WriteToYamlFile(actualFile), "error occurred in file write")
+			t.Log(cmp.Diff(readConfig, c.ledDeviceConfig))
+			assert.True(t, cmp.Equal(readConfig, c.ledDeviceConfig), "error read and generated device config are not equal")
+			assert.Equal(t, c.err, c.ledDeviceConfig.WriteToYamlFile(actualFile), "error occurred in file write")
 			defer os.Remove(actualFile)
 			testhelper.Diff(t, expectedFile, actualFile)
 		})

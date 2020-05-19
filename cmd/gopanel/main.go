@@ -38,7 +38,7 @@ func main() {
 	frame := hardware.NewFrame(mainConfig.TileConfigs, logger)
 
 	pixelDevice, err := device.NewLedDevice(
-		mainConfig.DeviceConfig,
+		mainConfig.LedDeviceConfig,
 		frame.GetSumHardwarePixel(),
 		logger,
 	)

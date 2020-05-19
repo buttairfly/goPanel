@@ -27,15 +27,15 @@ type LedDevice interface {
 }
 
 // NewLedDevice creates a new Led device
-func NewLedDevice(deviceConfig *DeviceConfig, length int, logger *zap.Logger) (LedDevice, error) {
+func NewLedDevice(ledDeviceConfig *LedDeviceConfig, length int, logger *zap.Logger) (LedDevice, error) {
 	var pixelDevice LedDevice
-	switch deviceConfig.Type {
+	switch ledDeviceConfig.Type {
 	case Print:
 		pixelDevice = NewPrintDevice(length, logger)
 	case Serial:
-		pixelDevice = NewSerialDevice(length, deviceConfig.SerialConfig, logger)
+		pixelDevice = NewSerialDevice(length, ledDeviceConfig.SerialConfig, logger)
 	default:
-		return nil, fmt.Errorf("unkown led device type: %v", deviceConfig.Type)
+		return nil, fmt.Errorf("unkown led device type: %v", ledDeviceConfig.Type)
 	}
 	if err := pixelDevice.Open(); err != nil {
 		return nil, err

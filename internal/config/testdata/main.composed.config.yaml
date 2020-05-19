@@ -1,3 +1,68 @@
+ledDeviceConfig:
+  type: serial
+  serialConfig:
+    streamConfig:
+      name: /dev/ttyUSB0
+      baud: 1152000
+      size: 8
+      readTimeout: 1s
+    verbose: false
+    verboseArduino: false
+    readBufferSize: 1024
+    paritySeed: 165
+    initSleepTime: 30ms
+    latchSleepTime: 10.5ms
+    commandSleepTime: 100µs
+    arduinoErrorConfig:
+      Elati:
+        name: latch timeout
+        param: min latch wait time ms
+      Encmd:
+        name: no command
+        character: command
+      Endcm:
+        name: not defined command
+        character: command
+      Enebs:
+        name: not enough bytes color param
+        param: current number of bytes
+        character: current char
+      Enhxc:
+        name: not hex color parameter
+        character: current char
+      Enhxn:
+        name: not hex number parameter
+        character: current char
+      Enini:
+        name: not initialized
+        character: current char
+      Enpeq:
+        name: number parameter overflow equals num leds
+        param: number paramerter
+        character: current char
+      Enpov:
+        name: number parameter overflow
+        param: number paramerter
+        character: current char
+      Enret:
+        name: no return
+        character: current char
+      Eucmd:
+        name: unknown command
+        param: command
+        character: current char
+      Euini:
+        name: no initialisation possible
+      Eulet:
+        name: unknown letter
+        param: charType (D=undefined, C=command, H=hexnumber, R=return)
+        character: letter
+      Euret:
+        name: unknown return
+        character: current char
+      Ewpar:
+        name: wrong parity
+        character: last char
 tileConfigs:
 - connectionOrder: 0
   bounds:
@@ -217,68 +282,3 @@ tileConfigs:
     "97": 29
     "98": 10
     "99": 9
-deviceConfig:
-  type: serial
-  serialConfig:
-    streamConfig:
-      name: /dev/ttyUSB0
-      baud: 1152000
-      size: 8
-      readTimeout: 1s
-    arduinoErrorConfig:
-      Elati:
-        name: latch timeout
-        param: min latch wait time ms
-      Encmd:
-        name: no command
-        character: command
-      Endcm:
-        name: not defined command
-        character: command
-      Enebs:
-        name: not enough bytes color param
-        param: current number of bytes
-        character: current char
-      Enhxc:
-        name: not hex color parameter
-        character: current char
-      Enhxn:
-        name: not hex number parameter
-        character: current char
-      Enini:
-        name: not initialized
-        character: current char
-      Enpeq:
-        name: number parameter overflow equals num leds
-        param: number paramerter
-        character: current char
-      Enpov:
-        name: number parameter overflow
-        param: number paramerter
-        character: current char
-      Enret:
-        name: no return
-        character: current char
-      Eucmd:
-        name: unknown command
-        param: command
-        character: current char
-      Euini:
-        name: no initialisation possible
-      Eulet:
-        name: unknown letter
-        param: charType (D=undefined, C=command, H=hexnumber, R=return)
-        character: letter
-      Euret:
-        name: unknown return
-        character: current char
-      Ewpar:
-        name: wrong parity
-        character: last char
-    verbose: false
-    verboseArduino: false
-    readBufferSize: 1024
-    paritySeed: 165
-    initSleepTime: 30ms
-    latchSleepTime: 10.5ms
-    commandSleepTime: 100µs

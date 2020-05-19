@@ -17,8 +17,8 @@ import (
 
 // MainConfig is the whole program config
 type MainConfig struct {
-	TileConfigs  hardware.TileConfigs `yaml:"tileConfigs"`
-	DeviceConfig *device.DeviceConfig `yaml:"deviceConfig"`
+	LedDeviceConfig *device.LedDeviceConfig `yaml:"ledDeviceConfig"`
+	TileConfigs     hardware.TileConfigs    `yaml:"tileConfigs"`
 }
 
 // NewMainConfigFromPanelConfigPath generates a new internal MainConfig struct from PanelConfig file
@@ -42,8 +42,8 @@ func NewMainConfigFromPanelConfigPath(filePath string, logger *zap.Logger) (*Mai
 	}
 	sort.Sort(tileConfigs)
 
-	var deviceConfig *device.DeviceConfig
-	deviceConfig, err = device.NewDeviceConfigFromPath(
+	var ledDeviceConfig *device.LedDeviceConfig
+	ledDeviceConfig, err = device.NewDeviceConfigFromPath(
 		path.Join(panelConfig.DeviceConfigPath, panelConfig.DeviceConfigFile),
 		logger,
 	)
@@ -51,7 +51,7 @@ func NewMainConfigFromPanelConfigPath(filePath string, logger *zap.Logger) (*Mai
 		return nil, err
 	}
 
-	if deviceConfig.Type == device.Serial {
+	if ledDeviceConfig.Type == device.Serial {
 		var arduinoErrorConfig *arduinocom.ArduinoErrorConfig
 		arduinoErrorConfig, err = arduinocom.NewArduinoErrorConfigFromPath(
 			path.Join(panelConfig.ArduinoErrorConfigPath, panelConfig.ArduinoErrorConfigFile),
@@ -60,12 +60,12 @@ func NewMainConfigFromPanelConfigPath(filePath string, logger *zap.Logger) (*Mai
 		if err != nil {
 			return nil, err
 		}
-		deviceConfig.SerialConfig.ArduinoErrorConfig = arduinoErrorConfig
+		ledDeviceConfig.SerialConfig.ArduinoErrorConfig = arduinoErrorConfig
 	}
 
 	return &MainConfig{
-		TileConfigs:  tileConfigs,
-		DeviceConfig: deviceConfig,
+		TileConfigs:     tileConfigs,
+		LedDeviceConfig: ledDeviceConfig,
 	}, nil
 }
 
