@@ -5,9 +5,12 @@ import "time"
 type statType string
 
 const (
+	// ArdoinoErrorStatType is the error category from the arduino
 	ArdoinoErrorStatType statType = "Error"
-	PrintStatType        statType = "Info "
-	LatchStatType        statType = "Latch"
+	// PrintStatType is the into category from the arduino
+	PrintStatType statType = "Info "
+	// LatchStatType is the current status category from the arduino
+	LatchStatType statType = "Latch"
 )
 
 // Stat marks an event which will get printed
