@@ -275,10 +275,10 @@ deviceConfig:
       Ewpar:
         name: wrong parity
         character: last char
-    verbose: true
+    verbose: false
     verboseArduino: false
     readBufferSize: 1024
     paritySeed: 165
-    initSleepTime: 20ms
+    initSleepTime: 30ms
     latchSleepTime: 10.5ms
     commandSleepTime: 100µs

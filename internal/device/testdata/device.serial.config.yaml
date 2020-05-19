@@ -5,10 +5,10 @@ serialConfig:
     baud: 1152000
     size: 8
     readTimeout: 1s
-  verbose: true
+  verbose: false
   verboseArduino: false
   readBufferSize: 1024
   paritySeed: 165
-  initSleepTime: 20ms
+  initSleepTime: 30ms
   latchSleepTime: 10.5ms
   commandSleepTime: 100µs
