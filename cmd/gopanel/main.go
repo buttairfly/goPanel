@@ -54,6 +54,14 @@ func main() {
 	wg.Add(1)
 	go pixelDevice.Run(wg)
 
+	wg.Add(1)
+	go FrameGenerator(frame, inputChan, wg, logger)
+}
+
+func FrameGenerator(frame hardware.Frame, inputChan chan<- hardware.Frame, wg *sync.WaitGroup, logger *zap.Logger) {
+	wg.Add(1)
+	defer wg.Done()
+
 	mainPicture := image.NewRGBA(frame.Bounds())
 
 	colors := make([]color.Color, 0, 10)

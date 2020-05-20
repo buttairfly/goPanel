@@ -29,7 +29,7 @@ type frame struct {
 	logger           *zap.Logger
 }
 
-// NewFrame return new Frame
+// NewFrame returns a paintable image consisting of many led-panel tiles
 func NewFrame(tileConfigs TileConfigs, logger *zap.Logger) Frame {
 	frameBounds := image.ZR
 	tiles := make([]Tile, tileConfigs.Len())
