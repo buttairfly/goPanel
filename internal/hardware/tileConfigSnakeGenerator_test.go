@@ -33,6 +33,21 @@ func TestNewTileConfigSnakeMapFile(t *testing.T) {
 		err          error
 	}{
 		{
+			desc: "single_c0_0-0_1-1",
+			generator: TileConfigSnakeGenerator{
+				startPoint:      image.Point{X: 0, Y: 0},
+				endPoint:        image.Point{X: 1, Y: 1},
+				direction:       horizontal,
+				connectionOrder: 0,
+			},
+			numPixel: 1,
+			testPixel: map[string]int{
+				" 0": 0,
+			},
+			expectedFile: ".config.yaml",
+			actualFile:   "actual.config.yaml",
+		},
+		{
 			desc: "snake_horizontal_c0_0-0_10-10",
 			generator: TileConfigSnakeGenerator{
 				startPoint:      image.Point{X: 0, Y: 0},

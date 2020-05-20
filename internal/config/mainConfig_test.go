@@ -16,8 +16,6 @@ import (
 
 var _ filereadwriter.Yaml = (*MainConfig)(nil)
 
-const mainConfigFile = "main.composed.config.yaml"
-
 func TestNewMainConfig(t *testing.T) {
 	logger, _ := zap.NewDevelopment()
 	defer logger.Sync()
@@ -37,7 +35,7 @@ func TestNewMainConfig(t *testing.T) {
 		err          error
 	}{
 		{
-			desc: "main_config",
+			desc: "main config",
 			panelConfig: &PanelConfig{
 				TileConfigPath:         configHardwareFolder,
 				DeviceConfigPath:       configDeviceFolder,
@@ -50,7 +48,22 @@ func TestNewMainConfig(t *testing.T) {
 				ArduinoErrorConfigFile: "device.ledpanel.arduino.error.config.yaml",
 			},
 			panelFile:    "main.panel.config.yaml",
-			expectedFile: mainConfigFile,
+			expectedFile: "main.composed.config.yaml",
+			actualFile:   "actual.config.yaml",
+		},
+		{
+			desc: "main print config",
+			panelConfig: &PanelConfig{
+				TileConfigPath:         configHardwareFolder,
+				DeviceConfigPath:       configDeviceFolder,
+				ArduinoErrorConfigPath: configArduinocomFolder,
+				TileConfigFiles: []string{
+					"tile.single_c0_0-0_1-1.config.yaml",
+				},
+				DeviceConfigFile: "device.print.config.yaml",
+			},
+			panelFile:    "main.panel.print.config.yaml",
+			expectedFile: "main.composed.print.config.yaml",
 			actualFile:   "actual.config.yaml",
 		},
 	}
@@ -98,8 +111,8 @@ func TestChangedMainConfig(t *testing.T) {
 	gopath := os.Getenv("GOPATH")
 	baseFolder := "src/github.com/buttairfly/goPanel/config"
 	testFolder := "testdata/"
-	src := path.Join(testFolder, mainConfigFile)
-	dst := path.Join(gopath, baseFolder, mainConfigFile)
+	src := path.Join(testFolder, "main.composed.config.yaml")
+	dst := path.Join(gopath, baseFolder, "main.composed.config.yaml")
 
 	assert.NoError(t, testhelper.CopyFile(src, dst))
 }

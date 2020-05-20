@@ -1,0 +1,6 @@
+tileConfigPath: /home/keks/code/go/src/github.com/buttairfly/goPanel/internal/hardware/testdata
+deviceConfigPath: /home/keks/code/go/src/github.com/buttairfly/goPanel/internal/device/testdata
+arduinoErrorConfigPath: /home/keks/code/go/src/github.com/buttairfly/goPanel/pkg/arduinocom/testdata
+tileConfigFiles:
+- tile.single_c0_0-0_1-1.config.yaml
+deviceConfigFile: device.print.config.yaml

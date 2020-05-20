@@ -1,0 +1,15 @@
+ledDeviceConfig:
+  type: print
+  printConfig:
+    framesPerSecond: 100
+tileConfigs:
+- connectionOrder: 0
+  bounds:
+    min:
+      x: 0
+      "y": 0
+    max:
+      x: 1
+      "y": 1
+  ledStripeMap:
+    ' 0': 0

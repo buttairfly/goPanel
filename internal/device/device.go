@@ -31,7 +31,7 @@ func NewLedDevice(ledDeviceConfig *LedDeviceConfig, length int, logger *zap.Logg
 	var pixelDevice LedDevice
 	switch ledDeviceConfig.Type {
 	case Print:
-		pixelDevice = NewPrintDevice(length, logger)
+		pixelDevice = NewPrintDevice(length, ledDeviceConfig.PrintConfig, logger)
 	case Serial:
 		pixelDevice = NewSerialDevice(length, ledDeviceConfig.SerialConfig, logger)
 	default:

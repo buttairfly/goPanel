@@ -1,7 +1,9 @@
 #!/bin/bash
 
 PROJECT_DIR="$(dirname "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )")"
-BINARY="gopanel"
+BINDIR="${GOPATH}/bin"
+PACKAGE="gopanel"
+BINARY="${PACKAGE}-arm"
 
 VERSION=`git describe --always --dirty`
 DATE=`date -u +%FT%T%z`
@@ -20,14 +22,14 @@ function COPY {
   rsync -acE --progress $1 $2
 }
 function BUILD {
-  return $(`${ENV} go build -ldflags "-X main.compileDate=${DATE} -X main.versionTag=${VERSION}" -o ${PROJECT_DIR}/${BINARY} ${PROJECT_DIR}/cmd/${BINARY}`)
+  return $(`${ENV} go build -ldflags "-X main.compileDate=${DATE} -X main.versionTag=${VERSION}" -o ${BINDIR}/${BINARY} ${PROJECT_DIR}/cmd/${PACKAGE}`)
 }
 
 echo -e "${GREEN}${BINARY}${NC}: compiled at ${BLUE}${DATE}${NC} with version ${LIGHT_BLUE}${VERSION}${NC}"
 
 if BUILD; then
     echo -e "build  ${BLUE}${BINARY}${NC}"
-    if COPY ${PROJECT_DIR}/${BINARY} pi@ledpix:~ ; then
+    if COPY ${BINDIR}/${BINARY} pi@ledpix:~ ; then
         echo -e "deploy ${BLUE}${BINARY}${NC}"
         COPY ${PROJECT_DIR}/config/ pi@ledpix:~/config
         echo -e "deploy ${BLUE}config folder${NC}"

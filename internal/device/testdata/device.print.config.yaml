@@ -1,1 +1,3 @@
 type: print
+printConfig:
+  framesPerSecond: 100

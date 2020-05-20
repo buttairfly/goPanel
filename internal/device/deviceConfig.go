@@ -15,6 +15,7 @@ import (
 type LedDeviceConfig struct {
 	Type         Type                     `yaml:"type"`
 	SerialConfig *arduinocom.SerialConfig `yaml:"serialConfig,omitempty"`
+	PrintConfig  *PrintConfig             `yaml:"printConfig,omitempty"`
 }
 
 // NewDeviceConfigFromPath returns a new LedDeviceConfig or error

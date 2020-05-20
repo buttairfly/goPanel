@@ -3,6 +3,7 @@ package hardware
 import (
 	"image"
 	"image/color"
+	"time"
 
 	"go.uber.org/zap"
 )
@@ -17,6 +18,8 @@ type Frame interface {
 	RGBAAt(x, y int) color.RGBA
 	GetWidth() int
 	GetHeight() int
+	GetTime() time.Time
+	GetLogger() *zap.Logger
 
 	getTiles() []Tile
 }
@@ -26,6 +29,7 @@ type frame struct {
 	tiles            []Tile
 	sumHardwarePixel int
 	width, height    int
+	frameTime        time.Time
 	logger           *zap.Logger
 }
 
@@ -46,6 +50,7 @@ func NewFrame(tileConfigs TileConfigs, logger *zap.Logger) Frame {
 		sumHardwarePixel: numPreviousLedsOnStripe,
 		width:            frameBounds.Dx(),
 		height:           frameBounds.Dy(),
+		frameTime:        time.Now(),
 		logger:           logger,
 	}
 }
@@ -59,14 +64,16 @@ func NewCopyFrameWithEmptyImage(other Frame) Frame {
 		sumHardwarePixel: other.GetSumHardwarePixel(),
 		width:            other.GetWidth(),
 		height:           other.GetHeight(),
+		frameTime:        time.Now(),
+		logger:           other.GetLogger(),
 	}
 }
 
 // NewCopyFrameFromImage creates a new Frame with the reference of Tiles
 // and copies the other image contents into the frame
-func NewCopyFrameFromImage(other Frame, pictureToCopy *image.RGBA, logger *zap.Logger) Frame {
+func NewCopyFrameFromImage(other Frame, pictureToCopy *image.RGBA) Frame {
 	if !other.Bounds().Eq(pictureToCopy.Bounds()) {
-		logger.Sugar().Fatalf("can not copy picture (%v) with different bounds as frame (%v)",
+		other.GetLogger().Sugar().Fatalf("can not copy picture (%v) with different bounds as frame (%v)",
 			other.Bounds(),
 			pictureToCopy.Bounds(),
 		)
@@ -79,7 +86,8 @@ func NewCopyFrameFromImage(other Frame, pictureToCopy *image.RGBA, logger *zap.L
 		sumHardwarePixel: other.GetSumHardwarePixel(),
 		width:            other.GetWidth(),
 		height:           other.GetHeight(),
-		logger:           logger,
+		frameTime:        time.Now(),
+		logger:           other.GetLogger(),
 	}
 }
 
@@ -142,6 +150,14 @@ func (f *frame) GetWidth() int {
 
 func (f *frame) GetHeight() int {
 	return f.height
+}
+
+func (f *frame) GetTime() time.Time {
+	return f.frameTime
+}
+
+func (f *frame) GetLogger() *zap.Logger {
+	return f.logger
 }
 
 func (f *frame) getTiles() []Tile {

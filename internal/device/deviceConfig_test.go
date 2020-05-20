@@ -58,6 +58,9 @@ func TestNewDeviceConfigFile(t *testing.T) {
 			desc: "print",
 			ledDeviceConfig: &LedDeviceConfig{
 				Type: Print,
+				PrintConfig: &PrintConfig{
+					FramesPerSecond: 100,
+				},
 			},
 			expectedFile: ".config.yaml",
 			actualFile:   "actual.config.yaml",
