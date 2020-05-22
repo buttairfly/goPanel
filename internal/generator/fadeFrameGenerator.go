@@ -4,7 +4,6 @@ import (
 	"image"
 	"image/color"
 	"sync"
-	"time"
 
 	"go.uber.org/zap"
 
@@ -22,7 +21,7 @@ func FrameGenerator(frame hardware.Frame, inputChan chan<- hardware.Frame, wg *s
 	colors := make([]color.Color, 0, 10)
 	colors = append(colors, color.RGBA{0xff, 0, 0, 0xff})
 	colors = append(colors, color.RGBA{0xff, 0xa5, 0, 0xff})
-	const granularity int = 100
+	const granularity int = 1
 	const wrapping bool = true
 	fader := palette.NewFader(colors, granularity, wrapping)
 	increments := fader.GetIncrements()
@@ -42,7 +41,6 @@ func FrameGenerator(frame hardware.Frame, inputChan chan<- hardware.Frame, wg *s
 				}
 				// TODO: add leaky buffer recycling https://golang.org/doc/effective_go.html#leaky_buffer
 				colorFrame := hardware.NewCopyFrameFromImage(frame, mainPicture)
-				time.Sleep(5 * 1000 * time.Millisecond)
 				inputChan <- colorFrame
 				// TODO: frame counter logic
 				// logger.Sugar().Infof("send frame %d", colorFrame.GetTime())
