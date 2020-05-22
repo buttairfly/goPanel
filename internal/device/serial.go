@@ -48,9 +48,11 @@ func (s *serialDevice) SetInput(input <-chan hardware.Frame) {
 func (s *serialDevice) Run(wg *sync.WaitGroup) {
 	defer wg.Done()
 	defer s.Close()
-	defer close(s.latchEnd)
 
 	s.latchEnd = make(chan bool)
+	// TODO: safe close channel
+	//defer close(s.latchEnd)
+
 	wg.Add(1)
 	go s.com.Read(wg)
 	wg.Add(1)
@@ -127,9 +129,9 @@ func (s *serialDevice) printLatches(wg *sync.WaitGroup) {
 	}
 }
 
-func (s *serialDevice) setPixel(pixel int, buffer []uint8) {
-	bufIndex := pixel * NumBytePerColor
-	command := fmt.Sprintf("P%04x%02x%02x%02x", pixel, buffer[bufIndex+0], buffer[bufIndex+1], buffer[bufIndex+2])
+func (s *serialDevice) setPixel(pixelNum int, buffer []uint8) {
+	bufIndex := pixelNum * NumBytePerColor
+	command := fmt.Sprintf("P%04x%02x%02x%02x", pixelNum, buffer[bufIndex+0], buffer[bufIndex+1], buffer[bufIndex+2])
 	s.Write(command)
 }
 
@@ -139,12 +141,24 @@ func (s *serialDevice) shade(pixel int, buffer []uint8) {
 }
 
 func (s *serialDevice) rawFrame(pixel int, frameBuffer []uint8) {
-	frameString := ""
-	for p := 0; p < pixel; p += NumBytePerColor {
-		frameString += fmt.Sprintf("%02x%02x%02x", frameBuffer[p], frameBuffer[p+1], frameBuffer[p+2])
+	currentRawFramePartNumLed := 10
+	for currentRawFramePart := 0; currentRawFramePart < pixel/currentRawFramePartNumLed; currentRawFramePart++ {
+		pixelOffset := currentRawFramePart * currentRawFramePartNumLed
+
+		frameString := ""
+		for p := 0; p < currentRawFramePartNumLed; p++ {
+			bufIndex := (pixelOffset + p) * NumBytePerColor
+			color := fmt.Sprintf("%02x%02x%02x", frameBuffer[bufIndex], frameBuffer[bufIndex+1], frameBuffer[bufIndex+2])
+			frameString += color
+		}
+
+		command := fmt.Sprintf("W%04x%02x%02x%s", pixel, currentRawFramePart, currentRawFramePartNumLed, frameString)
+
+		time.Sleep(s.com.Config().LatchSleepTime)
+		s.Write(command)
 	}
-	command := fmt.Sprintf("R%04x%s", pixel, frameString)
-	s.Write(command)
+	time.Sleep(s.com.Config().LatchSleepTime)
+	s.latchFrame()
 }
 
 func (s *serialDevice) latchFrame() {

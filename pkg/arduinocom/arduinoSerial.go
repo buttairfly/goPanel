@@ -63,9 +63,10 @@ func (a *ArduinoCom) Open() error {
 
 // Close removes serial arduino stream and all helper channels
 func (a *ArduinoCom) Close() error {
+	err := a.stream.Close()
 	close(a.readActive)
 	close(a.stats)
-	return a.stream.Close()
+	return err
 }
 
 // Init initializes a arduino serial
@@ -105,6 +106,7 @@ func (a *ArduinoCom) Read(wg *sync.WaitGroup) {
 	for {
 		select {
 		case <-a.readActive:
+			a.logger.Info("Closed readActive")
 			return
 		default:
 			n, err := a.stream.Read(buf)

@@ -9,14 +9,15 @@ import (
 	"go.uber.org/zap"
 )
 
-type version struct {
-	tag         string
-	compileDate string
-	programName string
+// Version holds all compile data
+type Version struct {
+	Tag         string `json:"tag"         yaml:"tag"`
+	CompileDate string `json:"compileDate" yaml:"compileDate"`
+	ProgramName string `json:"programName" yaml:"programName"`
 	logger      *zap.Logger
 }
 
-var programVersion version
+var programVersion Version
 
 // Init initializes the program version struct
 func Init(compileDate, tag string, logger *zap.Logger) {
@@ -24,9 +25,9 @@ func Init(compileDate, tag string, logger *zap.Logger) {
 	programParts := strings.Split(os.Args[0], "/")
 	programName := programParts[len(programParts)-1]
 
-	programVersion.tag = tag
-	programVersion.compileDate = compileDate
-	programVersion.programName = programName
+	programVersion.Tag = tag
+	programVersion.CompileDate = compileDate
+	programVersion.ProgramName = programName
 	programVersion.logger = logger.With(
 		zap.String("programName", programName),
 		zap.String("compileDate", compileDate),

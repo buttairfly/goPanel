@@ -21,6 +21,6 @@ func RunHTTPServer(wg *sync.WaitGroup, logger *zap.Logger) {
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
-	e.File("/favicon.ico", "images/favicon.png")
+	e.File("/favicon.ico", "images/favicon.ico")
 	logger.Fatal("error in http server", zap.Error(e.Start(":8080")))
 }

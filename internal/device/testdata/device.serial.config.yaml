@@ -5,7 +5,7 @@ serialConfig:
     baud: 1152000
     size: 8
     readTimeout: 1s
-  verbose: false
+  verbose: true
   verboseArduino: false
   readBufferSize: 1024
   paritySeed: 165

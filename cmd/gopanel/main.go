@@ -12,6 +12,7 @@ import (
 	"github.com/buttairfly/goPanel/internal/hardware"
 	"github.com/buttairfly/goPanel/internal/http"
 	"github.com/buttairfly/goPanel/pkg/log"
+	"github.com/buttairfly/goPanel/pkg/signal"
 	"github.com/buttairfly/goPanel/pkg/version"
 )
 
@@ -24,7 +25,7 @@ func main() {
 	logger := log.NewZapDevelopLogger()
 	defer logger.Sync()
 	version.Init(compileDate, versionTag, logger)
-	exitChan := make(chan bool)
+	exitChan := signal.Detect()
 	wg := new(sync.WaitGroup)
 	go version.Run(wg, exitChan)
 
@@ -49,7 +50,7 @@ func main() {
 	defer pixelDevice.Close()
 
 	inputChan := make(chan hardware.Frame)
-	defer close(inputChan)
+	// inputChan is closed in LastBlackFrameFrameGenerator
 
 	pixelDevice.SetInput(inputChan)
 
@@ -57,7 +58,10 @@ func main() {
 	go pixelDevice.Run(wg)
 
 	wg.Add(1)
-	go generator.FrameGenerator(frame, inputChan, wg, logger)
+	go generator.LastBlackFrameFrameGenerator(frame, inputChan, wg, exitChan, logger)
+
+	wg.Add(1)
+	go generator.FrameGenerator(frame, inputChan, wg, exitChan, logger)
 
 	wg.Add(1)
 	go http.RunHTTPServer(wg, logger)

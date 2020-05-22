@@ -43,7 +43,7 @@ func TestNewDeviceConfigFile(t *testing.T) {
 						Size:        8,
 					},
 					ReadBufferSize:   1024,
-					Verbose:          false,
+					Verbose:          true,
 					VerboseArduino:   false,
 					ParitySeed:       0xa5,
 					InitSleepTime:    30 * time.Millisecond,
