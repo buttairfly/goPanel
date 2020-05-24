@@ -1,6 +1,7 @@
 package arduinocom
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"strconv"
@@ -31,7 +32,7 @@ type ArduinoCom struct {
 // NewArduinoCom creates a new serial arduino communication
 //
 // Set numLed to 0 when not needed as configureable one time parameter
-func NewArduinoCom(numLed int, sc *SerialConfig, logger *zap.Logger) *ArduinoCom {
+func NewArduinoCom(cancelCtx context.Context, numLed int, sc *SerialConfig, logger *zap.Logger) *ArduinoCom {
 	a := new(ArduinoCom)
 	a.config = sc
 	a.readActive = make(chan bool)
@@ -63,9 +64,9 @@ func (a *ArduinoCom) Open() error {
 
 // Close removes serial arduino stream and all helper channels
 func (a *ArduinoCom) Close() error {
-	err := a.stream.Close()
-	close(a.readActive)
 	close(a.stats)
+	close(a.readActive)
+	err := a.stream.Close()
 	return err
 }
 

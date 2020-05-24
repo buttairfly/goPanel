@@ -1,6 +1,7 @@
 package device
 
 import (
+	"context"
 	"fmt"
 	"sync"
 	"time"
@@ -15,14 +16,16 @@ type printDevice struct {
 	numPix      int
 	lenHex      int
 	printConfig *PrintConfig
+	cancelCtx   context.Context
 	logger      *zap.Logger
 }
 
 // NewPrintDevice creates a new printDevice
-func NewPrintDevice(numPix int, printConfig *PrintConfig, logger *zap.Logger) LedDevice {
+func NewPrintDevice(cancelCtx context.Context, numPix int, printConfig *PrintConfig, logger *zap.Logger) LedDevice {
 	pd := new(printDevice)
 	pd.numPix = numPix
 	pd.lenHex = numPix * NumBytePerColor * NumByteToRepresentHex
+	pd.cancelCtx = cancelCtx
 	pd.printConfig = printConfig
 	pd.logger = logger
 	return pd

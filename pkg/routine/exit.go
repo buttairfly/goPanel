@@ -1,19 +1,21 @@
-package signal
+package routine
 
 import (
+	"context"
 	"os"
 	"os/signal"
 	"syscall"
 )
 
-// Detect detects a interrupt or sigterm signal and closes the returned channel
-func Detect() <-chan bool {
+// DetectExit detects a interrupt or sigterm signal and closes the returned channel
+func DetectExit(ctx context.Context) context.Context {
+	cancelCtx, cancel := context.WithCancel(ctx)
 	signalChannel := make(chan os.Signal)
 	signal.Notify(signalChannel, os.Interrupt, syscall.SIGTERM)
-	done := make(chan bool)
 
 	go func() {
-		defer close(done)
+		defer cancel()
+
 		sig := <-signalChannel
 		switch sig {
 		case os.Interrupt:
@@ -22,5 +24,5 @@ func Detect() <-chan bool {
 			// special treatment for syscall.SIGTERM
 		}
 	}()
-	return done
+	return cancelCtx
 }

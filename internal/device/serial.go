@@ -1,6 +1,7 @@
 package device
 
 import (
+	"context"
 	"fmt"
 	"sync"
 	"time"
@@ -12,19 +13,20 @@ import (
 )
 
 type serialDevice struct {
-	com      *arduinocom.ArduinoCom
-	numLed   int
-	input    <-chan hardware.Frame
-	latchEnd chan bool
-	latched  int64
-	logger   *zap.Logger
+	com       *arduinocom.ArduinoCom
+	numLed    int
+	input     <-chan hardware.Frame
+	latched   int64
+	cancelCtx context.Context
+	logger    *zap.Logger
 }
 
 // NewSerialDevice creates a new serial device
-func NewSerialDevice(numLed int, serialDeviceConfig *arduinocom.SerialConfig, logger *zap.Logger) LedDevice {
+func NewSerialDevice(cancelCtx context.Context, numLed int, serialDeviceConfig *arduinocom.SerialConfig, logger *zap.Logger) LedDevice {
 	s := new(serialDevice)
-	s.com = arduinocom.NewArduinoCom(numLed, serialDeviceConfig, logger)
+	s.com = arduinocom.NewArduinoCom(cancelCtx, numLed, serialDeviceConfig, logger)
 	s.numLed = numLed
+	s.cancelCtx = cancelCtx
 	s.logger = logger
 	return s
 }
@@ -48,17 +50,19 @@ func (s *serialDevice) SetInput(input <-chan hardware.Frame) {
 func (s *serialDevice) Run(wg *sync.WaitGroup) {
 	defer wg.Done()
 	defer s.Close()
+	subWg := new(sync.WaitGroup)
 
-	s.latchEnd = make(chan bool)
-	// TODO: safe close channel
-	//defer close(s.latchEnd)
+	subWg.Add(4)
+	go s.com.Read(subWg)
+	go s.com.PrintStats(subWg)
+	go s.printLatches(subWg)
+	go s.runFrameProcessor(subWg)
 
-	wg.Add(1)
-	go s.com.Read(wg)
-	wg.Add(1)
-	go s.com.PrintStats(wg)
-	wg.Add(1)
-	go s.printLatches(wg)
+	subWg.Wait()
+}
+
+func (s *serialDevice) runFrameProcessor(wg *sync.WaitGroup) {
+	defer wg.Done()
 
 	latchDelay := s.com.Config().LatchSleepTime
 	lastFrameTime := time.Now().Add(-latchDelay)
@@ -109,24 +113,27 @@ func (s *serialDevice) GetType() Type {
 }
 
 func (s *serialDevice) printLatches(wg *sync.WaitGroup) {
+	defer s.logger.Info("printLatches done")
 	defer wg.Done()
 	start := time.Now()
 	lastLapLatches := int64(0)
 	for {
 		select {
-		case <-s.latchEnd:
+		case <-s.cancelCtx.Done():
 			return
-		default:
-			time.Sleep(30 * time.Second)
-			timeDiff := time.Now().Sub(start)
-			s.logger.Info("latch summary",
-				zap.String("frames", fmt.Sprintf("%f.2/s", float64(s.latched)*float64(time.Second)/float64(timeDiff))),
-				zap.Int64("lastLap", s.latched-lastLapLatches),
-				zap.Duration("lastDiff", timeDiff),
-			)
-			lastLapLatches = s.latched
+		case <-time.After(30 * time.Second):
+			{
+				timeDiff := time.Now().Sub(start)
+				s.logger.Info("latch summary",
+					zap.String("frames", fmt.Sprintf("%f.2/s", float64(s.latched)*float64(time.Second)/float64(timeDiff))),
+					zap.Int64("lastLap", s.latched-lastLapLatches),
+					zap.Duration("lastDiff", timeDiff),
+				)
+				lastLapLatches = s.latched
+			}
 		}
 	}
+
 }
 
 func (s *serialDevice) setPixel(pixelNum int, buffer []uint8) {

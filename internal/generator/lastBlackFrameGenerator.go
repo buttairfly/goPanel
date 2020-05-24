@@ -1,10 +1,10 @@
 package generator
 
 import (
+	"context"
 	"image"
 	"image/color"
 	"sync"
-	"time"
 
 	"go.uber.org/zap"
 
@@ -12,34 +12,24 @@ import (
 )
 
 // LastBlackFrameFrameGenerator generates a black frame at the end of the program
+// and closes the frame input chan on program exit
 func LastBlackFrameFrameGenerator(
+	cancelCtx context.Context,
 	frame hardware.Frame,
 	inputChan chan<- hardware.Frame,
 	wg *sync.WaitGroup,
-	exitChan <-chan bool,
 	logger *zap.Logger,
 ) {
-	wg.Add(1)
 	defer wg.Done()
 	defer close(inputChan)
 
 	mainPicture := image.NewRGBA(frame.Bounds())
 	frame.Fill(color.Black)
+
 	// TODO: add leaky buffer recycling https://golang.org/doc/effective_go.html#leaky_buffer
 	colorFrame := hardware.NewCopyFrameFromImage(frame, mainPicture)
-	for {
-		select {
-		case _, ok := <-exitChan:
-			if !ok {
-				time.Sleep(500 * time.Millisecond)
-				inputChan <- colorFrame
-				return
-			}
-		default:
-			// TODO: frame counter logic
-			// logger.Sugar().Infof("send frame %d", colorFrame.GetTime())
-			time.Sleep(50 * time.Millisecond)
-		}
+	select {
+	case <-cancelCtx.Done():
+		inputChan <- colorFrame
 	}
-
 }

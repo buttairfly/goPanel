@@ -1,6 +1,7 @@
 package generator
 
 import (
+	"context"
 	"image"
 	"image/color"
 	"sync"
@@ -12,8 +13,13 @@ import (
 )
 
 // FrameGenerator generates a new input frame stream
-func FrameGenerator(frame hardware.Frame, inputChan chan<- hardware.Frame, wg *sync.WaitGroup, exitChan <-chan bool, logger *zap.Logger) {
-	wg.Add(1)
+func FrameGenerator(
+	cancelCtx context.Context,
+	frame hardware.Frame,
+	inputChan chan<- hardware.Frame,
+	wg *sync.WaitGroup,
+	logger *zap.Logger,
+) {
 	defer wg.Done()
 
 	mainPicture := image.NewRGBA(frame.Bounds())
@@ -26,21 +32,20 @@ func FrameGenerator(frame hardware.Frame, inputChan chan<- hardware.Frame, wg *s
 	fader := palette.NewFader(colors, granularity, wrapping)
 	increments := fader.GetIncrements()
 	for {
-		select {
-		case _, ok := <-exitChan:
-			if !ok {
-				return
-			}
-		default:
-			for _, increment := range increments {
-				color := fader.Fade(increment)
-				for y := 0; y < frame.GetHeight(); y++ {
-					for x := 0; x < frame.GetWidth(); x++ {
-						mainPicture.Set(x, y, color)
-					}
+		for _, increment := range increments {
+			color := fader.Fade(increment)
+			for y := 0; y < frame.GetHeight(); y++ {
+				for x := 0; x < frame.GetWidth(); x++ {
+					mainPicture.Set(x, y, color)
 				}
-				// TODO: add leaky buffer recycling https://golang.org/doc/effective_go.html#leaky_buffer
-				colorFrame := hardware.NewCopyFrameFromImage(frame, mainPicture)
+			}
+			// TODO: add leaky buffer recycling https://golang.org/doc/effective_go.html#leaky_buffer
+			colorFrame := hardware.NewCopyFrameFromImage(frame, mainPicture)
+
+			select {
+			case <-cancelCtx.Done():
+				return
+			default:
 				inputChan <- colorFrame
 				// TODO: frame counter logic
 				// logger.Sugar().Infof("send frame %d", colorFrame.GetTime())

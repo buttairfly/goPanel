@@ -13,6 +13,5 @@ type SerialConfig struct {
 	ParitySeed         byte                `yaml:"paritySeed"`
 	InitSleepTime      time.Duration       `yaml:"initSleepTime,omitempty"`
 	LatchSleepTime     time.Duration       `yaml:"latchSleepTime,omitempty"`
-	CommandSleepTime   time.Duration       `yaml:"commandSleepTime,omitempty"`
 	ArduinoErrorConfig *ArduinoErrorConfig `yaml:"arduinoErrorConfig,omitempty"`
 }

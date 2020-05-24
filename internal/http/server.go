@@ -2,7 +2,6 @@ package http
 
 import (
 	"net/http"
-	"sync"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -10,9 +9,7 @@ import (
 )
 
 // RunHTTPServer starts and runs a echo http server
-func RunHTTPServer(wg *sync.WaitGroup, logger *zap.Logger) {
-	defer wg.Done()
-
+func RunHTTPServer(logger *zap.Logger) {
 	e := echo.New()
 	// Root level middleware
 	e.Use(middleware.Logger())

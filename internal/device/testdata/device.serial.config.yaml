@@ -11,4 +11,3 @@ serialConfig:
   paritySeed: 165
   initSleepTime: 30ms
   latchSleepTime: 10.5ms
-  commandSleepTime: 100µs

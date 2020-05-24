@@ -1,8 +1,10 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"sync"
+	"time"
 
 	"go.uber.org/zap"
 
@@ -12,7 +14,7 @@ import (
 	"github.com/buttairfly/goPanel/internal/hardware"
 	"github.com/buttairfly/goPanel/internal/http"
 	"github.com/buttairfly/goPanel/pkg/log"
-	"github.com/buttairfly/goPanel/pkg/signal"
+	"github.com/buttairfly/goPanel/pkg/routine"
 	"github.com/buttairfly/goPanel/pkg/version"
 )
 
@@ -24,10 +26,11 @@ var (
 func main() {
 	logger := log.NewZapDevelopLogger()
 	defer logger.Sync()
-	version.Init(compileDate, versionTag, logger)
-	exitChan := signal.Detect()
-	wg := new(sync.WaitGroup)
-	go version.Run(wg, exitChan)
+	ctx := context.Background()
+	cancelCtx := routine.DetectExit(ctx)
+
+	mainVersion := version.New(compileDate, versionTag, 10*time.Second, logger)
+	go mainVersion.Run(cancelCtx)
 
 	mainConfigPath := flag.String("config", "config/main.composed.config.yaml", "path to config")
 	flag.Parse()
@@ -40,6 +43,7 @@ func main() {
 	frame := hardware.NewFrame(mainConfig.TileConfigs, logger)
 
 	pixelDevice, err := device.NewLedDevice(
+		cancelCtx,
 		mainConfig.LedDeviceConfig,
 		frame.GetSumHardwarePixel(),
 		logger,
@@ -54,17 +58,20 @@ func main() {
 
 	pixelDevice.SetInput(inputChan)
 
+	wg := new(sync.WaitGroup)
+
 	wg.Add(1)
 	go pixelDevice.Run(wg)
 
 	wg.Add(1)
-	go generator.LastBlackFrameFrameGenerator(frame, inputChan, wg, exitChan, logger)
+	go generator.LastBlackFrameFrameGenerator(cancelCtx, frame, inputChan, wg, logger)
 
 	wg.Add(1)
-	go generator.FrameGenerator(frame, inputChan, wg, exitChan, logger)
+	go generator.FrameGenerator(cancelCtx, frame, inputChan, wg, logger)
 
-	wg.Add(1)
-	go http.RunHTTPServer(wg, logger)
+	go http.RunHTTPServer(logger)
 
 	wg.Wait()
+
+	logger.Info("successfully stopped")
 }
