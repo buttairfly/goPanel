@@ -24,12 +24,7 @@ func LastBlackFrameFrameGenerator(
 	defer close(inputChan)
 
 	mainPicture := image.NewRGBA(frame.Bounds())
-	color := color.Black
-	for y := 0; y < frame.GetHeight(); y++ {
-		for x := 0; x < frame.GetWidth(); x++ {
-			mainPicture.Set(x, y, color)
-		}
-	}
+	frame.Fill(color.Black)
 	// TODO: add leaky buffer recycling https://golang.org/doc/effective_go.html#leaky_buffer
 	colorFrame := hardware.NewCopyFrameFromImage(frame, mainPicture)
 	for {

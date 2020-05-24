@@ -8,6 +8,17 @@ import (
 	"go.uber.org/zap"
 )
 
+type fillType int
+
+const (
+	// FillTypeFullFrame is used when a full frame needs transferring
+	FillTypeFullFrame fillType = iota
+	// FillTypeSinglePixelChange is used when only a single pixel changed
+	FillTypeSinglePixelChange
+	// FillTypeSingleFillColor is used when the frame consists of one color only
+	FillTypeSingleFillColor
+)
+
 // Frame is a hardware frame
 type Frame interface {
 	image.Image
@@ -15,6 +26,8 @@ type Frame interface {
 	GetSumHardwarePixel() int
 	SetRGBA(x, y int, c color.RGBA)
 	Set(x, y int, c color.Color)
+	FillRGBA(c color.RGBA)
+	Fill(c color.Color)
 	RGBAAt(x, y int) color.RGBA
 	GetWidth() int
 	GetHeight() int
@@ -29,6 +42,9 @@ type frame struct {
 	tiles            []Tile
 	sumHardwarePixel int
 	width, height    int
+	numPixelChanges  int
+	pixelChangePos   int
+	fillType         fillType
 	frameTime        time.Time
 	logger           *zap.Logger
 }
@@ -50,6 +66,9 @@ func NewFrame(tileConfigs TileConfigs, logger *zap.Logger) Frame {
 		sumHardwarePixel: numPreviousLedsOnStripe,
 		width:            frameBounds.Dx(),
 		height:           frameBounds.Dy(),
+		fillType:         FillTypeSingleFillColor,
+		numPixelChanges:  0,
+		pixelChangePos:   -1,
 		frameTime:        time.Now(),
 		logger:           logger,
 	}
@@ -64,6 +83,9 @@ func NewCopyFrameWithEmptyImage(other Frame) Frame {
 		sumHardwarePixel: other.GetSumHardwarePixel(),
 		width:            other.GetWidth(),
 		height:           other.GetHeight(),
+		fillType:         FillTypeFullFrame,
+		numPixelChanges:  0,
+		pixelChangePos:   -1,
 		frameTime:        time.Now(),
 		logger:           other.GetLogger(),
 	}
@@ -86,6 +108,9 @@ func NewCopyFrameFromImage(other Frame, pictureToCopy *image.RGBA) Frame {
 		sumHardwarePixel: other.GetSumHardwarePixel(),
 		width:            other.GetWidth(),
 		height:           other.GetHeight(),
+		fillType:         FillTypeFullFrame,
+		numPixelChanges:  0,
+		pixelChangePos:   -1,
 		frameTime:        time.Now(),
 		logger:           other.GetLogger(),
 	}
@@ -126,18 +151,55 @@ func (f *frame) At(x, y int) color.Color {
 	return f.image.At(x, y)
 }
 
+func (f *frame) RGBAAt(x, y int) color.RGBA {
+	return f.image.RGBAAt(x, y)
+}
+
+func (f *frame) updateFillTypeSet(x, y int) {
+	oldPixelChangePos := f.pixelChangePos
+	f.pixelChangePos = f.image.PixOffset(x, y)
+	if oldPixelChangePos != f.pixelChangePos {
+		f.numPixelChanges++
+		if f.numPixelChanges == 1 {
+			f.fillType = FillTypeSingleFillColor
+		} else {
+			f.fillType = FillTypeFullFrame
+		}
+	}
+}
+
 // Set makes image buffer muteable
 func (f *frame) Set(x, y int, c color.Color) {
+	f.updateFillTypeSet(x, y)
 	f.image.Set(x, y, c)
 }
 
 // SetRGBA makes image buffer muteable
 func (f *frame) SetRGBA(x, y int, c color.RGBA) {
+	f.updateFillTypeSet(x, y)
 	f.image.SetRGBA(x, y, c)
 }
 
-func (f *frame) RGBAAt(x, y int) color.RGBA {
-	return f.image.RGBAAt(x, y)
+// Fill fills the whole image with a color
+func (f *frame) Fill(c color.Color) {
+	f.numPixelChanges = 0
+	f.fillType = FillTypeSingleFillColor
+	for y := 0; y < f.height; y++ {
+		for x := 0; x < f.width; x++ {
+			f.image.Set(x, y, c)
+		}
+	}
+}
+
+// FillRGBA fills the whole image with a RGBA color
+func (f *frame) FillRGBA(c color.RGBA) {
+	f.numPixelChanges = 0
+	f.fillType = FillTypeSingleFillColor
+	for y := 0; y < f.height; y++ {
+		for x := 0; x < f.width; x++ {
+			f.image.SetRGBA(x, y, c)
+		}
+	}
 }
 
 func (f *frame) GetSumHardwarePixel() int {
