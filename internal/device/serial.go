@@ -49,7 +49,6 @@ func (s *serialDevice) SetInput(input <-chan hardware.Frame) {
 
 func (s *serialDevice) Run(wg *sync.WaitGroup) {
 	defer wg.Done()
-	defer s.Close()
 	subWg := new(sync.WaitGroup)
 
 	subWg.Add(4)
@@ -63,6 +62,7 @@ func (s *serialDevice) Run(wg *sync.WaitGroup) {
 
 func (s *serialDevice) runFrameProcessor(wg *sync.WaitGroup) {
 	defer wg.Done()
+	defer s.Close()
 
 	latchDelay := s.com.Config().LatchSleepTime
 	lastFrameTime := time.Now().Add(-latchDelay)

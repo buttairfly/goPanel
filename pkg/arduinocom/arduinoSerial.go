@@ -19,12 +19,12 @@ import (
 type ArduinoCom struct {
 	config     *SerialConfig
 	stream     *serial.Port
-	readActive chan bool
 	initDone   chan bool
 	stats      chan *Stat
 	latched    int64
 	paritySeed byte
 	numLed     int
+	cancelCtx  context.Context
 	logger     *zap.Logger
 	comLogger  *zap.Logger
 }
@@ -35,11 +35,11 @@ type ArduinoCom struct {
 func NewArduinoCom(cancelCtx context.Context, numLed int, sc *SerialConfig, logger *zap.Logger) *ArduinoCom {
 	a := new(ArduinoCom)
 	a.config = sc
-	a.readActive = make(chan bool)
 	a.initDone = make(chan bool)
 	a.stats = make(chan *Stat, 10)
 	a.numLed = numLed
 	a.paritySeed = sc.ParitySeed
+	a.cancelCtx = cancelCtx
 	a.logger = logger
 	a.comLogger = logger // todo update to have a specific comLogger
 	return a
@@ -64,8 +64,6 @@ func (a *ArduinoCom) Open() error {
 
 // Close removes serial arduino stream and all helper channels
 func (a *ArduinoCom) Close() error {
-	close(a.stats)
-	close(a.readActive)
 	err := a.stream.Close()
 	return err
 }
@@ -101,13 +99,16 @@ func (a *ArduinoCom) Init() {
 func (a *ArduinoCom) Read(wg *sync.WaitGroup) {
 	lastLine := ""
 	defer wg.Done()
-	defer a.logger.Info("lastLine", zap.String("read", lastLine))
+	defer func() {
+		if lastLine != "" {
+			a.logger.Info("lastLine", zap.String("read", lastLine))
+		}
+	}()
 
 	buf := make([]byte, a.config.ReadBufferSize)
 	for {
 		select {
-		case <-a.readActive:
-			a.logger.Info("Closed readActive")
+		case <-a.cancelCtx.Done():
 			return
 		default:
 			n, err := a.stream.Read(buf)
@@ -176,16 +177,23 @@ func (a *ArduinoCom) sendInitComand(command string) {
 // PrintStats prints all stats for running serial connection
 func (a *ArduinoCom) PrintStats(wg *sync.WaitGroup) {
 	defer wg.Done()
-	for stat := range a.stats {
-		if stat.Event != LatchStatType {
-			a.logger.Info(
-				"stats logger",
-				zap.String("arduino", string(stat.Event)),
-				zap.String("eventTine", fmt.Sprintf("%02d.%06d", stat.TimeStamp.Second(), stat.TimeStamp.Nanosecond()/int(time.Microsecond))),
-				zap.String("message", stat.Message),
-			)
-		} else {
-			a.latched++
+	for {
+		select {
+		case <-a.cancelCtx.Done():
+			return
+		case stat := <-a.stats:
+			{
+				if stat.Event != LatchStatType {
+					a.logger.Info(
+						"stats logger",
+						zap.String("arduino", string(stat.Event)),
+						zap.String("eventTine", fmt.Sprintf("%02d.%06d", stat.TimeStamp.Second(), stat.TimeStamp.Nanosecond()/int(time.Microsecond))),
+						zap.String("message", stat.Message),
+					)
+				} else {
+					a.latched++
+				}
+			}
 		}
 	}
 }
