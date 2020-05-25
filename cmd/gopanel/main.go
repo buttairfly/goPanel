@@ -43,7 +43,6 @@ func main() {
 	frame := hardware.NewFrame(mainConfig.TileConfigs, logger)
 
 	pixelDevice, err := device.NewLedDevice(
-		cancelCtx,
 		mainConfig.LedDeviceConfig,
 		frame.GetSumHardwarePixel(),
 		logger,
@@ -61,7 +60,7 @@ func main() {
 	wg := new(sync.WaitGroup)
 
 	wg.Add(1)
-	go pixelDevice.Run(wg)
+	go pixelDevice.Run(cancelCtx, wg)
 
 	wg.Add(1)
 	go generator.LastBlackFrameFrameGenerator(cancelCtx, frame, inputChan, wg, logger)

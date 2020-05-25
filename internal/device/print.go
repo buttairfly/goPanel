@@ -16,16 +16,14 @@ type printDevice struct {
 	numPix      int
 	lenHex      int
 	printConfig *PrintConfig
-	cancelCtx   context.Context
 	logger      *zap.Logger
 }
 
 // NewPrintDevice creates a new printDevice
-func NewPrintDevice(cancelCtx context.Context, numPix int, printConfig *PrintConfig, logger *zap.Logger) LedDevice {
+func NewPrintDevice(numPix int, printConfig *PrintConfig, logger *zap.Logger) LedDevice {
 	pd := new(printDevice)
 	pd.numPix = numPix
 	pd.lenHex = numPix * NumBytePerColor * NumByteToRepresentHex
-	pd.cancelCtx = cancelCtx
 	pd.printConfig = printConfig
 	pd.logger = logger
 	return pd
@@ -59,7 +57,7 @@ func (pd *printDevice) SetInput(inputChan <-chan hardware.Frame) {
 	pd.inputChan = inputChan
 }
 
-func (pd *printDevice) Run(wg *sync.WaitGroup) {
+func (pd *printDevice) Run(cancelCtx context.Context, wg *sync.WaitGroup) {
 	defer wg.Done()
 	defer pd.Close()
 	frameDuration := time.Second / time.Duration(pd.printConfig.FramesPerSecond)

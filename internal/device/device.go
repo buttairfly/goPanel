@@ -20,7 +20,7 @@ const (
 // LedDevice interface for all
 type LedDevice interface {
 	Open() error
-	Run(wg *sync.WaitGroup)
+	Run(cancelCtx context.Context, wg *sync.WaitGroup)
 	Write(command string) (int, error)
 	Close() error
 	SetInput(<-chan hardware.Frame)
@@ -28,13 +28,13 @@ type LedDevice interface {
 }
 
 // NewLedDevice creates a new Led device
-func NewLedDevice(cancelCtx context.Context, ledDeviceConfig *LedDeviceConfig, length int, logger *zap.Logger) (LedDevice, error) {
+func NewLedDevice(ledDeviceConfig *LedDeviceConfig, length int, logger *zap.Logger) (LedDevice, error) {
 	var pixelDevice LedDevice
 	switch ledDeviceConfig.Type {
 	case Print:
-		pixelDevice = NewPrintDevice(cancelCtx, length, ledDeviceConfig.PrintConfig, logger)
+		pixelDevice = NewPrintDevice(length, ledDeviceConfig.PrintConfig, logger)
 	case Serial:
-		pixelDevice = NewSerialDevice(cancelCtx, length, ledDeviceConfig.SerialConfig, logger)
+		pixelDevice = NewSerialDevice(length, ledDeviceConfig.SerialConfig, logger)
 	default:
 		return nil, fmt.Errorf("unkown led device type: %v", ledDeviceConfig.Type)
 	}

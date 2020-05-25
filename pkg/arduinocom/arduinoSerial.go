@@ -24,24 +24,20 @@ type ArduinoCom struct {
 	latched    int64
 	paritySeed byte
 	numLed     int
-	cancelCtx  context.Context
 	logger     *zap.Logger
-	comLogger  *zap.Logger
 }
 
 // NewArduinoCom creates a new serial arduino communication
 //
 // Set numLed to 0 when not needed as configureable one time parameter
-func NewArduinoCom(cancelCtx context.Context, numLed int, sc *SerialConfig, logger *zap.Logger) *ArduinoCom {
+func NewArduinoCom(numLed int, sc *SerialConfig, logger *zap.Logger) *ArduinoCom {
 	a := new(ArduinoCom)
 	a.config = sc
 	a.initDone = make(chan bool)
 	a.stats = make(chan *Stat, 10)
 	a.numLed = numLed
 	a.paritySeed = sc.ParitySeed
-	a.cancelCtx = cancelCtx
 	a.logger = logger
-	a.comLogger = logger // todo update to have a specific comLogger
 	return a
 }
 
@@ -96,19 +92,14 @@ func (a *ArduinoCom) Init() {
 // Read is the function to handle arduinoCom reads
 //
 // Read prints ArduinoErrors, when neccesary and shows debug information when configured
-func (a *ArduinoCom) Read(wg *sync.WaitGroup) {
-	lastLine := ""
+func (a *ArduinoCom) Read(cancelCtx context.Context, wg *sync.WaitGroup) {
 	defer wg.Done()
-	defer func() {
-		if lastLine != "" {
-			a.logger.Info("lastLine", zap.String("read", lastLine))
-		}
-	}()
-
+	lastLine := ""
 	buf := make([]byte, a.config.ReadBufferSize)
+
 	for {
 		select {
-		case <-a.cancelCtx.Done():
+		case <-cancelCtx.Done():
 			return
 		default:
 			n, err := a.stream.Read(buf)
@@ -175,11 +166,11 @@ func (a *ArduinoCom) sendInitComand(command string) {
 }
 
 // PrintStats prints all stats for running serial connection
-func (a *ArduinoCom) PrintStats(wg *sync.WaitGroup) {
+func (a *ArduinoCom) PrintStats(cancelCtx context.Context, wg *sync.WaitGroup) {
 	defer wg.Done()
 	for {
 		select {
-		case <-a.cancelCtx.Done():
+		case <-cancelCtx.Done():
 			return
 		case stat := <-a.stats:
 			{

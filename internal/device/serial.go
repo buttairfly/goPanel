@@ -13,20 +13,18 @@ import (
 )
 
 type serialDevice struct {
-	com       *arduinocom.ArduinoCom
-	numLed    int
-	input     <-chan hardware.Frame
-	latched   int64
-	cancelCtx context.Context
-	logger    *zap.Logger
+	com     *arduinocom.ArduinoCom
+	numLed  int
+	input   <-chan hardware.Frame
+	latched int64
+	logger  *zap.Logger
 }
 
 // NewSerialDevice creates a new serial device
-func NewSerialDevice(cancelCtx context.Context, numLed int, serialDeviceConfig *arduinocom.SerialConfig, logger *zap.Logger) LedDevice {
+func NewSerialDevice(numLed int, serialDeviceConfig *arduinocom.SerialConfig, logger *zap.Logger) LedDevice {
 	s := new(serialDevice)
-	s.com = arduinocom.NewArduinoCom(cancelCtx, numLed, serialDeviceConfig, logger)
+	s.com = arduinocom.NewArduinoCom(numLed, serialDeviceConfig, logger)
 	s.numLed = numLed
-	s.cancelCtx = cancelCtx
 	s.logger = logger
 	return s
 }
@@ -47,14 +45,15 @@ func (s *serialDevice) SetInput(input <-chan hardware.Frame) {
 	s.input = input
 }
 
-func (s *serialDevice) Run(wg *sync.WaitGroup) {
+func (s *serialDevice) Run(cancelCtx context.Context, wg *sync.WaitGroup) {
 	defer wg.Done()
-	subWg := new(sync.WaitGroup)
+	defer s.Close()
 
+	subWg := new(sync.WaitGroup)
 	subWg.Add(4)
-	go s.com.Read(subWg)
-	go s.com.PrintStats(subWg)
-	go s.printLatches(subWg)
+	go s.com.Read(cancelCtx, subWg)
+	go s.com.PrintStats(cancelCtx, subWg)
+	go s.printLatches(cancelCtx, subWg)
 	go s.runFrameProcessor(subWg)
 
 	subWg.Wait()
@@ -62,7 +61,6 @@ func (s *serialDevice) Run(wg *sync.WaitGroup) {
 
 func (s *serialDevice) runFrameProcessor(wg *sync.WaitGroup) {
 	defer wg.Done()
-	defer s.Close()
 
 	latchDelay := s.com.Config().LatchSleepTime
 	lastFrameTime := time.Now().Add(-latchDelay)
@@ -112,14 +110,15 @@ func (s *serialDevice) GetType() Type {
 	return Serial
 }
 
-func (s *serialDevice) printLatches(wg *sync.WaitGroup) {
-	defer s.logger.Info("printLatches done")
+func (s *serialDevice) printLatches(cancelCtx context.Context, wg *sync.WaitGroup) {
 	defer wg.Done()
+	defer s.logger.Info("printLatches done")
+
 	start := time.Now()
 	lastLapLatches := int64(0)
 	for {
 		select {
-		case <-s.cancelCtx.Done():
+		case <-cancelCtx.Done():
 			return
 		case <-time.After(30 * time.Second):
 			{
