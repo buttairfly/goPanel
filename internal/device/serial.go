@@ -147,24 +147,34 @@ func (s *serialDevice) shade(pixel int, buffer []uint8) {
 }
 
 func (s *serialDevice) rawFrame(pixel int, frameBuffer []uint8) {
-	currentRawFramePartNumLed := 10
-	for currentRawFramePart := 0; currentRawFramePart < pixel/currentRawFramePartNumLed; currentRawFramePart++ {
+	currentRawFramePartNumLed := s.com.Config().RawFramePartNumLed
+	if currentRawFramePartNumLed == 0 {
+		currentRawFramePartNumLed = pixel
+	}
+	maxRawFrameParts := pixel / currentRawFramePartNumLed
+	for currentRawFramePart := 0; currentRawFramePart < maxRawFrameParts; currentRawFramePart++ {
 		pixelOffset := currentRawFramePart * currentRawFramePartNumLed
-
-		frameString := ""
-		for p := 0; p < currentRawFramePartNumLed; p++ {
-			bufIndex := (pixelOffset + p) * NumBytePerColor
-			color := fmt.Sprintf("%02x%02x%02x", frameBuffer[bufIndex], frameBuffer[bufIndex+1], frameBuffer[bufIndex+2])
-			frameString += color
-		}
-
-		command := fmt.Sprintf("W%04x%02x%02x%s", pixel, currentRawFramePart, currentRawFramePartNumLed, frameString)
-
-		time.Sleep(s.com.Config().LatchSleepTime)
-		s.Write(command)
+		s.rawFramePart(pixel, pixelOffset, currentRawFramePart, currentRawFramePartNumLed, frameBuffer)
+	}
+	remainingRawFramePartNumLed := pixel % currentRawFramePartNumLed
+	if remainingRawFramePartNumLed > 0 {
+		pixelOffset := maxRawFrameParts * currentRawFramePartNumLed
+		s.rawFramePart(pixel, pixelOffset, maxRawFrameParts, remainingRawFramePartNumLed, frameBuffer)
 	}
 	time.Sleep(s.com.Config().LatchSleepTime)
 	s.latchFrame()
+}
+
+func (s *serialDevice) rawFramePart(pixel, pixelOffset, currentRawFramePart, currentRawFramePartNumLed int, frameBuffer []uint8) {
+	frameString := ""
+	for p := 0; p < currentRawFramePartNumLed; p++ {
+		bufIndex := (pixelOffset + p) * NumBytePerColor
+		color := fmt.Sprintf("%02x%02x%02x", frameBuffer[bufIndex], frameBuffer[bufIndex+1], frameBuffer[bufIndex+2])
+		frameString += color
+	}
+	command := fmt.Sprintf("W%04x%02x%02x%s", pixel, currentRawFramePart, currentRawFramePartNumLed, frameString)
+	time.Sleep(s.com.Config().LatchSleepTime)
+	s.Write(command)
 }
 
 func (s *serialDevice) latchFrame() {

@@ -10,6 +10,7 @@ type SerialConfig struct {
 	Verbose            bool                `yaml:"verbose"`
 	VerboseArduino     bool                `yaml:"verboseArduino"`
 	ReadBufferSize     int                 `yaml:"readBufferSize"`
+	RawFramePartNumLed int                 `yaml:"rawFramePartNumLed"`
 	ParitySeed         byte                `yaml:"paritySeed"`
 	InitSleepTime      time.Duration       `yaml:"initSleepTime,omitempty"`
 	LatchSleepTime     time.Duration       `yaml:"latchSleepTime,omitempty"`

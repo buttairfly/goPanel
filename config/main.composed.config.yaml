@@ -9,6 +9,7 @@ ledDeviceConfig:
     verbose: true
     verboseArduino: false
     readBufferSize: 1024
+    rawFramePartNumLed: 10
     paritySeed: 165
     initSleepTime: 30ms
     latchSleepTime: 10.5ms
