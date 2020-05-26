@@ -29,7 +29,7 @@ func main() {
 	ctx := context.Background()
 	cancelCtx := routine.DetectExit(ctx)
 
-	mainVersion := version.New(compileDate, versionTag, 10*time.Second, logger)
+	mainVersion := version.New(version.GetProgramName(), compileDate, versionTag, 10*time.Second, logger)
 	go mainVersion.Run(cancelCtx)
 
 	mainConfigPath := flag.String("config", "config/main.composed.config.yaml", "path to config")
