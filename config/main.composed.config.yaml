@@ -12,7 +12,7 @@ ledDeviceConfig:
     rawFramePartNumLed: 10
     paritySeed: 165
     initSleepTime: 30ms
-    latchSleepTime: 10.5ms
+    latchSleepTime: 5.5ms
     arduinoErrorConfig:
       Elati:
         name: latch timeout

@@ -48,7 +48,7 @@ func TestNewDeviceConfigFile(t *testing.T) {
 					VerboseArduino:     false,
 					ParitySeed:         0xa5,
 					InitSleepTime:      30 * time.Millisecond,
-					LatchSleepTime:     10500 * time.Microsecond,
+					LatchSleepTime:     5500 * time.Microsecond,
 				},
 			},
 			expectedFile: ".config.yaml",

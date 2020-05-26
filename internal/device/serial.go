@@ -137,11 +137,13 @@ func (s *serialDevice) setPixel(pixelNum int, buffer []uint8) {
 	bufIndex := pixelNum * NumBytePerColor
 	command := fmt.Sprintf("P%04x%02x%02x%02x", pixelNum, buffer[bufIndex+0], buffer[bufIndex+1], buffer[bufIndex+2])
 	s.Write(command)
+	time.Sleep(s.com.Config().LatchSleepTime)
 }
 
 func (s *serialDevice) shade(pixel int, buffer []uint8) {
 	command := fmt.Sprintf("S%04x%02x%02x%02x", pixel, buffer[0], buffer[1], buffer[2])
 	s.Write(command)
+	time.Sleep(s.com.Config().LatchSleepTime)
 }
 
 func (s *serialDevice) rawFrame(pixel int, frameBuffer []uint8) {
