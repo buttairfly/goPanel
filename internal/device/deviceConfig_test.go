@@ -59,7 +59,8 @@ func TestNewDeviceConfigFile(t *testing.T) {
 			ledDeviceConfig: &LedDeviceConfig{
 				Type: Print,
 				PrintConfig: &PrintConfig{
-					FramesPerSecond: 100,
+					FramesPerSecond: 1,
+					Quiet:           true,
 				},
 			},
 			expectedFile: ".config.yaml",

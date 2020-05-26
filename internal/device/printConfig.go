@@ -11,7 +11,8 @@ import (
 
 // PrintConfig configures a print device
 type PrintConfig struct {
-	FramesPerSecond int `yaml:"framesPerSecond"`
+	FramesPerSecond int  `yaml:"framesPerSecond"`
+	Quiet           bool `yaml:"quiet,omitempty"`
 }
 
 // NewPrintConfigFromPath returns a new PrintConfig or error

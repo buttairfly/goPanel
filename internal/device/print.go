@@ -39,17 +39,19 @@ func (pd *printDevice) Close() error {
 }
 
 func (pd *printDevice) Write(data string) (int, error) {
-	hexData := fmt.Sprintf("%x", data)
-	if len(hexData) != pd.lenHex {
-		return 0, fmt.Errorf(
-			"len write hexData %v/numBytePerColor=%v/numByteToRepresentHex=%v does not equal numPix %v",
-			len(hexData),
-			pd.numPix,
-			NumBytePerColor,
-			NumByteToRepresentHex,
-		)
+	if !pd.printConfig.Quiet {
+		hexData := fmt.Sprintf("%x", data)
+		if len(hexData) != pd.lenHex {
+			return 0, fmt.Errorf(
+				"len write hexData %v/numBytePerColor=%v/numByteToRepresentHex=%v does not equal numPix %v",
+				len(hexData),
+				pd.numPix,
+				NumBytePerColor,
+				NumByteToRepresentHex,
+			)
+		}
+		pd.logger.Info("printDevice", zap.String("frame", hexData))
 	}
-	pd.logger.Info("printDevice", zap.String("frame", hexData))
 	return len(data), nil
 }
 

@@ -1,3 +1,4 @@
 type: print
 printConfig:
-  framesPerSecond: 100
+  framesPerSecond: 1
+  quiet: true
