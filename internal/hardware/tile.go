@@ -1,6 +1,7 @@
 package hardware
 
 import (
+	"fmt"
 	"image"
 )
 
@@ -8,6 +9,8 @@ import (
 type Tile interface {
 	MapTilePixelToStripePosition(tilePixel image.Point) int
 	MapTilePositionToStipePosition(tileXYPos int) int
+	FramePixelToTilePixel(framePixel image.Point) (image.Point, error)
+	MapFramePixelToStripePosition(framePixel image.Point) (int, error)
 	Bounds() image.Rectangle
 	NumHardwarePixel() int
 	FramePoint(tilePoint image.Point) image.Point
@@ -72,4 +75,23 @@ func (t *tile) NumHardwarePixel() int {
 
 func (t *tile) FramePoint(tilePoint image.Point) image.Point {
 	return t.Bounds().Min.Add(tilePoint)
+}
+
+func (t *tile) isFramePointInTile(framePixel image.Point) bool {
+	return framePixel.In(t.bounds)
+}
+
+func (t *tile) FramePixelToTilePixel(framePixel image.Point) (image.Point, error) {
+	if !t.isFramePointInTile(framePixel) {
+		return image.Pt(-1, -1), fmt.Errorf("FramePoint not in tile")
+	}
+	return framePixel.Sub(t.bounds.Min), nil
+}
+
+func (t *tile) MapFramePixelToStripePosition(framePixel image.Point) (int, error) {
+	tilePixel, err := t.FramePixelToTilePixel(framePixel)
+	if err != nil {
+		return -1, err
+	}
+	return t.MapTilePixelToStripePosition(tilePixel), nil
 }

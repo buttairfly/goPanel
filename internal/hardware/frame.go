@@ -8,11 +8,12 @@ import (
 	"go.uber.org/zap"
 )
 
-type fillType int
+// FrameFillType is an enum which holds the frame fill type
+type FrameFillType int
 
 const (
 	// FillTypeFullFrame is used when a full frame needs transferring
-	FillTypeFullFrame fillType = iota
+	FillTypeFullFrame FrameFillType = iota
 	// FillTypeSinglePixelChange is used when only a single pixel changed
 	FillTypeSinglePixelChange
 	// FillTypeSingleFillColor is used when the frame consists of one color only
@@ -29,6 +30,7 @@ type Frame interface {
 	FillRGBA(c color.RGBA)
 	Fill(c color.Color)
 	RGBAAt(x, y int) color.RGBA
+	GetFillType() FrameFillType
 	GetWidth() int
 	GetHeight() int
 	GetTime() time.Time
@@ -43,8 +45,8 @@ type frame struct {
 	sumHardwarePixel int
 	width, height    int
 	numPixelChanges  int
-	pixelChangePos   int
-	fillType         fillType
+	changedPixel     *image.Point
+	fillType         FrameFillType
 	frameTime        time.Time
 	logger           *zap.Logger
 }
@@ -67,8 +69,6 @@ func NewFrame(tileConfigs TileConfigs, logger *zap.Logger) Frame {
 		width:            frameBounds.Dx(),
 		height:           frameBounds.Dy(),
 		fillType:         FillTypeSingleFillColor,
-		numPixelChanges:  0,
-		pixelChangePos:   -1,
 		frameTime:        time.Now(),
 		logger:           logger,
 	}
@@ -84,8 +84,6 @@ func NewCopyFrameWithEmptyImage(other Frame) Frame {
 		width:            other.GetWidth(),
 		height:           other.GetHeight(),
 		fillType:         FillTypeFullFrame,
-		numPixelChanges:  0,
-		pixelChangePos:   -1,
 		frameTime:        time.Now(),
 		logger:           other.GetLogger(),
 	}
@@ -109,15 +107,19 @@ func NewCopyFrameFromImage(other Frame, pictureToCopy *image.RGBA) Frame {
 		width:            other.GetWidth(),
 		height:           other.GetHeight(),
 		fillType:         FillTypeFullFrame,
-		numPixelChanges:  0,
-		pixelChangePos:   -1,
 		frameTime:        time.Now(),
 		logger:           other.GetLogger(),
 	}
 }
 
 func (f *frame) ToLedStripe() LedStripe {
-	ledStripe := NewLedStripe(f.sumHardwarePixel, f.logger)
+	ledStripe := NewLedStripe(
+		f.sumHardwarePixel,
+		f.numPixelChanges,
+		f.mapChangedPixelToStripePosition(),
+		f.fillType,
+		f.logger,
+	)
 	buffer := ledStripe.GetBuffer()
 	for _, tile := range f.tiles {
 		for x := 0; x < tile.GetWidth(); x++ {
@@ -155,13 +157,13 @@ func (f *frame) RGBAAt(x, y int) color.RGBA {
 	return f.image.RGBAAt(x, y)
 }
 
-func (f *frame) updateFillTypeSet(x, y int) {
-	oldPixelChangePos := f.pixelChangePos
-	f.pixelChangePos = f.image.PixOffset(x, y)
-	if oldPixelChangePos != f.pixelChangePos {
+func (f *frame) updateFillTypeSetPixel(x, y int) {
+	oldChangedPixel := f.changedPixel
+	f.changedPixel = &image.Point{x, y}
+	if oldChangedPixel == nil || !oldChangedPixel.Eq(*f.changedPixel) {
 		f.numPixelChanges++
 		if f.numPixelChanges == 1 {
-			f.fillType = FillTypeSingleFillColor
+			f.fillType = FillTypeSinglePixelChange
 		} else {
 			f.fillType = FillTypeFullFrame
 		}
@@ -170,20 +172,25 @@ func (f *frame) updateFillTypeSet(x, y int) {
 
 // Set makes image buffer muteable
 func (f *frame) Set(x, y int, c color.Color) {
-	f.updateFillTypeSet(x, y)
+	f.updateFillTypeSetPixel(x, y)
 	f.image.Set(x, y, c)
 }
 
 // SetRGBA makes image buffer muteable
 func (f *frame) SetRGBA(x, y int, c color.RGBA) {
-	f.updateFillTypeSet(x, y)
+	f.updateFillTypeSetPixel(x, y)
 	f.image.SetRGBA(x, y, c)
+}
+
+func (f *frame) updateFillTypeFillColor() {
+	f.numPixelChanges = 0
+	f.changedPixel = nil
+	f.fillType = FillTypeSingleFillColor
 }
 
 // Fill fills the whole image with a color
 func (f *frame) Fill(c color.Color) {
-	f.numPixelChanges = 0
-	f.fillType = FillTypeSingleFillColor
+	f.updateFillTypeFillColor()
 	for y := 0; y < f.height; y++ {
 		for x := 0; x < f.width; x++ {
 			f.image.Set(x, y, c)
@@ -193,8 +200,7 @@ func (f *frame) Fill(c color.Color) {
 
 // FillRGBA fills the whole image with a RGBA color
 func (f *frame) FillRGBA(c color.RGBA) {
-	f.numPixelChanges = 0
-	f.fillType = FillTypeSingleFillColor
+	f.updateFillTypeFillColor()
 	for y := 0; y < f.height; y++ {
 		for x := 0; x < f.width; x++ {
 			f.image.SetRGBA(x, y, c)
@@ -218,10 +224,38 @@ func (f *frame) GetTime() time.Time {
 	return f.frameTime
 }
 
+func (f *frame) GetFillType() FrameFillType {
+	return f.fillType
+}
+
 func (f *frame) GetLogger() *zap.Logger {
 	return f.logger
 }
 
 func (f *frame) getTiles() []Tile {
 	return f.tiles
+}
+
+func (f *frame) mapChangedPixelToStripePosition() []int {
+	var stipePositions []int
+	if f.fillType == FillTypeSinglePixelChange {
+		posArray := make([]int, 1)
+		if f.changedPixel == nil {
+			f.logger.Fatal("fillType must not be FillTypeSinglePixelChange with changedPixel unset")
+		}
+		for _, tile := range f.tiles {
+			pos, err := tile.MapFramePixelToStripePosition(*f.changedPixel)
+			if err == nil {
+				posArray = append(posArray, pos)
+			}
+		}
+		if len(posArray) < 1 {
+			f.logger.Sugar().Fatalf(
+				"posArray must not be empty with fillType set to FillTypeSinglePixelChange - changedPixel was %+v",
+				f.changedPixel,
+			)
+		}
+		stipePositions = posArray
+	}
+	return stipePositions
 }

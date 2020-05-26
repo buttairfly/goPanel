@@ -27,7 +27,7 @@ func FrameGenerator(
 	colors := make([]color.Color, 0, 10)
 	colors = append(colors, color.RGBA{0xff, 0, 0, 0xff})
 	colors = append(colors, color.RGBA{0xff, 0xa5, 0, 0xff})
-	const granularity int = 1
+	const granularity int = 100
 	const wrapping bool = true
 	fader := palette.NewFader(colors, granularity, wrapping)
 	increments := fader.GetIncrements()
@@ -36,20 +36,22 @@ func FrameGenerator(
 			color := fader.Fade(increment)
 			for y := 0; y < frame.GetHeight(); y++ {
 				for x := 0; x < frame.GetWidth(); x++ {
+					// TODO: add leaky buffer recycling https://golang.org/doc/effective_go.html#leaky_buffer
+					colorFrame := hardware.NewCopyFrameFromImage(frame, mainPicture)
+					colorFrame.Set(x, y, color)
+					// TODO: change NewCopyFrameFromImage to check on a single pixel frame so mainPicture does not need to get changed
 					mainPicture.Set(x, y, color)
+
+					select {
+					case <-cancelCtx.Done():
+						return
+					default:
+						// TODO: frame counter logic
+						inputChan <- colorFrame
+					}
 				}
 			}
-			// TODO: add leaky buffer recycling https://golang.org/doc/effective_go.html#leaky_buffer
-			colorFrame := hardware.NewCopyFrameFromImage(frame, mainPicture)
 
-			select {
-			case <-cancelCtx.Done():
-				return
-			default:
-				inputChan <- colorFrame
-				// TODO: frame counter logic
-				// logger.Sugar().Infof("send frame %d", colorFrame.GetTime())
-			}
 		}
 	}
 }

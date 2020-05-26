@@ -2,7 +2,6 @@ package generator
 
 import (
 	"context"
-	"image"
 	"image/color"
 	"sync"
 
@@ -23,11 +22,9 @@ func LastBlackFrameFrameGenerator(
 	defer wg.Done()
 	defer close(inputChan)
 
-	mainPicture := image.NewRGBA(frame.Bounds())
-	frame.Fill(color.Black)
-
 	// TODO: add leaky buffer recycling https://golang.org/doc/effective_go.html#leaky_buffer
-	colorFrame := hardware.NewCopyFrameFromImage(frame, mainPicture)
+	colorFrame := hardware.NewCopyFrameWithEmptyImage(frame)
+	colorFrame.Fill(color.Black)
 	select {
 	case <-cancelCtx.Done():
 		inputChan <- colorFrame

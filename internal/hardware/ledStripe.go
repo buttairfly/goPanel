@@ -9,13 +9,16 @@ type LedStripe interface {
 	GetBuffer() []uint8
 	GetPixelLength() int
 	GetColorMap() map[string][]int
-	Compare(other LedStripe) *LedStripeCompare
+	GetAction() *LedStripeAction
 }
 
 type ledStripe struct {
-	buffer      []uint8
-	pixelLength int
-	logger      *zap.Logger
+	buffer          []uint8
+	pixelLength     int
+	numPixelChanges int
+	pixelChangePos  []int
+	fillType        FrameFillType
+	logger          *zap.Logger
 }
 
 func (l *ledStripe) GetBuffer() []uint8 {
@@ -27,13 +30,21 @@ func (l *ledStripe) GetPixelLength() int {
 }
 
 // NewLedStripe creates a new led stripe buffer
-func NewLedStripe(numLed int, logger *zap.Logger) LedStripe {
+func NewLedStripe(
+	numLed, numPixelChanges int,
+	pixelChangePos []int,
+	fillType FrameFillType,
+	logger *zap.Logger,
+) LedStripe {
 	bufferCap := numLed * NumBytePixel
 	buffer := make([]uint8, bufferCap, bufferCap)
 	return &ledStripe{
-		buffer:      buffer,
-		pixelLength: numLed,
-		logger:      logger,
+		buffer:          buffer,
+		pixelLength:     numLed,
+		numPixelChanges: numPixelChanges,
+		pixelChangePos:  pixelChangePos,
+		fillType:        fillType,
+		logger:          logger,
 	}
 }
 
@@ -52,58 +63,24 @@ func (l *ledStripe) GetColorMap() map[string][]int {
 	return colorMap
 }
 
-func (l *ledStripe) Compare(
-	other LedStripe,
-) *LedStripeCompare {
-	if l.pixelLength != other.GetPixelLength() || len(l.buffer) != len(l.GetBuffer()) {
-		l.logger.Fatal("pixel length is not equal",
-			zap.Int("thisStripe", l.pixelLength),
-			zap.Int("otherStripe", other.GetPixelLength()),
-		)
-		return nil
-	}
-	/*
-		change := false
-		fullColor := Pixel(nil)
-		colorMap := l.GetColorMap()
-		maxColor := 0
-		maxColorHex := ""
-		for hexColor, posSlice := range colorMap {
-			maxColor = intmath.Max(maxColor, len(posSlice))
-			maxColorHex = hexColor
+func (l *ledStripe) GetAction() *LedStripeAction {
+	switch l.fillType {
+	case FillTypeFullFrame:
+		return &LedStripeAction{
+			change:    true,
+			fullFrame: true,
 		}
-		if maxColor > l.pixelLength/2 {
-			_, ok := colorMap[maxColorHex]
-			if ok {
-				var err error
-				fullColor, err = NewPixelFromHex(maxColorHex)
-				if err != nil {
-					l.logger.Fatal("pixel from hex", zap.Error(err))
-				}
-			}
-			change = true
+	case FillTypeSinglePixelChange:
+		return &LedStripeAction{
+			change:          true,
+			otherDiffPixels: l.pixelChangePos,
 		}
-		otherDiffPixels := make([]int, 0, l.pixelLength-maxColor+1)
-		oPix := fullColor
-		for i := 0; i < l.pixelLength; i++ {
-			lPix := NewPixelFromSlice(l.buffer, i, l.logger)
-			if fullColor == nil {
-				oPix = NewPixelFromSlice(other.GetBuffer(), i, l.logger)
-			}
-			if !lPix.Equals(oPix) {
-				change = true
-				otherDiffPixels = append(otherDiffPixels, i)
-			}
+	case FillTypeSingleFillColor:
+		return &LedStripeAction{
+			change:    true,
+			fillColor: NewPixelFromSlice(l.buffer, 0, l.logger),
 		}
-		return &LedStripeCompare{
-			change:          change,
-			fullColor:       fullColor,
-			otherDiffPixels: otherDiffPixels,
-		}
-	*/
-	// very dumb approach
-	return &LedStripeCompare{
-		change:    true,
-		fullFrame: true,
+	default:
+		return &LedStripeAction{}
 	}
 }

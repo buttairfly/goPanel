@@ -13,11 +13,11 @@ import (
 )
 
 type serialDevice struct {
-	com     *arduinocom.ArduinoCom
-	numLed  int
-	input   <-chan hardware.Frame
-	latched int64
-	logger  *zap.Logger
+	com       *arduinocom.ArduinoCom
+	numLed    int
+	inputChan <-chan hardware.Frame
+	latched   int64
+	logger    *zap.Logger
 }
 
 // NewSerialDevice creates a new serial device
@@ -41,8 +41,8 @@ func (s *serialDevice) Write(command string) (int, error) {
 	return s.com.CalcParityAndWrite(command)
 }
 
-func (s *serialDevice) SetInput(input <-chan hardware.Frame) {
-	s.input = input
+func (s *serialDevice) SetInput(inputChan <-chan hardware.Frame) {
+	s.inputChan = inputChan
 }
 
 func (s *serialDevice) Run(cancelCtx context.Context, wg *sync.WaitGroup) {
@@ -70,12 +70,11 @@ func (s *serialDevice) runFrameProcessor(wg *sync.WaitGroup) {
 	s.com.Init()
 
 	s.logger.Sugar().Infof("numLed ledStripe %d", s.numLed)
-	lastLedStripe := hardware.NewLedStripe(s.numLed, s.logger)
-	for frame := range s.input {
-		// TODO: fix frame input
+	for frame := range s.inputChan {
+
 		ledStripe := frame.ToLedStripe()
-		ledStripeCompare := ledStripe.Compare(lastLedStripe)
-		if ledStripeCompare.HasChanged() {
+		ledStripeAction := ledStripe.GetAction()
+		if ledStripeAction.HasChanged() {
 			now := time.Now()
 			sleepDuration := latchDelay - (now.Sub(lastFrameTime))
 			stat := &arduinocom.Stat{
@@ -88,20 +87,19 @@ func (s *serialDevice) runFrameProcessor(wg *sync.WaitGroup) {
 				time.Sleep(sleepDuration)
 			}
 			lastFrameTime = now
-			if ledStripeCompare.IsFullFrame() {
+
+			if ledStripeAction.IsFullFrame() {
 				s.rawFrame(s.numLed, ledStripe.GetBuffer())
 			} else {
-				fullColor := ledStripeCompare.GetFullColor()
-				if fullColor != nil {
-					s.shade(s.numLed, fullColor.Slice())
+				fillColor := ledStripeAction.GetFillColor()
+				if fillColor != nil {
+					s.shade(s.numLed, fillColor.Slice())
 				}
-				for _, pixelIndex := range ledStripeCompare.GetOtherDiffPixels() {
+				for _, pixelIndex := range ledStripeAction.GetOtherDiffPixels() {
 					s.setPixel(pixelIndex, ledStripe.GetBuffer())
 				}
 				s.latchFrame()
 			}
-
-			lastLedStripe = ledStripe
 		}
 	}
 }
