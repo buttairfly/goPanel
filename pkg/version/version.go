@@ -18,8 +18,6 @@ type Version struct {
 	logger      *zap.Logger
 }
 
-var programVersion Version
-
 // New initializes returns a new Version struct
 func New(compileDate, tag string, interval time.Duration, logger *zap.Logger) *Version {
 
@@ -46,17 +44,13 @@ func (v *Version) Run(cancelCtx context.Context) {
 		select {
 		case <-cancelCtx.Done():
 			{
-				print("exit")
+				v.logger.Info("exit")
 				return
 			}
 		case <-time.After(v.Interval):
 			{
-				print("version")
+				v.logger.Info("version")
 			}
 		}
 	}
-}
-
-func (v *Version) print(text string) {
-	v.logger.Info(text)
 }
