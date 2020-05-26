@@ -14,6 +14,6 @@ func getVersions(c echo.Context) error {
 }
 
 // Version adds all version routes
-func Version(g *echo.Echo) {
-	g.GET("/versions", getVersions).name = "get-versions"
+func Version(g *echo.Group) {
+	g.GET("/versions", getVersions).Name = "get-versions"
 }
