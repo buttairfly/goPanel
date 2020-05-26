@@ -39,7 +39,6 @@ func New(compileDate, tag string, interval time.Duration, logger *zap.Logger) *V
 
 // Run starts a go routine to print program details in a regular manner into the log
 func (v *Version) Run(cancelCtx context.Context) {
-	print("version")
 	for {
 		select {
 		case <-cancelCtx.Done():

@@ -2,9 +2,11 @@ package routine
 
 import (
 	"context"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 )
 
 // DetectExit detects a interrupt or sigterm signal and closes the returned channel
@@ -15,14 +17,8 @@ func DetectExit(ctx context.Context) context.Context {
 
 	go func() {
 		defer cancel()
-
-		sig := <-signalChannel
-		switch sig {
-		case os.Interrupt:
-			// special treatment for os.Interrupt
-		case syscall.SIGTERM:
-			// special treatment for syscall.SIGTERM
-		}
+		<-signalChannel
+		log.New(os.Stdout, "\t", 0).Printf("%v shutdown", time.Now().Format("2006-01-02T15:04:05.000Z0700"))
 	}()
 	return cancelCtx
 }
