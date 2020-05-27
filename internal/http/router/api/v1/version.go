@@ -10,10 +10,11 @@ import (
 
 // GetVersions returns
 func getVersions(c echo.Context) error {
-	return c.JSON(http.StatusOK, version.Versions)
+	return c.JSON(http.StatusOK, version.GetVersions())
 }
 
 // Version adds all version routes
 func Version(g *echo.Group) {
-	g.GET("/versions", getVersions).Name = "get-versions"
+	versionGroup := g.Group("/version")
+	versionGroup.GET("/all", getVersions).Name = "get-all-versions"
 }

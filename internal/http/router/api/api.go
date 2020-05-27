@@ -9,5 +9,7 @@ import (
 // Router changes the api router
 func Router(e *echo.Echo) {
 	g := e.Group("/api/v1")
+
 	apiv1.Version(g)
+	apiv1.Config(g)
 }

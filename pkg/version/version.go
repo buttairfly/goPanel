@@ -16,8 +16,7 @@ type Version struct {
 	logger      *zap.Logger
 }
 
-// Versions are the
-var Versions []Version
+var versions []Version
 
 // New returns a new Version struct and adds it to the Versions slice
 func New(programName, compileDate, tag string, interval time.Duration, logger *zap.Logger) *Version {
@@ -32,8 +31,13 @@ func New(programName, compileDate, tag string, interval time.Duration, logger *z
 			zap.String("tag", tag),
 		),
 	}
-	Versions = append(Versions, newVersion)
+	versions = append(versions, newVersion)
 	return &newVersion
+}
+
+// GetVersions returns the applied version array
+func GetVersions() []Version {
+	return versions
 }
 
 // Run starts a go routine to print program details in a regular manner into the log
