@@ -1,6 +1,7 @@
 package hardware
 
 import (
+	"encoding/json"
 	"fmt"
 	"image"
 	"io"
@@ -92,6 +93,11 @@ func (mtc *MarshalTileConfig) FromYamlReader(r io.Reader, logger *zap.Logger) er
 		return err
 	}
 	return nil
+}
+
+// MarshalJSON implements the json.Marshaller interface
+func (tc *TileConfig) MarshalJSON() ([]byte, error) {
+	return json.Marshal(tc.ToMarshalTileConfig())
 }
 
 // WriteToYamlFile writes the config to a filePath
