@@ -169,12 +169,12 @@ func TestNewTileConfigSnakeMapFile(t *testing.T) {
 			require.NoError(t, err)
 			require.NotNil(t, genConfig)
 
-			assert.Equal(t, c.numPixel, genConfig.NumHardwarePixel(), "error not enough pixel NumHardwarePixel")
-			assert.Equal(t, c.numPixel, len(genConfig.GetLedStripeMap()), "error not enough pixel GetLedStripeMap")
-			assert.Equal(t, c.generator.connectionOrder, genConfig.GetConnectionOrder(), "error not correct connection order")
+			assert.Equal(t, c.numPixel, genConfig.ToTileConfig().NumHardwarePixel(), "error not enough pixel NumHardwarePixel")
+			assert.Equal(t, c.numPixel, len(genConfig.ToTileConfig().GetLedStripeMap()), "error not enough pixel GetLedStripeMap")
+			assert.Equal(t, c.generator.connectionOrder, genConfig.ToTileConfig().GetConnectionOrder(), "error not correct connection order")
 			assert.Equal(
 				t,
-				image.Rectangle{Min: c.generator.startPoint, Max: c.generator.endPoint}.Canon(), genConfig.GetBounds(),
+				image.Rectangle{Min: c.generator.startPoint, Max: c.generator.endPoint}.Canon(), genConfig.ToTileConfig().GetBounds(),
 				"error not correct bounds",
 			)
 
@@ -195,7 +195,7 @@ func TestNewTileConfigSnakeMapFile(t *testing.T) {
 			testhelper.Diff(t, expectedFile, actualFile)
 
 			for k, v := range c.testPixel {
-				assert.Equal(t, v, genConfig.GetLedStripeMap()[k], "testPixel not equal at pos: %s", k)
+				assert.Equal(t, v, genConfig.ToTileConfig().GetLedStripeMap()[k], "testPixel not equal at pos: %s", k)
 			}
 		})
 	}

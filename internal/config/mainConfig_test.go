@@ -35,7 +35,7 @@ func TestNewMainConfig(t *testing.T) {
 		err          error
 	}{
 		{
-			desc: "main config",
+			desc: "main led config",
 			panelConfig: &PanelConfig{
 				TileConfigPath:         configHardwareFolder,
 				DeviceConfigPath:       configDeviceFolder,
@@ -85,6 +85,7 @@ func TestNewMainConfig(t *testing.T) {
 			}
 
 			genConfig, err := NewMainConfigFromPanelConfigPath(panelFile, logger)
+			logger.Info("genconfig", zap.Any("genconfig", genConfig))
 			require.NoError(t, err)
 			require.NotNil(t, genConfig)
 

@@ -5,6 +5,7 @@ import (
 	"image"
 
 	"github.com/buttairfly/goPanel/internal/intmath"
+	"github.com/buttairfly/goPanel/pkg/marshal"
 )
 
 type direction int
@@ -28,7 +29,7 @@ type TileConfigSnakeGenerator struct {
 }
 
 // NewTileConfigSnakeMapFile creates a new snake tile config
-func NewTileConfigSnakeMapFile(g TileConfigSnakeGenerator) (*TileConfig, error) {
+func NewTileConfigSnakeMapFile(g TileConfigSnakeGenerator) (*MarshalTileConfig, error) {
 	tileBoundsInFrame := image.Rectangle{
 		Min: g.startPoint,
 		Max: g.endPoint,
@@ -95,9 +96,9 @@ func NewTileConfigSnakeMapFile(g TileConfigSnakeGenerator) (*TileConfig, error) 
 			pos++
 		}
 	}
-	return &TileConfig{
+	return &MarshalTileConfig{
 		ConnectionOrder: g.connectionOrder,
-		Bounds:          boundsInFrame,
+		Bounds:          marshal.FromImageRectangle(boundsInFrame),
 		LedStripeMap:    ledStripeMap,
 	}, nil
 }

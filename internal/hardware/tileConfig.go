@@ -1,15 +1,10 @@
 package hardware
 
 import (
-	"encoding/json"
 	"fmt"
 	"image"
-	"io"
-	"io/ioutil"
-	"os"
 
 	"go.uber.org/zap"
-	"gopkg.in/yaml.v2"
 
 	"github.com/buttairfly/goPanel/internal/intmath"
 	"github.com/buttairfly/goPanel/pkg/marshal"
@@ -20,26 +15,9 @@ const MapFormatString = "%2d"
 
 // TileConfig is a struct of a config of one led panel tile
 type TileConfig struct {
-	ConnectionOrder int             `json:"connectionOrder" yaml:"connectionOrder"`
-	Bounds          image.Rectangle `json:"bounds" yaml:"bounds"`
-	LedStripeMap    map[string]int  `json:"ledStripeMap" yaml:"ledStripeMap"`
-}
-
-// MarshalTileConfig is a marshalable TileConfig
-type MarshalTileConfig struct {
-	ConnectionOrder int               `json:"connectionOrder" yaml:"connectionOrder"`
-	Bounds          marshal.Rectangle `json:"bounds" yaml:"bounds"`
-	LedStripeMap    map[string]int    `json:"ledStripeMap" yaml:"ledStripeMap"`
-}
-
-// NewTileConfigFromPath creates a new tile from config filePath
-func NewTileConfigFromPath(filePath string, logger *zap.Logger) (*TileConfig, error) {
-	mtc := new(MarshalTileConfig)
-	err := mtc.FromYamlFile(filePath, logger)
-	if err != nil {
-		return nil, err
-	}
-	return mtc.ToTileConfig(), nil
+	ConnectionOrder int
+	Bounds          image.Rectangle
+	LedStripeMap    map[string]int
 }
 
 // NumHardwarePixel counts the number of actual valid hardware pixels in the config
@@ -73,61 +51,6 @@ func (tc *TileConfig) NumHardwarePixel() int {
 	return numHardwarePixel
 }
 
-// FromYamlFile reads the config from a filePath
-func (mtc *MarshalTileConfig) FromYamlFile(filePath string, logger *zap.Logger) error {
-	f, err := os.Open(filePath)
-	if err != nil {
-		logger.Error("can not read TileConfig file", zap.String("configPath", filePath), zap.Error(err))
-		return err
-	}
-	defer f.Close()
-	return mtc.FromYamlReader(f, logger)
-}
-
-// FromYamlReader decodes the config from io.Reader
-func (mtc *MarshalTileConfig) FromYamlReader(r io.Reader, logger *zap.Logger) error {
-	dec := yaml.NewDecoder(r)
-	err := dec.Decode(mtc)
-	if err != nil {
-		logger.Error("can not decode TileConfig yaml", zap.Error(err))
-		return err
-	}
-	return nil
-}
-
-// MarshalJSON implements the json.Marshaller interface
-func (tc *TileConfig) MarshalJSON() ([]byte, error) {
-	return json.Marshal(tc.ToMarshalTileConfig())
-}
-
-// WriteToYamlFile writes the config to a filePath
-func (tc *TileConfig) WriteToYamlFile(filePath string) error {
-	yamlConfig, err := yaml.Marshal(tc.ToMarshalTileConfig())
-	if err != nil {
-		return err
-	}
-
-	return ioutil.WriteFile(filePath, yamlConfig, 0622)
-}
-
-// ToMarshalTileConfig retruns the marshalable tile config
-func (tc *TileConfig) ToMarshalTileConfig() *MarshalTileConfig {
-	mtc := new(MarshalTileConfig)
-	mtc.ConnectionOrder = tc.ConnectionOrder
-	mtc.Bounds = marshal.FromImageRectangle(tc.Bounds)
-	mtc.LedStripeMap = tc.LedStripeMap
-	return mtc
-}
-
-// ToTileConfig converts the marshalable tile config into a TileConfig
-func (mtc *MarshalTileConfig) ToTileConfig() *TileConfig {
-	tc := new(TileConfig)
-	tc.ConnectionOrder = mtc.ConnectionOrder
-	tc.Bounds = mtc.Bounds.ToImageRectangle()
-	tc.LedStripeMap = mtc.LedStripeMap
-	return tc
-}
-
 // GetBounds retruns the tile image rectangle
 func (tc *TileConfig) GetBounds() image.Rectangle {
 	return tc.Bounds
@@ -150,3 +73,34 @@ func tilePointxyToString(x, y, maxX int) string {
 func tilePositionToString(pos int) string {
 	return fmt.Sprintf(MapFormatString, pos)
 }
+
+// ToMarshalTileConfig retruns the marshalable tile config
+func (tc *TileConfig) ToMarshalTileConfig() *MarshalTileConfig {
+	mtc := new(MarshalTileConfig)
+	mtc.ConnectionOrder = tc.ConnectionOrder
+	mtc.Bounds = marshal.FromImageRectangle(tc.Bounds)
+	mtc.LedStripeMap = tc.LedStripeMap
+	return mtc
+}
+
+/*
+// MarshalJSON implements the json.Marshaller interface
+func (tc *TileConfig) MarshalJSON() ([]byte, error) {
+	return json.Marshal(tc.ToMarshalTileConfig())
+}
+
+// UnmarshalJSON implements the json.Unmarshaller interface
+func (tc *TileConfig) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, tc.ToMarshalTileConfig())
+}
+
+// MarshalYAML implements the yaml.Marshaller interface
+func (tc *TileConfig) MarshalYAML() (interface{}, error) {
+	return yaml.Marshal(tc.ToMarshalTileConfig())
+}
+
+// UnmarshalYAML implements the yaml.UnUnmarshaller interface
+func (tc *TileConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	return unmarshal(tc.ToMarshalTileConfig())
+}
+*/

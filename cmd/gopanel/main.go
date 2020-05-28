@@ -40,7 +40,7 @@ func main() {
 		logger.Fatal("could not load mainConfig", zap.Error(err1))
 	}
 
-	frame := hardware.NewFrame(mainConfig.TileConfigs, logger)
+	frame := hardware.NewFrame(mainConfig.TileConfigs.ToTileConfigs(), logger)
 
 	pixelDevice, err := device.NewLedDevice(
 		mainConfig.LedDeviceConfig,

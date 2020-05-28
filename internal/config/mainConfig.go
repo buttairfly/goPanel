@@ -17,8 +17,8 @@ import (
 
 // MainConfig is the whole program config
 type MainConfig struct {
-	LedDeviceConfig *device.LedDeviceConfig `json:"ledDeviceConfig" yaml:"ledDeviceConfig"`
-	TileConfigs     hardware.TileConfigs    `json:"tileConfigs" yaml:"tileConfigs"`
+	LedDeviceConfig *device.LedDeviceConfig     `json:"ledDeviceConfig" yaml:"ledDeviceConfig"`
+	TileConfigs     hardware.MarshalTileConfigs `json:"tileConfigs" yaml:"tileConfigs"`
 }
 
 var mainConfig *MainConfig
@@ -32,7 +32,7 @@ func NewMainConfigFromPanelConfigPath(filePath string, logger *zap.Logger) (*Mai
 	pc, _ := yaml.Marshal(panelConfig)
 	logger.Info("panelConfig", zap.String("panelConfig", string(pc)), zap.String("filePath", filePath))
 
-	tileConfigs := make(hardware.TileConfigs, len(panelConfig.TileConfigFiles))
+	tileConfigs := make(hardware.MarshalTileConfigs, len(panelConfig.TileConfigFiles))
 	for i, tileConfigFile := range panelConfig.TileConfigFiles {
 		tileConfigs[i], err = hardware.NewTileConfigFromPath(
 			path.Join(panelConfig.TileConfigPath, tileConfigFile),
@@ -101,7 +101,7 @@ func (c *MainConfig) FromYamlFile(filePath string, logger *zap.Logger) error {
 // FromYamlReader decodes the config from io.Reader
 func (c *MainConfig) FromYamlReader(r io.Reader, logger *zap.Logger) error {
 	dec := yaml.NewDecoder(r)
-	err := dec.Decode(&*c)
+	err := dec.Decode(c)
 	if err != nil {
 		logger.Error("can not decode panelConfig yaml", zap.Error(err))
 		return err

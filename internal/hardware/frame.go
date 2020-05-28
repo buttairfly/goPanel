@@ -54,7 +54,7 @@ type frame struct {
 // NewFrame returns a paintable image consisting of many led-panel tiles
 func NewFrame(tileConfigs TileConfigs, logger *zap.Logger) Frame {
 	frameBounds := image.ZR
-	tiles := make([]Tile, tileConfigs.Len())
+	tiles := make([]Tile, len(tileConfigs))
 	numPreviousLedsOnStripe := 0
 	for i, tileConfig := range tileConfigs {
 		frameBounds = frameBounds.Union(tileConfig.GetBounds())
