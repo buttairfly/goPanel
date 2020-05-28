@@ -11,6 +11,7 @@ import (
 	"gopkg.in/yaml.v2"
 
 	"github.com/buttairfly/goPanel/internal/intmath"
+	"github.com/buttairfly/goPanel/pkg/marshal"
 )
 
 // MapFormatString is the string to format the map[string]int led position mapping
@@ -18,19 +19,26 @@ const MapFormatString = "%2d"
 
 // TileConfig is a struct of a config of one led panel tile
 type TileConfig struct {
-	ConnectionOrder int             `yaml:"connectionOrder"`
-	Bounds          image.Rectangle `yaml:"bounds"`
-	LedStripeMap    map[string]int  `yaml:"ledStripeMap"`
+	ConnectionOrder int             `json:"connectionOrder" yaml:"connectionOrder"`
+	Bounds          image.Rectangle `json:"bounds" yaml:"bounds"`
+	LedStripeMap    map[string]int  `json:"ledStripeMap" yaml:"ledStripeMap"`
+}
+
+// MarshalTileConfig is a marshalable TileConfig
+type MarshalTileConfig struct {
+	ConnectionOrder int               `json:"connectionOrder" yaml:"connectionOrder"`
+	Bounds          marshal.Rectangle `json:"bounds" yaml:"bounds"`
+	LedStripeMap    map[string]int    `json:"ledStripeMap" yaml:"ledStripeMap"`
 }
 
 // NewTileConfigFromPath creates a new tile from config filePath
 func NewTileConfigFromPath(filePath string, logger *zap.Logger) (*TileConfig, error) {
-	tc := new(TileConfig)
-	err := tc.FromYamlFile(filePath, logger)
+	mtc := new(MarshalTileConfig)
+	err := mtc.FromYamlFile(filePath, logger)
 	if err != nil {
 		return nil, err
 	}
-	return tc, nil
+	return mtc.ToTileConfig(), nil
 }
 
 // NumHardwarePixel counts the number of actual valid hardware pixels in the config
@@ -65,20 +73,20 @@ func (tc *TileConfig) NumHardwarePixel() int {
 }
 
 // FromYamlFile reads the config from a filePath
-func (tc *TileConfig) FromYamlFile(filePath string, logger *zap.Logger) error {
+func (mtc *MarshalTileConfig) FromYamlFile(filePath string, logger *zap.Logger) error {
 	f, err := os.Open(filePath)
 	if err != nil {
 		logger.Error("can not read TileConfig file", zap.String("configPath", filePath), zap.Error(err))
 		return err
 	}
 	defer f.Close()
-	return tc.FromYamlReader(f, logger)
+	return mtc.FromYamlReader(f, logger)
 }
 
 // FromYamlReader decodes the config from io.Reader
-func (tc *TileConfig) FromYamlReader(r io.Reader, logger *zap.Logger) error {
+func (mtc *MarshalTileConfig) FromYamlReader(r io.Reader, logger *zap.Logger) error {
 	dec := yaml.NewDecoder(r)
-	err := dec.Decode(&*tc)
+	err := dec.Decode(mtc)
 	if err != nil {
 		logger.Error("can not decode TileConfig yaml", zap.Error(err))
 		return err
@@ -88,12 +96,30 @@ func (tc *TileConfig) FromYamlReader(r io.Reader, logger *zap.Logger) error {
 
 // WriteToYamlFile writes the config to a filePath
 func (tc *TileConfig) WriteToYamlFile(filePath string) error {
-	yamlConfig, err := yaml.Marshal(tc)
+	yamlConfig, err := yaml.Marshal(tc.ToMarshalTileConfig())
 	if err != nil {
 		return err
 	}
 
 	return ioutil.WriteFile(filePath, yamlConfig, 0622)
+}
+
+// ToMarshalTileConfig retruns the marshalable tile config
+func (tc *TileConfig) ToMarshalTileConfig() *MarshalTileConfig {
+	mtc := new(MarshalTileConfig)
+	mtc.ConnectionOrder = tc.ConnectionOrder
+	mtc.Bounds = marshal.FromImageRectangle(tc.Bounds)
+	mtc.LedStripeMap = tc.LedStripeMap
+	return mtc
+}
+
+// ToTileConfig converts the marshalable tile config into a TileConfig
+func (mtc *MarshalTileConfig) ToTileConfig() *TileConfig {
+	tc := new(TileConfig)
+	tc.ConnectionOrder = mtc.ConnectionOrder
+	tc.Bounds = mtc.Bounds.ToImageRectangle()
+	tc.LedStripeMap = mtc.LedStripeMap
+	return tc
 }
 
 // GetBounds retruns the tile image rectangle

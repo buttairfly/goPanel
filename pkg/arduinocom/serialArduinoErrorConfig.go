@@ -20,9 +20,9 @@ type ArduinoErrorConfig map[string]ArduinoErrorDescription
 // ArduinoErrorDescription is the description of an single arduino error and
 // its parameters
 type ArduinoErrorDescription struct {
-	Name      string `yaml:"name"`
-	Param     string `yaml:"param,omitempty"`
-	Character string `yaml:"character,omitempty"`
+	Name      string `json:"name" yaml:"name"`
+	Param     string `json:"param,omitempty" yaml:"param,omitempty"`
+	Character string `json:"character,omitempty" yaml:"character,omitempty"`
 }
 
 // NewArduinoErrorConfigFromPath reads a ArduinoErrorConfig from file

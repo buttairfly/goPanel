@@ -13,9 +13,9 @@ import (
 
 // LedDeviceConfig is the config of the type of device
 type LedDeviceConfig struct {
-	Type         Type                     `yaml:"type"`
-	SerialConfig *arduinocom.SerialConfig `yaml:"serialConfig,omitempty"`
-	PrintConfig  *PrintConfig             `yaml:"printConfig,omitempty"`
+	Type         Type                     `json:"type" yaml:"type"`
+	SerialConfig *arduinocom.SerialConfig `json:"serialConfig,omitempty" yaml:"serialConfig,omitempty"`
+	PrintConfig  *PrintConfig             `json:"printConfig,omitempty" yaml:"printConfig,omitempty"`
 }
 
 // NewDeviceConfigFromPath returns a new LedDeviceConfig or error

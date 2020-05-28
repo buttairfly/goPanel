@@ -1,11 +1,11 @@
 connectionOrder: 0
 bounds:
   min:
-    x: 0
-    "y": 0
+    px: 0
+    py: 0
   max:
-    x: 3
-    "y": 3
+    px: 3
+    py: 3
 ledStripeMap:
   ' 0': 0
   ' 1': 5

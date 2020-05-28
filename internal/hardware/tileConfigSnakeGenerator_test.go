@@ -12,11 +12,8 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 
-	"github.com/buttairfly/goPanel/pkg/filereadwriter"
 	"github.com/buttairfly/goPanel/pkg/testhelper"
 )
-
-var _ filereadwriter.Yaml = (*TileConfig)(nil)
 
 func TestNewTileConfigSnakeMapFile(t *testing.T) {
 	logger, _ := zap.NewDevelopment()

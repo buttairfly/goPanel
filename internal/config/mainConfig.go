@@ -17,8 +17,8 @@ import (
 
 // MainConfig is the whole program config
 type MainConfig struct {
-	LedDeviceConfig *device.LedDeviceConfig `yaml:"ledDeviceConfig"`
-	TileConfigs     hardware.TileConfigs    `yaml:"tileConfigs"`
+	LedDeviceConfig *device.LedDeviceConfig `json:"ledDeviceConfig" yaml:"ledDeviceConfig"`
+	TileConfigs     hardware.TileConfigs    `json:"tileConfigs" yaml:"tileConfigs"`
 }
 
 var mainConfig *MainConfig
