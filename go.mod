@@ -5,6 +5,7 @@ go 1.14
 require (
 	github.com/davecgh/go-spew v1.1.1
 	github.com/google/go-cmp v0.4.0
+	github.com/labstack/echo v3.3.10+incompatible
 	github.com/labstack/echo/v4 v4.1.16
 	github.com/lucasb-eyer/go-colorful v1.0.3
 	github.com/stretchr/testify v1.5.1

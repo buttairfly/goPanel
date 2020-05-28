@@ -1,20 +1,14 @@
 package apiv1
 
 import (
-	"net/http"
-
 	"github.com/labstack/echo/v4"
 
-	"github.com/buttairfly/goPanel/internal/config"
+	"github.com/buttairfly/goPanel/internal/http/controller"
 )
-
-// GetVersions returns
-func getMainConfig(c echo.Context) error {
-	return c.JSON(http.StatusOK, config.GetMainConfig())
-}
 
 // Config adds all config routes
 func Config(g *echo.Group) {
 	configGroup := g.Group("/config")
-	configGroup.GET("/all", getMainConfig).Name = "get-main-config"
+	configGroup.GET("/main", controller.GetMainConfig).Name = "get-main-config"
+	configGroup.GET("/consumer", controller.GetConsumerConfig).Name = "get-consumer-config"
 }
