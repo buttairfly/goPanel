@@ -4,8 +4,8 @@ import "image"
 
 // Point is the marshalable version of image.Point
 type Point struct {
-	X int `json:"px" yaml:"px"`
-	Y int `json:"py" yaml:"py"`
+	X int `json:"px" yaml:"px" query:"px"`
+	Y int `json:"py" yaml:"py" query:"py"`
 }
 
 // ToImagePoint converts a marshalable Point to image.Point

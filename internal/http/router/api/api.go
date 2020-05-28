@@ -12,4 +12,5 @@ func Router(e *echo.Echo) {
 
 	apiv1.Version(g)
 	apiv1.Config(g)
+	apiv1.Paint(g)
 }
