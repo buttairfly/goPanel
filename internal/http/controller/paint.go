@@ -19,7 +19,7 @@ type FramePoint struct {
 	Point   marshal.Point `json:"point"`
 }
 
-// ColorAtFrame is a RGBA color at a FramePoint
+// ColorAtFrame is a color at a FramePoint
 type ColorAtFrame struct {
 	FramePoint FramePoint `json:"framePoint"`
 	Color      string     `json:"color"`
