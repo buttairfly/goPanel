@@ -17,6 +17,8 @@ const (
 	NumByteToRepresentHex = 2
 )
 
+var ledDevice LedDevice
+
 // LedDevice interface for all
 type LedDevice interface {
 	Open() error
@@ -25,6 +27,7 @@ type LedDevice interface {
 	Close() error
 	SetInput(<-chan hardware.Frame)
 	GetType() Type
+	GetCurrentFrame() hardware.Frame
 }
 
 // NewLedDevice creates a new Led device
@@ -41,5 +44,11 @@ func NewLedDevice(ledDeviceConfig *LedDeviceConfig, length int, logger *zap.Logg
 	if err := pixelDevice.Open(); err != nil {
 		return nil, err
 	}
+	ledDevice = pixelDevice
 	return pixelDevice, nil
+}
+
+// GetLedDevice gets the current base LedDevice
+func GetLedDevice() LedDevice {
+	return ledDevice
 }

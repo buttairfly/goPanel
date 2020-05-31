@@ -13,11 +13,12 @@ import (
 )
 
 type serialDevice struct {
-	com       *arduinocom.ArduinoCom
-	numLed    int
-	inputChan <-chan hardware.Frame
-	latched   int64
-	logger    *zap.Logger
+	com          *arduinocom.ArduinoCom
+	numLed       int
+	inputChan    <-chan hardware.Frame
+	currentFrame hardware.Frame
+	latched      int64
+	logger       *zap.Logger
 }
 
 // NewSerialDevice creates a new serial device
@@ -71,7 +72,7 @@ func (s *serialDevice) runFrameProcessor(wg *sync.WaitGroup) {
 
 	s.logger.Sugar().Infof("numLed ledStripe %d", s.numLed)
 	for frame := range s.inputChan {
-
+		s.currentFrame = frame
 		ledStripe := frame.ToLedStripe()
 		ledStripeAction := ledStripe.GetAction()
 		if ledStripeAction.HasChanged() {
@@ -106,6 +107,10 @@ func (s *serialDevice) runFrameProcessor(wg *sync.WaitGroup) {
 
 func (s *serialDevice) GetType() Type {
 	return Serial
+}
+
+func (s *serialDevice) GetCurrentFrame() hardware.Frame {
+	return s.currentFrame
 }
 
 func (s *serialDevice) printLatches(cancelCtx context.Context, wg *sync.WaitGroup) {

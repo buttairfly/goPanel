@@ -12,11 +12,12 @@ import (
 )
 
 type printDevice struct {
-	inputChan   <-chan hardware.Frame
-	numPix      int
-	lenHex      int
-	printConfig *PrintConfig
-	logger      *zap.Logger
+	inputChan    <-chan hardware.Frame
+	currentFrame hardware.Frame
+	numPix       int
+	lenHex       int
+	printConfig  *PrintConfig
+	logger       *zap.Logger
 }
 
 // NewPrintDevice creates a new printDevice
@@ -64,7 +65,7 @@ func (pd *printDevice) Run(cancelCtx context.Context, wg *sync.WaitGroup) {
 	defer pd.Close()
 	frameDuration := time.Second / time.Duration(pd.printConfig.FramesPerSecond)
 	for frame := range pd.inputChan {
-
+		pd.currentFrame = frame
 		// TODO: fix frame input
 		// pd.logger.Info("receive frame", zap.Time("frameTime", frame.GetTime()))
 		now := time.Now()
@@ -82,4 +83,8 @@ func (pd *printDevice) Run(cancelCtx context.Context, wg *sync.WaitGroup) {
 
 func (pd *printDevice) GetType() Type {
 	return Print
+}
+
+func (pd *printDevice) GetCurrentFrame() hardware.Frame {
+	return pd.currentFrame
 }
