@@ -14,14 +14,9 @@ import (
 
 // ColorAtFrame is a color at a FramePoint
 type ColorAtFrame struct {
-	FrameID    string     `json:"frameId"`
-	PointColor PointColor `json:"pointColor"`
-}
-
-// PointColor is a color at a point
-type PointColor struct {
-	Point marshal.Point `json:"point"`
-	Color string        `json:"color"`
+	FrameID string        `json:"frameId"`
+	Point   marshal.Point `json:"point,omitempty"`
+	Color   string        `json:"color"`
 }
 
 // GetPixelColor returns the PixelColor as color string
@@ -38,17 +33,15 @@ func GetPixelColor(c echo.Context) error {
 
 	frameID := c.Param("frameId")
 	// TODO: use frameID instead of currentFrame
-	currentFrame := device.GetLedDevice().GetCurrentFrame()
-	if !mp.ToImagePoint().In(currentFrame.Bounds()) {
+	frame := device.GetLedDevice().GetCurrentFrame()
+	if !mp.ToImagePoint().In(frame.Bounds()) {
 		return fmt.Errorf("Point out of bounds of frame x %d y %d", x, y)
 	}
-	color := hardware.NewPixelFromColor(currentFrame.At(x, y))
+	color := hardware.NewPixelFromColor(frame.At(x, y))
 	cf := ColorAtFrame{
 		FrameID: frameID,
-		PointColor: PointColor{
-			Point: mp,
-			Color: color.Hex(),
-		},
+		Point:   mp,
+		Color:   color.Hex(),
 	}
 	return c.JSON(http.StatusOK, cf)
 }
@@ -67,8 +60,8 @@ func SetPixelColor(c echo.Context) error {
 
 	frameID := c.Param("frameId")
 	// TODO: use frameID instead of currentFrame
-	currentFrame := device.GetLedDevice().GetCurrentFrame()
-	if !mp.ToImagePoint().In(currentFrame.Bounds()) {
+	frame := device.GetLedDevice().GetCurrentFrame()
+	if !mp.ToImagePoint().In(frame.Bounds()) {
 		return fmt.Errorf("Point out of bounds of frame x %d y %d", x, y)
 	}
 
@@ -78,14 +71,34 @@ func SetPixelColor(c echo.Context) error {
 	}
 
 	// set pixel
-	currentFrame.Set(x, y, color)
+	frame.Set(x, y, color)
 
 	cf := ColorAtFrame{
 		FrameID: frameID,
-		PointColor: PointColor{
-			Point: mp,
-			Color: color.Hex(),
-		},
+		Point:   mp,
+		Color:   color.Hex(),
+	}
+
+	return c.JSON(http.StatusOK, cf)
+}
+
+// SetFillColor sets the PixelColor at frameId
+func SetFillColor(c echo.Context) error {
+	frameID := c.Param("frameId")
+	// TODO: use frameID instead of currentFrame
+	frame := device.GetLedDevice().GetCurrentFrame()
+
+	color, errColor := hardware.NewPixelFromHex(c.QueryParam("color"))
+	if errColor != nil {
+		return errColor
+	}
+
+	// set pixel
+	frame.Fill(color)
+
+	cf := ColorAtFrame{
+		FrameID: frameID,
+		Color:   color.Hex(),
 	}
 
 	return c.JSON(http.StatusOK, cf)
