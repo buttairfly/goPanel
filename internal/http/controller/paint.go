@@ -6,23 +6,22 @@ import (
 	"strconv"
 
 	"github.com/labstack/echo/v4"
-	"go.uber.org/zap"
 
 	"github.com/buttairfly/goPanel/internal/device"
 	"github.com/buttairfly/goPanel/internal/hardware"
 	"github.com/buttairfly/goPanel/pkg/marshal"
 )
 
-// FramePoint is the point in a specific frame
-type FramePoint struct {
-	FrameID string        `json:"frameId"`
-	Point   marshal.Point `json:"point"`
-}
-
 // ColorAtFrame is a color at a FramePoint
 type ColorAtFrame struct {
-	FramePoint FramePoint `json:"framePoint"`
-	Color      string     `json:"color"`
+	FrameID    string     `json:"frameId"`
+	PointColor PointColor `json:"pointColor"`
+}
+
+// PointColor is a color at a point
+type PointColor struct {
+	Point marshal.Point `json:"point"`
+	Color string        `json:"color"`
 }
 
 // GetPixelColor returns the PixelColor as color string
@@ -36,20 +35,20 @@ func GetPixelColor(c echo.Context) error {
 		return errY
 	}
 	mp := marshal.Point{X: x, Y: y}
-	// check if mp is within frame bounds
 
-	fp := FramePoint{
-		FrameID: c.Param("frameId"),
-		Point:   mp,
-	}
+	frameID := c.Param("frameId")
+	// TODO: use frameID instead of currentFrame
 	currentFrame := device.GetLedDevice().GetCurrentFrame()
-	if !fp.Point.ToImagePoint().In(currentFrame.Bounds()) {
+	if !mp.ToImagePoint().In(currentFrame.Bounds()) {
 		return fmt.Errorf("Point out of bounds of frame x %d y %d", x, y)
 	}
 	color := hardware.NewPixelFromColor(currentFrame.At(x, y))
 	cf := ColorAtFrame{
-		FramePoint: fp,
-		Color:      color.Hex(),
+		FrameID: frameID,
+		PointColor: PointColor{
+			Point: mp,
+			Color: color.Hex(),
+		},
 	}
 	return c.JSON(http.StatusOK, cf)
 }
@@ -65,13 +64,29 @@ func SetPixelColor(c echo.Context) error {
 		return errY
 	}
 	mp := marshal.Point{X: x, Y: y}
-	// check if mp is within frame bounds
 
-	fp := FramePoint{
-		FrameID: c.Param("frameId"),
-		Point:   mp,
+	frameID := c.Param("frameId")
+	// TODO: use frameID instead of currentFrame
+	currentFrame := device.GetLedDevice().GetCurrentFrame()
+	if !mp.ToImagePoint().In(currentFrame.Bounds()) {
+		return fmt.Errorf("Point out of bounds of frame x %d y %d", x, y)
 	}
-	zap.L().Sugar().Infof("%+v", fp)
 
-	return c.JSON(http.StatusOK, fp)
+	color, errColor := hardware.NewPixelFromHex(c.QueryParam("color"))
+	if errColor != nil {
+		return errColor
+	}
+
+	// set pixel
+	currentFrame.Set(x, y, color)
+
+	cf := ColorAtFrame{
+		FrameID: frameID,
+		PointColor: PointColor{
+			Point: mp,
+			Color: color.Hex(),
+		},
+	}
+
+	return c.JSON(http.StatusOK, cf)
 }
