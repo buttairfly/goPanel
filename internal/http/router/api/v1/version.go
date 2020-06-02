@@ -10,4 +10,5 @@ import (
 func Version(g *echo.Group) {
 	versionGroup := g.Group("/version")
 	versionGroup.GET("/all", controller.GetVersions).Name = "get-all-versions"
+	versionGroup.GET("/name/:name", controller.GetVersionByName).Name = "get-version-by-name"
 }
