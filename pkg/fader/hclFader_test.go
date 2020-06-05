@@ -81,7 +81,7 @@ func TestNewHCLFader(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(c.desc, func(t *testing.T) {
-			fader := NewHCLFader(c.colors, c.granularity, c.wrapping)
+			fader := NewHCLFader("", c.colors, c.granularity, c.wrapping)
 			assert.Equal(t, c.expected, fader)
 			for step, expectedColor := range c.stepMap {
 				t.Run(fmt.Sprintf("%s_%f", c.desc, step), func(t *testing.T) {
@@ -147,7 +147,7 @@ func TestFaderIncrements(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(c.desc, func(t *testing.T) {
-			fader := NewHCLFader(c.colors, c.granularity, c.wrapping)
+			fader := NewHCLFader("", c.colors, c.granularity, c.wrapping)
 			increments := fader.GetIncrements()
 			assert.Equal(t, c.expectedLen, len(increments))
 			assert.Equal(t, c.expected, increments)

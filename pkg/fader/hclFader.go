@@ -9,6 +9,7 @@ import (
 
 // Fader struct to fade colors in a palette
 type Fader struct {
+	name        string
 	palette     color.Palette
 	granularity int
 	wrapping    bool
@@ -16,11 +17,11 @@ type Fader struct {
 }
 
 // NewHCLFader creates a Fader from a palette
-func NewHCLFader(palette color.Palette, granularity int, wrapping bool) *Fader {
+func NewHCLFader(name string, palette color.Palette, granularity int, wrapping bool) *Fader {
 	if granularity < 1 {
 		granularity = 1
 	}
-	return &Fader{palette: palette, granularity: granularity, wrapping: wrapping}
+	return &Fader{name: name, palette: palette, granularity: granularity, wrapping: wrapping}
 }
 
 // Convert calls the Palette color convert function

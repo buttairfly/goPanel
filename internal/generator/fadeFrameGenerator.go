@@ -29,7 +29,7 @@ func FrameGenerator(
 	colors = append(colors, color.RGBA{0xff, 0xa5, 0, 0xff})
 	const granularity int = 100
 	const wrapping bool = true
-	hclFader := fader.NewHCLFader(colors, granularity, wrapping)
+	hclFader := fader.NewHCLFader("fadeFrame", colors, granularity, wrapping)
 	increments := hclFader.GetIncrements()
 	for {
 		for _, increment := range increments {
