@@ -16,9 +16,9 @@ var (
 )
 
 var (
-	greenPalette        = &Fader{palette: []color.Color{cGreen}, granularity: 1, wrapping: false}
-	redGreenPalette     = &Fader{palette: []color.Color{cRed, cGreen}, granularity: 1, wrapping: false}
-	redGreenWrapPalette = &Fader{palette: []color.Color{cRed, cGreen}, granularity: 1, wrapping: true}
+	greenPalette        = &HCLFader{palette: []color.Color{cGreen}, granularity: 1, wrapping: false}
+	redGreenPalette     = &HCLFader{palette: []color.Color{cRed, cGreen}, granularity: 1, wrapping: false}
+	redGreenWrapPalette = &HCLFader{palette: []color.Color{cRed, cGreen}, granularity: 1, wrapping: true}
 )
 
 func TestNewHCLFader(t *testing.T) {
@@ -27,12 +27,12 @@ func TestNewHCLFader(t *testing.T) {
 		colors      []color.Color
 		granularity int
 		wrapping    bool
-		expected    *Fader
+		expected    Fader
 		stepMap     map[float64]color.Color
 	}{
 		{
 			desc:     "empty_fader",
-			expected: &Fader{palette: nil, granularity: 1, wrapping: false},
+			expected: &HCLFader{palette: nil, granularity: 1, wrapping: false},
 			stepMap:  map[float64]color.Color{1.0: color.Black},
 		},
 		{

@@ -66,7 +66,7 @@ func main() {
 	go generator.LastBlackFrameFrameGenerator(cancelCtx, frame, inputChan, wg, logger)
 
 	wg.Add(1)
-	go generator.FrameGenerator(cancelCtx, frame, inputChan, wg, logger)
+	go generator.FullFrameFadeGenerator(cancelCtx, "", frame, inputChan, wg, logger)
 
 	go http.RunHTTPServer(logger)
 

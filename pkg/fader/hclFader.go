@@ -7,8 +7,8 @@ import (
 	"github.com/lucasb-eyer/go-colorful"
 )
 
-// Fader struct to fade colors in a palette
-type Fader struct {
+// HCLFader struct to fade colors in a palette
+type HCLFader struct {
 	name        string
 	palette     color.Palette
 	granularity int
@@ -16,26 +16,26 @@ type Fader struct {
 	//luminance   float64
 }
 
-// NewHCLFader creates a Fader from a palette
-func NewHCLFader(name string, palette color.Palette, granularity int, wrapping bool) *Fader {
+// NewHCLFader creates a HCLFader from a palette
+func NewHCLFader(name string, palette color.Palette, granularity int, wrapping bool) Fader {
 	if granularity < 1 {
 		granularity = 1
 	}
-	return &Fader{name: name, palette: palette, granularity: granularity, wrapping: wrapping}
+	return &HCLFader{name: name, palette: palette, granularity: granularity, wrapping: wrapping}
 }
 
 // Convert calls the Palette color convert function
-func (f *Fader) Convert(c color.Color) color.Color {
+func (f *HCLFader) Convert(c color.Color) color.Color {
 	return color.Palette(f.palette).Convert(c)
 }
 
-// Index gets the index of the
-func (f *Fader) Index(c color.Color) int {
+// Index gets the index of the palette
+func (f *HCLFader) Index(c color.Color) int {
 	return color.Palette(f.palette).Index(c)
 }
 
 // AddColor adds a new color to existing fader at pos
-func (f *Fader) AddColor(c color.Color, pos int) {
+func (f *HCLFader) AddColor(c color.Color, pos int) {
 	numColors := len(f.palette)
 	if pos > numColors {
 		pos = numColors
@@ -48,12 +48,12 @@ func (f *Fader) AddColor(c color.Color, pos int) {
 }
 
 // AddLastColor appends a color to the end of the fader
-func (f *Fader) AddLastColor(c color.Color) {
+func (f *HCLFader) AddLastColor(c color.Color) {
 	f.AddColor(c, len(f.palette))
 }
 
 // Fade fades between the colors with equal distance and dependend on step [0.0,1.0]
-func (f *Fader) Fade(step float64) color.Color {
+func (f *HCLFader) Fade(step float64) color.Color {
 	paletteLen := len(f.palette)
 	if paletteLen == 0 {
 		return color.Black
@@ -102,7 +102,7 @@ func (f *Fader) Fade(step float64) color.Color {
 }
 
 // GetIncrements returns the steps array for the Fader
-func (f *Fader) GetIncrements() []float64 {
+func (f *HCLFader) GetIncrements() []float64 {
 	lenPalette := len(f.palette)
 	if lenPalette < 2 {
 		return []float64{0.0}

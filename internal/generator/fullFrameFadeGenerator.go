@@ -12,9 +12,10 @@ import (
 	"github.com/buttairfly/goPanel/pkg/fader"
 )
 
-// FrameGenerator generates a new input frame stream
-func FrameGenerator(
+// FullFrameFadeGenerator generates a new full frame fading frame stream
+func FullFrameFadeGenerator(
 	cancelCtx context.Context,
+	name string,
 	frame hardware.Frame,
 	inputChan chan<- hardware.Frame,
 	wg *sync.WaitGroup,
@@ -29,11 +30,11 @@ func FrameGenerator(
 	colors = append(colors, color.RGBA{0xff, 0xa5, 0, 0xff})
 	const granularity int = 100
 	const wrapping bool = true
-	hclFader := fader.NewHCLFader("fadeFrame", colors, granularity, wrapping)
-	increments := hclFader.GetIncrements()
+	fader := fader.NewHCLFader(name, colors, granularity, wrapping)
+	increments := fader.GetIncrements()
 	for {
 		for _, increment := range increments {
-			color := hclFader.Fade(increment)
+			color := fader.Fade(increment)
 			for y := 0; y < frame.GetHeight(); y++ {
 				for x := 0; x < frame.GetWidth(); x++ {
 					// TODO: add leaky buffer recycling https://golang.org/doc/effective_go.html#leaky_buffer
