@@ -1,4 +1,4 @@
-package palette
+package fader
 
 import (
 	"image/color"
@@ -7,40 +7,34 @@ import (
 	"github.com/lucasb-eyer/go-colorful"
 )
 
-// Fader interface to fade colors in a palette
-type Fader interface {
-	Convert(c color.Color) color.Color
-	Index(c color.Color) int
-	AddColor(c color.Color, pos int)
-	AddLastColor(c color.Color)
-	GetIncrements() []float64
-	Fade(step float64) color.Color
-}
-
-type fader struct {
+// Fader struct to fade colors in a palette
+type Fader struct {
 	palette     color.Palette
 	granularity int
 	wrapping    bool
 	//luminance   float64
 }
 
-// NewFader creates a Fader from a palette
-func NewFader(palette color.Palette, granularity int, wrapping bool) Fader {
+// NewHCLFader creates a Fader from a palette
+func NewHCLFader(palette color.Palette, granularity int, wrapping bool) *Fader {
 	if granularity < 1 {
 		granularity = 1
 	}
-	return &fader{palette: palette, granularity: granularity, wrapping: wrapping}
+	return &Fader{palette: palette, granularity: granularity, wrapping: wrapping}
 }
 
-func (f fader) Convert(c color.Color) color.Color {
+// Convert calls the Palette color convert function
+func (f *Fader) Convert(c color.Color) color.Color {
 	return color.Palette(f.palette).Convert(c)
 }
 
-func (f fader) Index(c color.Color) int {
+// Index gets the index of the
+func (f *Fader) Index(c color.Color) int {
 	return color.Palette(f.palette).Index(c)
 }
 
-func (f fader) AddColor(c color.Color, pos int) {
+// AddColor adds a new color to existing fader at pos
+func (f *Fader) AddColor(c color.Color, pos int) {
 	numColors := len(f.palette)
 	if pos > numColors {
 		pos = numColors
@@ -52,11 +46,13 @@ func (f fader) AddColor(c color.Color, pos int) {
 	}
 }
 
-func (f fader) AddLastColor(c color.Color) {
+// AddLastColor appends a color to the end of the fader
+func (f *Fader) AddLastColor(c color.Color) {
 	f.AddColor(c, len(f.palette))
 }
 
-func (f fader) Fade(step float64) color.Color {
+// Fade fades between the colors with equal distance and dependend on step [0.0,1.0]
+func (f *Fader) Fade(step float64) color.Color {
 	paletteLen := len(f.palette)
 	if paletteLen == 0 {
 		return color.Black
@@ -72,7 +68,7 @@ func (f fader) Fade(step float64) color.Color {
 
 	if step < 0.0 {
 		if f.wrapping {
-			for step < 0.0 { // this may happen more then once
+			for step < 0.0 { // this may happen more than once
 				step += numColorsToFade // it is a subtract since step is negative
 			}
 		} else {
@@ -104,14 +100,17 @@ func (f fader) Fade(step float64) color.Color {
 	return c1.BlendHcl(c2, step-math.Trunc(step)).Clamped()
 }
 
-func (f fader) GetIncrements() []float64 {
+// GetIncrements returns the steps array for the Fader
+func (f *Fader) GetIncrements() []float64 {
 	lenPalette := len(f.palette)
 	if lenPalette < 2 {
 		return []float64{0.0}
 	}
-	numSteps := f.granularity*(lenPalette-1) + 1
+	var numSteps int
 	if f.wrapping {
 		numSteps = f.granularity * lenPalette
+	} else {
+		numSteps = f.granularity*(lenPalette-1) + 1
 	}
 	increments := make([]float64, numSteps)
 	for num := range increments {

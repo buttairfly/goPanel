@@ -10,15 +10,15 @@ import (
 )
 
 var (
-	black             = colorful.Color{R: 0, G: 0, B: 0}
-	red               = colorful.Color{R: 1.0, G: 0, B: 0}
-	green             = colorful.Color{R: 0, G: 1.0, B: 0}
-	redGreen          = colorful.Color{R: 0.8415372297953739, G: 0.6529456392653107, B: 0}
+	pBlack            = colorful.Color{R: 0, G: 0, B: 0}
+	pRed              = colorful.Color{R: 1.0, G: 0, B: 0}
+	pGreen            = colorful.Color{R: 0, G: 1.0, B: 0}
+	cgRedGreen        = colorful.Color{R: 0.8415372297953739, G: 0.6529456392653107, B: 0}
 	emptyPalette      = []paletteColor{}
-	green0Palette     = []paletteColor{{pos: 0.0, color: green}}
-	green1Palette     = []paletteColor{{pos: 1.0, color: green}}
-	green1red0Palette = []paletteColor{{pos: 1.0, color: green}, {pos: 0.0, color: red}}
-	red0green1Palette = []paletteColor{{pos: 0.0, color: red}, {pos: 1.0, color: green}}
+	green0Palette     = []paletteColor{{pos: 0.0, color: pGreen}}
+	green1Palette     = []paletteColor{{pos: 1.0, color: pGreen}}
+	green1red0Palette = []paletteColor{{pos: 1.0, color: pGreen}, {pos: 0.0, color: pRed}}
+	red0green1Palette = []paletteColor{{pos: 0.0, color: pRed}, {pos: 1.0, color: pGreen}}
 )
 
 func TestPaletteAdd(t *testing.T) {
@@ -32,9 +32,9 @@ func TestPaletteAdd(t *testing.T) {
 			desc:     "empty_palette",
 			expected: emptyPalette,
 			stepMap: map[float64]colorful.Color{
-				0.0: black,
-				0.5: black,
-				1.0: black,
+				0.0: pBlack,
+				0.5: pBlack,
+				1.0: pBlack,
 			},
 		},
 		{
@@ -42,9 +42,9 @@ func TestPaletteAdd(t *testing.T) {
 			paletteColors: green0Palette,
 			expected:      green0Palette,
 			stepMap: map[float64]colorful.Color{
-				0.0: green,
-				0.5: green,
-				1.0: green,
+				0.0: pGreen,
+				0.5: pGreen,
+				1.0: pGreen,
 			},
 		},
 		{
@@ -52,9 +52,9 @@ func TestPaletteAdd(t *testing.T) {
 			paletteColors: green1Palette,
 			expected:      green1Palette,
 			stepMap: map[float64]colorful.Color{
-				0.0: green,
-				0.5: green,
-				1.0: green,
+				0.0: pGreen,
+				0.5: pGreen,
+				1.0: pGreen,
 			},
 		},
 		{
@@ -62,9 +62,9 @@ func TestPaletteAdd(t *testing.T) {
 			paletteColors: green1red0Palette,
 			expected:      red0green1Palette,
 			stepMap: map[float64]colorful.Color{
-				0.0: red,
-				0.5: redGreen,
-				1.0: green,
+				0.0: pRed,
+				0.5: cgRedGreen,
+				1.0: pGreen,
 			},
 		},
 	}

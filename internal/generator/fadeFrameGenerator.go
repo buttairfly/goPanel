@@ -9,7 +9,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/buttairfly/goPanel/internal/hardware"
-	"github.com/buttairfly/goPanel/internal/palette"
+	"github.com/buttairfly/goPanel/pkg/fader"
 )
 
 // FrameGenerator generates a new input frame stream
@@ -29,11 +29,11 @@ func FrameGenerator(
 	colors = append(colors, color.RGBA{0xff, 0xa5, 0, 0xff})
 	const granularity int = 100
 	const wrapping bool = true
-	fader := palette.NewFader(colors, granularity, wrapping)
-	increments := fader.GetIncrements()
+	hclFader := fader.NewHCLFader(colors, granularity, wrapping)
+	increments := hclFader.GetIncrements()
 	for {
 		for _, increment := range increments {
-			color := fader.Fade(increment)
+			color := hclFader.Fade(increment)
 			for y := 0; y < frame.GetHeight(); y++ {
 				for x := 0; x < frame.GetWidth(); x++ {
 					// TODO: add leaky buffer recycling https://golang.org/doc/effective_go.html#leaky_buffer
