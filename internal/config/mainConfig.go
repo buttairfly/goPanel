@@ -21,8 +21,6 @@ type MainConfig struct {
 	TileConfigs     hardware.MarshalTileConfigs `json:"tileConfigs" yaml:"tileConfigs"`
 }
 
-var mainConfig *MainConfig
-
 // NewMainConfigFromPanelConfigPath generates a new internal MainConfig struct from PanelConfig file
 func NewMainConfigFromPanelConfigPath(filePath string, logger *zap.Logger) (*MainConfig, error) {
 	panelConfig, err := newPanelConfigFromPath(filePath, logger)
@@ -71,11 +69,6 @@ func NewMainConfigFromPanelConfigPath(filePath string, logger *zap.Logger) (*Mai
 	}, nil
 }
 
-// GetMainConfig returns the parsed main config
-func GetMainConfig() *MainConfig {
-	return mainConfig
-}
-
 // NewMainConfigFromPath gets a MainConfig from filePath
 func NewMainConfigFromPath(filePath string, logger *zap.Logger) (*MainConfig, error) {
 	c := new(MainConfig)
@@ -83,7 +76,6 @@ func NewMainConfigFromPath(filePath string, logger *zap.Logger) (*MainConfig, er
 	if err != nil {
 		return nil, err
 	}
-	mainConfig = c
 	return c, nil
 }
 

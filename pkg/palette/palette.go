@@ -10,8 +10,14 @@ import (
 // Palette is the palette interface
 type Palette interface {
 	sort.Interface
-	Add(c colorful.Color, pos float64)
 	Blend(pos float64) colorful.Color
+	AddAt(c colorful.Color, pos float64)
+	PutAt(c colorful.Color, pos float64)
+	ReplaceAt(c colorful.Color, pos float64) error
+	DeleteAt(pos float64) error
+	MoveAt(pos, toPos float64) error
+	Clear()
+	GetKeyColorAtPos(pos float64) (*colorful.Color, error)
 }
 
 type palette []paletteColor
@@ -23,14 +29,64 @@ type paletteColor struct {
 
 // NewPalette generates a new Palette
 func NewPalette() Palette {
-	p := make(palette, 0, 0)
-	return &p
+	p := new(palette)
+	p.Clear()
+	return p
 }
 
-func (p *palette) Add(c colorful.Color, pos float64) {
+func (p *palette) Clear() {
+	plaetteSlice := make(palette, 0, 0)
+	p = &plaetteSlice
+}
+
+func (p *palette) AddAt(c colorful.Color, pos float64) {
 	pos = guaranteeBetween0And1(pos)
 	*p = append(*p, paletteColor{color: c, pos: pos})
 	sort.Sort(p)
+}
+
+func (p *palette) ReplaceAt(c colorful.Color, pos float64) error {
+	index, err := p.getIndexFromPos(pos)
+	if err != nil {
+		return err
+	}
+	(*p)[index].color = c
+	return nil
+}
+
+func (p *palette) PutAt(c colorful.Color, pos float64) {
+	if err := p.ReplaceAt(c, pos); err != nil {
+		p.AddAt(c, pos)
+	}
+}
+
+func (p *palette) GetKeyColorAtPos(pos float64) (*colorful.Color, error) {
+	index, err := p.getIndexFromPos(pos)
+	if err != nil {
+		return nil, err
+	}
+	return &((*p)[index].color), nil
+}
+
+func (p *palette) MoveAt(pos, toPos float64) error {
+	index, err := p.getIndexFromPos(pos)
+	if err != nil {
+		return err
+	}
+
+	toPos = guaranteeBetween0And1(toPos)
+	(*p)[index].pos = toPos
+	sort.Sort(p)
+	return nil
+}
+
+func (p *palette) DeleteAt(pos float64) error {
+	index, err := p.getIndexFromPos(pos)
+	if err != nil {
+		return err
+	}
+	*p = append((*p)[:index], (*p)[index+1:]...)
+	return nil
 }
 
 func (p *palette) Blend(pos float64) colorful.Color {
@@ -57,6 +113,16 @@ func (p *palette) getInterpolatedColorFor(t float64) colorful.Color {
 
 	// Nothing found? Means we're at (or past) the last gradient keypoint.
 	return (*p)[len(*p)-1].color
+}
+
+func (p *palette) getIndexFromPos(pos float64) (int, error) {
+	pos = guaranteeBetween0And1(pos)
+	for i, pc := range *p {
+		if pc.pos == pos {
+			return i, nil
+		}
+	}
+	return -1, NoKeyColorFoundError(pos)
 }
 
 func guaranteeBetween0And1(pos float64) float64 {

@@ -6,7 +6,7 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/buttairfly/goPanel/internal/intmath"
+	"github.com/buttairfly/goPanel/pkg/intmath"
 	"github.com/buttairfly/goPanel/pkg/marshal"
 )
 

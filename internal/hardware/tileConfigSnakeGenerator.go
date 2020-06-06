@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"image"
 
-	"github.com/buttairfly/goPanel/internal/intmath"
+	"github.com/buttairfly/goPanel/pkg/intmath"
 	"github.com/buttairfly/goPanel/pkg/marshal"
 )
 

@@ -1,5 +1,6 @@
 package fader
 
+/*
 import (
 	"image/color"
 	"math"
@@ -119,3 +120,4 @@ func (f *HCLFader) GetIncrements() []float64 {
 	}
 	return increments
 }
+*/

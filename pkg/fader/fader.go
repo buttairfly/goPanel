@@ -1,11 +1,22 @@
 package fader
 
-import "image/color"
+import "github.com/buttairfly/goPanel/pkg/palette"
 
-type Fader interface {
-	Convert(c color.Color) color.Color
-	Index(c color.Color) int
-	AddColor(c color.Color, pos int)
-	Fade(step float64) color.Color
-	GetIncrements() []float64
+// Fader is a color fader with a state
+type Fader struct {
+	name        string
+	palette     palette.Palette
+	currentPos  float64
+	granularity int
+	wrapping    bool
+}
+
+func NewEmptyFader(name string, start float64, granularity int, wrapping bool) *Fader {
+	return &Fader{
+		name:        name,
+		palette:     palette.NewPalette(),
+		currentPos:  start,
+		granularity: granularity,
+		wrapping:    wrapping,
+	}
 }
