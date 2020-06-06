@@ -67,7 +67,6 @@ func (pd *printDevice) Run(cancelCtx context.Context, wg *sync.WaitGroup) {
 	for frame := range pd.inputChan {
 		pd.currentFrame = frame
 		// TODO: fix frame input
-		// pd.logger.Info("receive frame", zap.Time("frameTime", frame.GetTime()))
 		now := time.Now()
 		sleepDuration := frameDuration - now.Sub(frame.GetTime())
 		// pd.logger.Sugar().Infof("sleepDuration %d, %v, %v", runtime.NumGoroutine(), sleepDuration, frame.GetTime())

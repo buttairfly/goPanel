@@ -3,7 +3,6 @@ package hardware
 import (
 	"image"
 	"image/color"
-	"time"
 
 	"go.uber.org/zap"
 )
@@ -33,7 +32,6 @@ type Frame interface {
 	GetFillType() FrameFillType
 	GetWidth() int
 	GetHeight() int
-	GetTime() time.Time
 	GetLogger() *zap.Logger
 
 	getTiles() []Tile
@@ -47,7 +45,6 @@ type frame struct {
 	numPixelChanges  int
 	changedPixel     *image.Point
 	fillType         FrameFillType
-	frameTime        time.Time
 	logger           *zap.Logger
 }
 
@@ -69,7 +66,6 @@ func NewFrame(tileConfigs TileConfigs, logger *zap.Logger) Frame {
 		width:            frameBounds.Dx(),
 		height:           frameBounds.Dy(),
 		fillType:         FillTypeSingleFillColor,
-		frameTime:        time.Now(),
 		logger:           logger,
 	}
 }
@@ -84,7 +80,6 @@ func NewCopyFrameWithEmptyImage(other Frame) Frame {
 		width:            other.GetWidth(),
 		height:           other.GetHeight(),
 		fillType:         FillTypeFullFrame,
-		frameTime:        time.Now(),
 		logger:           other.GetLogger(),
 	}
 }
@@ -107,7 +102,6 @@ func NewCopyFrameFromImage(other Frame, pictureToCopy *image.RGBA) Frame {
 		width:            other.GetWidth(),
 		height:           other.GetHeight(),
 		fillType:         FillTypeFullFrame,
-		frameTime:        time.Now(),
 		logger:           other.GetLogger(),
 	}
 }
@@ -218,10 +212,6 @@ func (f *frame) GetWidth() int {
 
 func (f *frame) GetHeight() int {
 	return f.height
-}
-
-func (f *frame) GetTime() time.Time {
-	return f.frameTime
 }
 
 func (f *frame) GetFillType() FrameFillType {
