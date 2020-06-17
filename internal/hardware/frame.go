@@ -3,6 +3,7 @@ package hardware
 import (
 	"image"
 	"image/color"
+	"image/draw"
 
 	"go.uber.org/zap"
 )
@@ -21,11 +22,11 @@ const (
 
 // Frame is a hardware frame
 type Frame interface {
-	image.Image
+	draw.Image
+	CopyFromOther(other Frame)
 	ToLedStripe() LedStripe
 	GetSumHardwarePixel() int
 	SetRGBA(x, y int, c color.RGBA)
-	Set(x, y int, c color.Color)
 	FillRGBA(c color.RGBA)
 	Fill(c color.Color)
 	RGBAAt(x, y int) color.RGBA
@@ -102,6 +103,24 @@ func NewCopyFrameFromImage(other Frame, pictureToCopy *image.RGBA) Frame {
 		width:            other.GetWidth(),
 		height:           other.GetHeight(),
 		fillType:         FillTypeFullFrame,
+		logger:           other.GetLogger(),
+	}
+}
+
+func (f *frame) CopyFromOther(other Frame) {
+	newImage := image.NewRGBA(other.Bounds())
+	for x := 0; x < other.GetWidth(); x++ {
+		for y := 0; y < other.GetHeight(); y++ {
+			newImage.SetRGBA(x, y, other.RGBAAt(x, y))
+		}
+	}
+	f = &frame{
+		image:            newImage,
+		tiles:            other.getTiles(),
+		sumHardwarePixel: other.GetSumHardwarePixel(),
+		width:            other.GetWidth(),
+		height:           other.GetHeight(),
+		fillType:         other.GetFillType(),
 		logger:           other.GetLogger(),
 	}
 }

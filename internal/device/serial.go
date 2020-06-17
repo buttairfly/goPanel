@@ -9,13 +9,14 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/buttairfly/goPanel/internal/hardware"
+	"github.com/buttairfly/goPanel/internal/leakybuffer"
 	"github.com/buttairfly/goPanel/pkg/arduinocom"
 )
 
 type serialDevice struct {
 	com          *arduinocom.ArduinoCom
 	numLed       int
-	inputChan    <-chan hardware.Frame
+	inputChan    hardware.FrameSource
 	currentFrame hardware.Frame
 	latched      int64
 	logger       *zap.Logger
@@ -42,7 +43,7 @@ func (s *serialDevice) Write(command string) (int, error) {
 	return s.com.CalcParityAndWrite(command)
 }
 
-func (s *serialDevice) SetInput(inputChan <-chan hardware.Frame) {
+func (s *serialDevice) SetInput(inputChan hardware.FrameSource) {
 	s.inputChan = inputChan
 }
 
@@ -74,6 +75,7 @@ func (s *serialDevice) runFrameProcessor(wg *sync.WaitGroup) {
 	for frame := range s.inputChan {
 		s.currentFrame = frame
 		ledStripe := frame.ToLedStripe()
+
 		ledStripeAction := ledStripe.GetAction()
 		if ledStripeAction.HasChanged() {
 			now := time.Now()
@@ -102,6 +104,7 @@ func (s *serialDevice) runFrameProcessor(wg *sync.WaitGroup) {
 				s.latchFrame()
 			}
 		}
+		leakybuffer.DumpFrame(frame)
 	}
 }
 

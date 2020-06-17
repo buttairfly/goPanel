@@ -35,7 +35,7 @@ func GetPixelColor(c echo.Context) error {
 	// TODO: use frameID instead of currentFrame
 	frame := device.GetLedDevice().GetCurrentFrame()
 	if !mp.ToImagePoint().In(frame.Bounds()) {
-		return fmt.Errorf("Point out of bounds of frame x %d y %d", x, y)
+		return fmt.Errorf("Point out of bounds of frame %s x %d y %d", frameID, x, y)
 	}
 	color := hardware.NewPixelFromColor(frame.At(x, y))
 	cf := ColorAtFrame{
@@ -62,7 +62,7 @@ func SetPixelColor(c echo.Context) error {
 	// TODO: use frameID instead of currentFrame
 	frame := device.GetLedDevice().GetCurrentFrame()
 	if !mp.ToImagePoint().In(frame.Bounds()) {
-		return fmt.Errorf("Point out of bounds of frame x %d y %d", x, y)
+		return fmt.Errorf("Point out of bounds of frame %s x %d y %d", frameID, x, y)
 	}
 
 	color, errColor := hardware.NewPixelFromHex(c.QueryParam("color"))

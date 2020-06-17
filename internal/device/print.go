@@ -9,10 +9,11 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/buttairfly/goPanel/internal/hardware"
+	"github.com/buttairfly/goPanel/internal/leakybuffer"
 )
 
 type printDevice struct {
-	inputChan    <-chan hardware.Frame
+	inputChan    hardware.FrameSource
 	currentFrame hardware.Frame
 	numPix       int
 	lenHex       int
@@ -56,7 +57,7 @@ func (pd *printDevice) Write(data string) (int, error) {
 	return len(data), nil
 }
 
-func (pd *printDevice) SetInput(inputChan <-chan hardware.Frame) {
+func (pd *printDevice) SetInput(inputChan hardware.FrameSource) {
 	pd.inputChan = inputChan
 }
 
@@ -64,11 +65,12 @@ func (pd *printDevice) Run(cancelCtx context.Context, wg *sync.WaitGroup) {
 	defer wg.Done()
 	defer pd.Close()
 	frameDuration := time.Second / time.Duration(pd.printConfig.FramesPerSecond)
+	lastFrameTime := time.Unix(0, 0)
 	for frame := range pd.inputChan {
+		now := time.Now()
 		pd.currentFrame = frame
 		// TODO: fix frame input
-		now := time.Now()
-		sleepDuration := frameDuration - now.Sub(frame.GetTime())
+		sleepDuration := frameDuration - now.Sub(lastFrameTime)
 		// pd.logger.Sugar().Infof("sleepDuration %d, %v, %v", runtime.NumGoroutine(), sleepDuration, frame.GetTime())
 
 		if sleepDuration > 0 {
@@ -77,6 +79,8 @@ func (pd *printDevice) Run(cancelCtx context.Context, wg *sync.WaitGroup) {
 		if _, err := pd.Write(string(frame.ToLedStripe().GetBuffer())); err != nil {
 			pd.logger.Fatal("write error", zap.Error(err))
 		}
+		leakybuffer.DumpFrame(frame)
+		lastFrameTime = now
 	}
 }
 

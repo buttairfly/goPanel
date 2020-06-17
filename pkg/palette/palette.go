@@ -14,10 +14,10 @@ type Palette interface {
 	AddAt(c colorful.Color, pos float64)
 	PutAt(c colorful.Color, pos float64)
 	ReplaceAt(c colorful.Color, pos float64) error
+	GetKeyColorAtPos(pos float64) (*colorful.Color, error)
 	DeleteAt(pos float64) error
 	MoveAt(pos, toPos float64) error
 	Clear()
-	GetKeyColorAtPos(pos float64) (*colorful.Color, error)
 }
 
 type palette []paletteColor

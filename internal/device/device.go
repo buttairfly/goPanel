@@ -25,7 +25,7 @@ type LedDevice interface {
 	Run(cancelCtx context.Context, wg *sync.WaitGroup)
 	Write(command string) (int, error)
 	Close() error
-	SetInput(<-chan hardware.Frame)
+	SetInput(hardware.FrameSource)
 	GetType() Type
 	GetCurrentFrame() hardware.Frame
 }

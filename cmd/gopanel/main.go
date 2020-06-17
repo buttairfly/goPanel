@@ -10,9 +10,9 @@ import (
 
 	"github.com/buttairfly/goPanel/internal/config"
 	"github.com/buttairfly/goPanel/internal/device"
-	"github.com/buttairfly/goPanel/internal/generator"
 	"github.com/buttairfly/goPanel/internal/hardware"
 	"github.com/buttairfly/goPanel/internal/http"
+	"github.com/buttairfly/goPanel/internal/panel"
 	"github.com/buttairfly/goPanel/pkg/log"
 	"github.com/buttairfly/goPanel/pkg/routine"
 	"github.com/buttairfly/goPanel/pkg/version"
@@ -52,21 +52,16 @@ func main() {
 	}
 	defer pixelDevice.Close()
 
+	wg := new(sync.WaitGroup)
+	panel.NewPanel(cancelCtx, mainConfig, pixelDevice, wg, logger)
+
 	inputChan := make(chan hardware.Frame)
-	// inputChan is closed in LastBlackFrameFrameGenerator
+	// inputChan is closed in LastBlackFrameGenerator
 
 	pixelDevice.SetInput(inputChan)
 
-	wg := new(sync.WaitGroup)
-
 	wg.Add(1)
 	go pixelDevice.Run(cancelCtx, wg)
-
-	wg.Add(1)
-	go generator.LastBlackFrameFrameGenerator(cancelCtx, frame, inputChan, wg, logger)
-
-	wg.Add(1)
-	go generator.FullFrameFadeGenerator(cancelCtx, "", frame, inputChan, wg, logger)
 
 	go http.RunHTTPServer(logger)
 
