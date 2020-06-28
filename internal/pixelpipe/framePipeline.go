@@ -3,7 +3,6 @@ package pixelpipe
 import (
 	"context"
 	"sync"
-	"sync/atomic"
 
 	"go.uber.org/zap"
 
@@ -13,35 +12,32 @@ import (
 // FramePipeline is a struct which defines a source
 type FramePipeline struct {
 	destroyCtx        context.Context
-	count             int32
+	running           bool
 	rebuild           chan bool
-	rebuildDone       chan bool
-	emptyPipeline     chan bool
+	frameWg           *sync.WaitGroup
 	internalInputChan chan hardware.Frame
 
 	pipe       *Pipe
 	logger     *zap.Logger
-	pixelPipes map[string]PixelPiper
+	pixelPipes map[ID]PixelPiper
+	lastPipe   ID
 }
 
 // NewEmptyFramePipeline creates a new, empty FramePipeline
 func NewEmptyFramePipeline(destroyCtx context.Context, id ID, logger *zap.Logger) *FramePipeline {
-	pixelPipes := make(map[string]PixelPiper)
+	pixelPipes := make(map[ID]PixelPiper)
 	rebuild := make(chan bool)
-	rebuildDone := make(chan bool)
-	emptyPipeline := make(chan bool)
 	outputChan := make(chan hardware.Frame)
-	internalInputChan := make(chan hardware.Frame)
 
 	return &FramePipeline{
 		destroyCtx:        destroyCtx,
 		rebuild:           rebuild,
-		emptyPipeline:     emptyPipeline,
-		rebuildDone:       rebuildDone,
-		internalInputChan: internalInputChan,
+		frameWg:           new(sync.WaitGroup),
+		internalInputChan: outputChan,
 		pipe:              NewPipe(id, outputChan),
 		logger:            logger,
 		pixelPipes:        pixelPipes,
+		lastPipe:          EmptyID,
 	}
 }
 
@@ -49,40 +45,45 @@ func NewEmptyFramePipeline(destroyCtx context.Context, id ID, logger *zap.Logger
 func (me *FramePipeline) RunPipe(wg *sync.WaitGroup) {
 	defer wg.Done()
 	defer close(me.pipe.outputChan)
+	me.running = true
+
 	subWg := new(sync.WaitGroup)
+	defer subWg.Wait()
+
+	subWg.Add(1)
+
+	go me.processOutgoingFrames(context.TODO(), subWg)
+
+	me.startPipePieces(subWg)
 
 	for {
-		if inputChannelClosed := me.runInternalPipe(); inputChannelClosed {
-			<-me.emptyPipeline
+		if inputClosed := me.runInternalPipe(); inputClosed {
 			return
 		}
-		<-me.emptyPipeline
+		me.frameWg = new(sync.WaitGroup)
 		me.rebuild = make(chan bool)
 
-		// rebuild pipeline
+		// wait until pipeline rebuild is ready
 	}
-
-	subWg.Wait()
 }
 
 func (me *FramePipeline) runInternalPipe() bool {
-	defer close(me.rebuild)
+	defer me.frameWg.Wait()
 	for {
 		select {
 		case <-me.rebuild:
 			return false
 		default:
 		}
-		if inputChannelClosed := me.processFrame(); inputChannelClosed {
+		if inputClosed := me.processIncommingFrame(); inputClosed {
 			return true
 		}
 	}
 }
 
-func (me *FramePipeline) processFrame() bool {
-	defer me.decFrameCount()
-	me.incFrameCount()
-	inputFrame, ok := <-me.pipe.inputChan
+func (me *FramePipeline) processIncommingFrame() bool {
+	me.frameWg.Add(1)
+	inputFrame, ok := <-me.pipe.GetInput()
 	if !ok {
 		close(me.internalInputChan)
 		return true
@@ -91,10 +92,30 @@ func (me *FramePipeline) processFrame() bool {
 	return false
 }
 
+func (me *FramePipeline) startPipePieces(wg *sync.WaitGroup) {
+	wg.Add(len(me.pixelPipes))
+	for _, pipe := range me.pixelPipes {
+		go pipe.RunPipe(wg)
+	}
+}
+
+func (me *FramePipeline) processOutgoingFrames(ctx context.Context, wg *sync.WaitGroup) {
+	defer wg.Done()
+	for outputFrame := range me.pixelPipes[me.lastPipe].GetOutput(me.lastPipe) {
+		me.pipe.GetFullOutput() <- outputFrame
+		me.frameWg.Done()
+		select {
+		case <-ctx.Done():
+			return
+		default:
+		}
+	}
+}
+
 // GetOutput implements PixelPiper interface
 func (me *FramePipeline) GetOutput(id ID) hardware.FrameSource {
 	if id == me.GetID() {
-		return me.pipe.GetOutput()
+		return me.pipe.GetOutput(id)
 	}
 	me.logger.Fatal("OutputIDMismatchError", zap.Error(OutputIDMismatchError("simplePipeIntersection", me.GetID(), id)))
 	return nil
@@ -102,7 +123,7 @@ func (me *FramePipeline) GetOutput(id ID) hardware.FrameSource {
 
 // SetInput implements PixelPiper interface
 func (me *FramePipeline) SetInput(inputID ID, inputChan hardware.FrameSource) {
-	me.pipe.SetInput(inputChan)
+	me.pipe.SetInput(inputID, inputChan)
 }
 
 // GetID implements PixelPiper interface
@@ -110,17 +131,43 @@ func (me *FramePipeline) GetID() ID {
 	return me.pipe.GetID()
 }
 
-func (me *FramePipeline) incFrameCount() {
-	atomic.AddInt32(&me.count, 1)
+// AddPipeBefore adds a pipe segment before id
+func (me *FramePipeline) AddPipeBefore(id ID, newPipe PixelPiper) {
+	if me.running {
+		// stop pipeline and wait until all frames are empty
+		close(me.rebuild)
+		me.frameWg.Wait()
+	}
+	me.addPipeBefore(id, newPipe)
 }
 
-func (me *FramePipeline) decFrameCount() {
-	atomic.AddInt32(&me.count, -1)
-	switch {
-	case <-me.rebuild:
-		if atomic.CompareAndSwapInt32(&me.count, 0, 0) {
-			me.emptyPipeline <- true
+func (me *FramePipeline) addPipeBefore(id ID, newPipe PixelPiper) {
+	if newPipe.GetID() != id {
+		// actually insert pipe
+		basePipe, ok := me.pixelPipes[id]
+		if !ok {
+			basePipe = me.pipe
 		}
-	default:
+		prevID := EmptyID
+		if id != EmptyID {
+			prevID = basePipe.GetPrevID()
+		}
+		if prevID != EmptyID {
+			newPipe.SetInput(prevID, me.pixelPipes[prevID].GetOutput(newPipe.GetID()))
+		} else {
+			newPipe.SetInput(EmptyID, me.internalInputChan)
+		}
+
+		if me.lastPipe != EmptyID {
+			basePipe.SetInput(newPipe.GetID(), newPipe.GetOutput(newPipe.GetID()))
+		} else {
+			me.pipe.SetInput(newPipe.GetID(), newPipe.GetOutput(newPipe.GetID()))
+		}
+
+		me.pixelPipes[newPipe.GetID()] = newPipe
+		return
 	}
+
+	// replace pipe
+
 }

@@ -34,7 +34,7 @@ func NewLastBlackFramePipe(
 
 func (me *lastBlackFramePipe) RunPipe(wg *sync.WaitGroup) {
 	defer wg.Done()
-	defer close(me.pipe.GetOutput())
+	defer close(me.pipe.GetFullOutput())
 
 	// first get a frame; if not, just return
 	select {
@@ -51,11 +51,11 @@ func (me *lastBlackFramePipe) RunPipe(wg *sync.WaitGroup) {
 
 		// just pass trough all colorFrames
 		for colorFrame := range me.pipe.GetInput() {
-			me.pipe.GetOutput() <- colorFrame
+			me.pipe.GetFullOutput() <- colorFrame
 		}
 
 		// input chan is closed
-		me.pipe.GetOutput() <- emptyFrame
+		me.pipe.GetFullOutput() <- emptyFrame
 	}
 }
 
@@ -63,14 +63,18 @@ func (me *lastBlackFramePipe) GetID() pixelpipe.ID {
 	return me.pipe.GetID()
 }
 
+func (me *lastBlackFramePipe) GetPrevID() pixelpipe.ID {
+	return me.pipe.GetPrevID()
+}
+
 func (me *lastBlackFramePipe) GetOutput(id pixelpipe.ID) hardware.FrameSource {
 	if id == me.GetID() {
-		return me.pipe.GetOutput()
+		return me.pipe.GetOutput(id)
 	}
 	me.logger.Fatal("OutputIDMismatchError", zap.Error(pixelpipe.OutputIDMismatchError("simplePipeIntersection", me.GetID(), id)))
 	return nil
 }
 
 func (me *lastBlackFramePipe) SetInput(inputID pixelpipe.ID, inputChan hardware.FrameSource) {
-	me.pipe.SetInput(inputChan)
+	me.pipe.SetInput(inputID, inputChan)
 }

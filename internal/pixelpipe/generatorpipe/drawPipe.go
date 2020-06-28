@@ -49,7 +49,7 @@ func DrawPipe(
 
 func (me *drawPipe) RunPipe(wg *sync.WaitGroup) {
 	defer wg.Done()
-	defer close(me.pipe.GetOutput())
+	defer close(me.pipe.GetFullOutput())
 	for frame := range me.pipe.GetInput() {
 		isClosed := me.interpretCommand(frame)
 		if !isClosed {
@@ -58,7 +58,7 @@ func (me *drawPipe) RunPipe(wg *sync.WaitGroup) {
 		}
 
 		// TODO: frame counter logic
-		me.pipe.GetOutput() <- frame
+		me.pipe.GetFullOutput() <- frame
 	}
 }
 
@@ -66,16 +66,20 @@ func (me *drawPipe) GetID() pixelpipe.ID {
 	return me.pipe.GetID()
 }
 
+func (me *drawPipe) GetPrevID() pixelpipe.ID {
+	return me.pipe.GetPrevID()
+}
+
 func (me *drawPipe) GetOutput(id pixelpipe.ID) hardware.FrameSource {
 	if id == me.GetID() {
-		return me.pipe.GetOutput()
+		return me.pipe.GetOutput(id)
 	}
 	me.logger.Fatal("OutputIDMismatchError", zap.Error(pixelpipe.OutputIDMismatchError("simplePipeIntersection", me.GetID(), id)))
 	return nil
 }
 
 func (me *drawPipe) SetInput(inputID pixelpipe.ID, inputChan hardware.FrameSource) {
-	me.pipe.SetInput(inputChan)
+	me.pipe.SetInput(inputID, inputChan)
 }
 
 func (me *drawPipe) interpretCommand(frame hardware.Frame) bool {

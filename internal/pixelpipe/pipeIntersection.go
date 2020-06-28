@@ -11,6 +11,7 @@ import (
 
 type simplePipeIntersection struct {
 	id         ID
+	prevIds    map[ID]ID
 	inputs     map[ID]hardware.FrameSource
 	emptyInput hardware.FrameSource
 	outputs    map[ID]chan hardware.Frame
@@ -33,8 +34,8 @@ func NewSimplePipeIntersection(
 	return &simplePipeIntersection{
 		id:         id,
 		inputs:     inputs,
-		emptyInput: emptyInput,
 		outputs:    outputs,
+		emptyInput: emptyInput,
 		logger:     logger,
 	}
 }
@@ -88,6 +89,11 @@ func (me *simplePipeIntersection) SetInput(inputID ID, inputChan hardware.FrameS
 }
 
 func (me *simplePipeIntersection) GetID() ID {
+	return me.id
+}
+
+func (me *simplePipeIntersection) GetPrevID() ID {
+	// TODO fix function
 	return me.id
 }
 

@@ -42,7 +42,7 @@ func FullFrameFadePipe(
 
 func (me *fullFrameFadePipe) RunPipe(wg *sync.WaitGroup) {
 	defer wg.Done()
-	defer close(me.pipe.GetOutput())
+	defer close(me.pipe.GetFullOutput())
 
 	step := 1.0 / float64(me.numSteps)
 	for {
@@ -54,7 +54,7 @@ func (me *fullFrameFadePipe) RunPipe(wg *sync.WaitGroup) {
 			color := me.palette.Blend(step * float64(i))
 			colorFrame.Fill(color)
 			// TODO: frame counter logic
-			me.pipe.GetOutput() <- colorFrame
+			me.pipe.GetFullOutput() <- colorFrame
 		}
 	}
 }
@@ -63,14 +63,18 @@ func (me *fullFrameFadePipe) GetID() pixelpipe.ID {
 	return me.pipe.GetID()
 }
 
+func (me *fullFrameFadePipe) GetPrevID() pixelpipe.ID {
+	return me.pipe.GetPrevID()
+}
+
 func (me *fullFrameFadePipe) GetOutput(id pixelpipe.ID) hardware.FrameSource {
 	if id == me.GetID() {
-		return me.pipe.GetOutput()
+		return me.pipe.GetOutput(id)
 	}
 	me.logger.Fatal("OutputIDMismatchError", zap.Error(pixelpipe.OutputIDMismatchError("simplePipeIntersection", me.GetID(), id)))
 	return nil
 }
 
 func (me *fullFrameFadePipe) SetInput(inputID pixelpipe.ID, inputChan hardware.FrameSource) {
-	me.pipe.SetInput(inputChan)
+	me.pipe.SetInput(inputID, inputChan)
 }
