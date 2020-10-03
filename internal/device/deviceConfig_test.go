@@ -60,7 +60,7 @@ func TestNewDeviceConfigFile(t *testing.T) {
 				Type: Print,
 				PrintConfig: &PrintConfig{
 					FramesPerSecond: 1,
-					Quiet:           true,
+					Quiet:           false,
 				},
 			},
 			expectedFile: ".config.yaml",

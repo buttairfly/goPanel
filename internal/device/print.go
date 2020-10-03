@@ -3,6 +3,7 @@ package device
 import (
 	"context"
 	"fmt"
+	"runtime"
 	"sync"
 	"time"
 
@@ -21,7 +22,7 @@ type printDevice struct {
 	logger       *zap.Logger
 }
 
-// NewPrintDevice creates a new printDevice
+// NewPrintDevice creates a new printDevice as LedDevice
 func NewPrintDevice(numPix int, printConfig *PrintConfig, logger *zap.Logger) LedDevice {
 	pd := new(printDevice)
 	pd.numPix = numPix
@@ -58,6 +59,7 @@ func (pd *printDevice) Write(data string) (int, error) {
 }
 
 func (pd *printDevice) SetInput(inputChan hardware.FrameSource) {
+	pd.logger.Debug("printDevice SetInput")
 	pd.inputChan = inputChan
 }
 
@@ -71,7 +73,7 @@ func (pd *printDevice) Run(cancelCtx context.Context, wg *sync.WaitGroup) {
 		pd.currentFrame = frame
 		// TODO: fix frame input
 		sleepDuration := frameDuration - now.Sub(lastFrameTime)
-		// pd.logger.Sugar().Infof("sleepDuration %d, %v, %v", runtime.NumGoroutine(), sleepDuration, frame.GetTime())
+		pd.logger.Sugar().Infof("sleepDuration %d, %v", runtime.NumGoroutine(), sleepDuration)
 
 		if sleepDuration > 0 {
 			time.Sleep(sleepDuration)

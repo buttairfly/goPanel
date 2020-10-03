@@ -2,7 +2,7 @@ ledDeviceConfig:
   type: print
   printConfig:
     framesPerSecond: 1
-    quiet: true
+    quiet: false
 tileConfigs:
 - connectionOrder: 0
   bounds:
