@@ -3,6 +3,7 @@ package device
 import (
 	"context"
 	"fmt"
+	"runtime"
 	"sync"
 	"time"
 
@@ -64,12 +65,13 @@ func (pd *printDevice) Run(cancelCtx context.Context, wg *sync.WaitGroup) {
 	defer wg.Done()
 	defer pd.Close()
 	frameDuration := time.Second / time.Duration(pd.printConfig.FramesPerSecond)
+	lastFrameTime := time.Unix(0, 0)
 	for frame := range pd.inputChan {
 		pd.currentFrame = frame
 		// TODO: fix frame input
 		now := time.Now()
-		sleepDuration := frameDuration - now.Sub(frame.GetTime())
-		// pd.logger.Sugar().Infof("sleepDuration %d, %v, %v", runtime.NumGoroutine(), sleepDuration, frame.GetTime())
+		sleepDuration := frameDuration - now.Sub(lastFrameTime)
+		pd.logger.Sugar().Infof("sleepDuration %d, %v, %v", runtime.NumGoroutine(), sleepDuration, lastFrameTime)
 
 		if sleepDuration > 0 {
 			time.Sleep(sleepDuration)
@@ -77,6 +79,7 @@ func (pd *printDevice) Run(cancelCtx context.Context, wg *sync.WaitGroup) {
 		if _, err := pd.Write(string(frame.ToLedStripe().GetBuffer())); err != nil {
 			pd.logger.Fatal("write error", zap.Error(err))
 		}
+		lastFrameTime = now
 	}
 }
 
