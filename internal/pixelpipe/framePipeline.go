@@ -64,21 +64,23 @@ func (me *FramePipeline) RunPipe(wg *sync.WaitGroup) {
 				me.frameWg.Wait()
 				me.running = false
 				me.frameWg = new(sync.WaitGroup)
-				me.rebuild = make(chan bool)
 				return
 			}
 		} else {
 			return
 		}
 
-		// wait until pipeline rebuild is ready
+		//TODO wait until pipeline rebuild is ready
 	}
 }
 
 func (me *FramePipeline) runInternalPipe() bool {
+	defer func() {
+		me.rebuild = make(chan bool)
+	}()
 	for {
 		if IsEmptyID(me.lastPipeID) || me.internalSource == nil {
-			return true
+			return false
 		}
 		var sourceChan hardware.FrameSource
 		if IsEmptyID(me.lastPipeID) {
@@ -86,16 +88,11 @@ func (me *FramePipeline) runInternalPipe() bool {
 		} else {
 			sourceChan = me.internalSource
 		}
-		select {
-		case <-me.rebuild:
-			return false
-		case sourceFrame, ok := <-sourceChan:
-			if !ok {
-				return true
-			}
-			me.internalLastPipe.applyFrame(sourceFrame)
-			continue
+		sourceFrame, ok := <-sourceChan
+		if !ok {
+			return true
 		}
+		me.internalLastPipe.applyFrame(sourceFrame)
 	}
 }
 
@@ -146,10 +143,11 @@ func (me *FramePipeline) AddPipeBefore(id ID, newPipe PixelPiper) {
 		// stop pipeline and wait until all frames are empty
 		close(me.rebuild)
 		for me.running {
-
+			// TODO: what to do when
 		}
 	}
 	me.addPipeBefore(id, newPipe)
+
 }
 
 func (me *FramePipeline) addPipeBefore(id ID, newPipe PixelPiper) {
