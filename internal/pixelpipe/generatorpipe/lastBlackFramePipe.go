@@ -24,6 +24,10 @@ func NewLastBlackFramePipe(
 	id pixelpipe.ID,
 	logger *zap.Logger,
 ) pixelpipe.PixelPiper {
+	if pixelpipe.IsPlaceholderID(id) {
+		logger.Fatal("PipeIDPlaceholderError", zap.Error(pixelpipe.PipeIDPlaceholderError(id)))
+	}
+
 	outputChan := make(chan hardware.Frame)
 	return &lastBlackFramePipe{
 		cancelCtx: cancelCtx,
@@ -71,10 +75,13 @@ func (me *lastBlackFramePipe) GetOutput(id pixelpipe.ID) hardware.FrameSource {
 	if id == me.GetID() {
 		return me.pipe.GetOutput(id)
 	}
-	me.logger.Fatal("OutputIDMismatchError", zap.Error(pixelpipe.OutputIDMismatchError("simplePipeIntersection", me.GetID(), id)))
+	me.logger.Fatal("OutputIDMismatchError", zap.Error(pixelpipe.OutputIDMismatchError(me.GetID(), id)))
 	return nil
 }
 
-func (me *lastBlackFramePipe) SetInput(inputID pixelpipe.ID, inputChan hardware.FrameSource) {
-	me.pipe.SetInput(inputID, inputChan)
+func (me *lastBlackFramePipe) SetInput(prevID pixelpipe.ID, inputChan hardware.FrameSource) {
+	if pixelpipe.IsEmptyID(prevID) {
+		me.logger.Fatal("PipeIDEmptyError", zap.Error(pixelpipe.PipeIDEmptyError()))
+	}
+	me.pipe.SetInput(prevID, inputChan)
 }

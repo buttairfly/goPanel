@@ -53,15 +53,13 @@ func main() {
 	defer pixelDevice.Close()
 
 	wg := new(sync.WaitGroup)
-	panel.NewPanel(cancelCtx, mainConfig, pixelDevice, wg, logger)
-
-	inputChan := make(chan hardware.Frame)
-	// inputChan is closed in LastBlackFrameGenerator
-
-	pixelDevice.SetInput(inputChan)
+	panel := panel.NewPanel(cancelCtx, mainConfig, pixelDevice, logger)
 
 	wg.Add(1)
 	go pixelDevice.Run(cancelCtx, wg)
+
+	wg.Add(1)
+	go panel.Run(cancelCtx, wg)
 
 	go http.RunHTTPServer(logger)
 

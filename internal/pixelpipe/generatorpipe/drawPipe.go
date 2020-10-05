@@ -32,6 +32,9 @@ func DrawPipe(
 	logger *zap.Logger,
 	commandInput <-chan DrawCommand,
 ) pixelpipe.PixelPiper {
+	if pixelpipe.IsPlaceholderID(id) {
+		logger.Fatal("PipeIDPlaceholderError", zap.Error(pixelpipe.PipeIDPlaceholderError(id)))
+	}
 	outputChan := make(chan hardware.Frame)
 
 	//TODO: replace p and pos with real draw commands
@@ -74,12 +77,15 @@ func (me *drawPipe) GetOutput(id pixelpipe.ID) hardware.FrameSource {
 	if id == me.GetID() {
 		return me.pipe.GetOutput(id)
 	}
-	me.logger.Fatal("OutputIDMismatchError", zap.Error(pixelpipe.OutputIDMismatchError("simplePipeIntersection", me.GetID(), id)))
+	me.logger.Fatal("OutputIDMismatchError", zap.Error(pixelpipe.OutputIDMismatchError(me.GetID(), id)))
 	return nil
 }
 
-func (me *drawPipe) SetInput(inputID pixelpipe.ID, inputChan hardware.FrameSource) {
-	me.pipe.SetInput(inputID, inputChan)
+func (me *drawPipe) SetInput(prevID pixelpipe.ID, inputChan hardware.FrameSource) {
+	if pixelpipe.IsEmptyID(prevID) {
+		me.logger.Fatal("PipeIDEmptyError", zap.Error(pixelpipe.PipeIDEmptyError()))
+	}
+	me.pipe.SetInput(prevID, inputChan)
 }
 
 func (me *drawPipe) interpretCommand(frame hardware.Frame) bool {

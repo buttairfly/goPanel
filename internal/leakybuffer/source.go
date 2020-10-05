@@ -7,15 +7,33 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/buttairfly/goPanel/internal/hardware"
+	"github.com/buttairfly/goPanel/internal/pixelpipe"
 )
 
+var source *Source
 var freeList = make(chan hardware.Frame, 100)
-var outputChan = make(chan hardware.Frame)
+
+// Source is a frame recycler and source of frames
+type Source struct {
+	tileConfigs hardware.TileConfigs
+	outputChan  chan hardware.Frame
+	logger      *zap.Logger
+}
 
 // NewFrameSource produces a frame channel with a recycled frame or new one
-func NewFrameSource(cancelCtx context.Context, tileConfigs hardware.TileConfigs, wg *sync.WaitGroup, logger *zap.Logger) {
+func NewFrameSource(tileConfigs hardware.TileConfigs, logger *zap.Logger) *Source {
+	source = &Source{
+		tileConfigs: tileConfigs,
+		outputChan:  make(chan hardware.Frame),
+		logger:      logger,
+	}
+	return source
+}
+
+// Run starts the Source
+func (me *Source) Run(cancelCtx context.Context, wg *sync.WaitGroup) {
 	defer wg.Done()
-	defer close(outputChan)
+	defer close(me.outputChan)
 	for {
 		var f hardware.Frame
 		// Grab a buffer if available; allocate if not.
@@ -26,13 +44,23 @@ func NewFrameSource(cancelCtx context.Context, tileConfigs hardware.TileConfigs,
 			// Got one; nothing more to do.
 		default:
 			// None free, so allocate a new one.
-			f = hardware.NewFrame(tileConfigs, logger)
+			f = hardware.NewFrame(me.tileConfigs, me.logger)
 		}
-		outputChan <- f // Send to output.
+		me.outputChan <- f // Send to output.
 	}
 }
 
 // GetFrameSource returns the frame producer chan
+func (me *Source) GetFrameSource() hardware.FrameSource {
+	return me.outputChan
+}
+
+// GetFrameSource returns the frame producer chan from the global var source
 func GetFrameSource() hardware.FrameSource {
-	return outputChan
+	return source.outputChan
+}
+
+// GetID returns the frame producer chan
+func (me *Source) GetID() pixelpipe.ID {
+	return pixelpipe.SourceID
 }

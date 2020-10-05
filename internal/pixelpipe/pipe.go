@@ -3,6 +3,8 @@ package pixelpipe
 import (
 	"sync"
 
+	"go.uber.org/zap"
+
 	"github.com/buttairfly/goPanel/internal/hardware"
 )
 
@@ -16,6 +18,9 @@ type Pipe struct {
 
 // NewPipe returns a new Pipe
 func NewPipe(id ID, outputChan chan hardware.Frame) *Pipe {
+	if IsPlaceholderID(id) {
+		zap.L().Fatal("PipeIDPlaceholderError", zap.Error(PipeIDPlaceholderError(id)))
+	}
 	return &Pipe{
 		id:         id,
 		outputChan: outputChan,
@@ -28,12 +33,19 @@ func (me *Pipe) RunPipe(wg *sync.WaitGroup) {
 	defer close(me.GetFullOutput())
 	// input chan is closed
 	for frame := range me.inputChan {
-		me.GetFullOutput() <- frame
+		me.applyFrame(frame)
 	}
+}
+
+func (me *Pipe) applyFrame(frame hardware.Frame) {
+	me.GetFullOutput() <- frame
 }
 
 // GetOutput returns the framesource output
 func (me *Pipe) GetOutput(id ID) hardware.FrameSource {
+	if id != me.GetID() {
+		zap.L().Fatal("OutputIDMismatchError", zap.Error(OutputIDMismatchError(me.GetID(), id)))
+	}
 	return me.outputChan
 }
 
@@ -43,8 +55,11 @@ func (me *Pipe) GetFullOutput() chan hardware.Frame {
 }
 
 // SetInput sets the input
-func (me *Pipe) SetInput(id ID, inputChan hardware.FrameSource) {
-	me.prevID = id
+func (me *Pipe) SetInput(prevID ID, inputChan hardware.FrameSource) {
+	if IsEmptyID(prevID) {
+		zap.L().Fatal("PipeIDEmptyError", zap.Error(PipeIDEmptyError()))
+	}
+	me.prevID = prevID
 	me.inputChan = inputChan
 }
 

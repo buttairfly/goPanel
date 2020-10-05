@@ -26,6 +26,9 @@ func NewSimplePipeIntersection(
 	numOutputChannels int,
 	logger *zap.Logger,
 ) PixelPiper {
+	if IsPlaceholderID(id) {
+		logger.Fatal("PipeIDPlaceholderError", zap.Error(PipeIDPlaceholderError(id)))
+	}
 	outputs := make(map[ID]chan hardware.Frame)
 	for num := 0; num < numOutputChannels; num++ {
 		channelID := ID(fmt.Sprintf("%s_%d", id, num))
@@ -80,12 +83,16 @@ func (me *simplePipeIntersection) GetOutput(id ID) hardware.FrameSource {
 	if output, ok := me.outputs[id]; ok {
 		return output
 	}
-	me.logger.Fatal("OutputIDMismatchError", zap.Error(OutputIDMismatchError("simplePipeIntersection", me.GetID(), id)))
+	me.logger.Fatal("OutputIDMismatchError", zap.Error(OutputIDMismatchError(me.GetID(), id)))
 	return nil
 }
 
-func (me *simplePipeIntersection) SetInput(inputID ID, inputChan hardware.FrameSource) {
-	me.inputs[inputID] = inputChan
+func (me *simplePipeIntersection) SetInput(prevID ID, inputChan hardware.FrameSource) {
+	if IsEmptyID(prevID) {
+		me.logger.Fatal("PipeIDEmptyError", zap.Error(PipeIDEmptyError()))
+	}
+	me.inputs[prevID] = inputChan
+	me.prevIds[prevID] = prevID
 }
 
 func (me *simplePipeIntersection) GetID() ID {
