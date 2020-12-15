@@ -7,7 +7,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/buttairfly/goPanel/internal/hardware"
-	"github.com/buttairfly/goPanel/internal/pixelpipe"
+	"github.com/buttairfly/goPanel/internal/pixelpipe/pipepart"
 )
 
 var source *Source
@@ -61,6 +61,6 @@ func GetFrameSource() hardware.FrameSource {
 }
 
 // GetID returns the frame producer chan
-func (me *Source) GetID() pixelpipe.ID {
-	return pixelpipe.SourceID
+func (me *Source) GetID() pipepart.ID {
+	return pipepart.SourceID
 }

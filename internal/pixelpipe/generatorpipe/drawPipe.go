@@ -8,7 +8,7 @@ import (
 
 	"github.com/buttairfly/goPanel/internal/hardware"
 	"github.com/buttairfly/goPanel/internal/leakybuffer"
-	"github.com/buttairfly/goPanel/internal/pixelpipe"
+	"github.com/buttairfly/goPanel/internal/pixelpipe/pipepart"
 	"github.com/buttairfly/goPanel/pkg/palette"
 )
 
@@ -20,7 +20,7 @@ var pos float64
 type DrawCommand string
 
 type drawPipe struct {
-	pipe   *pixelpipe.Pipe
+	pipe   *pipepart.Pipe
 	logger *zap.Logger
 
 	commandInput <-chan DrawCommand
@@ -28,12 +28,12 @@ type drawPipe struct {
 
 // DrawPipe generates for each command a draw step and draws a new frame
 func DrawPipe(
-	id pixelpipe.ID,
+	id pipepart.ID,
 	logger *zap.Logger,
 	commandInput <-chan DrawCommand,
-) pixelpipe.PixelPiper {
-	if pixelpipe.IsPlaceholderID(id) {
-		logger.Fatal("PipeIDPlaceholderError", zap.Error(pixelpipe.PipeIDPlaceholderError(id)))
+) pipepart.PixelPiper {
+	if pipepart.IsPlaceholderID(id) {
+		logger.Fatal("PipeIDPlaceholderError", zap.Error(pipepart.PipeIDPlaceholderError(id)))
 	}
 	outputChan := make(chan hardware.Frame)
 
@@ -44,7 +44,7 @@ func DrawPipe(
 	pos = 0.0
 
 	return &drawPipe{
-		pipe:         pixelpipe.NewPipe(id, outputChan),
+		pipe:         pipepart.NewPipe(id, outputChan),
 		logger:       logger,
 		commandInput: commandInput,
 	}
@@ -65,25 +65,25 @@ func (me *drawPipe) RunPipe(wg *sync.WaitGroup) {
 	}
 }
 
-func (me *drawPipe) GetID() pixelpipe.ID {
+func (me *drawPipe) GetID() pipepart.ID {
 	return me.pipe.GetID()
 }
 
-func (me *drawPipe) GetPrevID() pixelpipe.ID {
+func (me *drawPipe) GetPrevID() pipepart.ID {
 	return me.pipe.GetPrevID()
 }
 
-func (me *drawPipe) GetOutput(id pixelpipe.ID) hardware.FrameSource {
+func (me *drawPipe) GetOutput(id pipepart.ID) hardware.FrameSource {
 	if id == me.GetID() {
 		return me.pipe.GetOutput(id)
 	}
-	me.logger.Fatal("OutputIDMismatchError", zap.Error(pixelpipe.OutputIDMismatchError(me.GetID(), id)))
+	me.logger.Fatal("OutputIDMismatchError", zap.Error(pipepart.OutputIDMismatchError(me.GetID(), id)))
 	return nil
 }
 
-func (me *drawPipe) SetInput(prevID pixelpipe.ID, inputChan hardware.FrameSource) {
-	if pixelpipe.IsEmptyID(prevID) {
-		me.logger.Fatal("PipeIDEmptyError", zap.Error(pixelpipe.PipeIDEmptyError()))
+func (me *drawPipe) SetInput(prevID pipepart.ID, inputChan hardware.FrameSource) {
+	if pipepart.IsEmptyID(prevID) {
+		me.logger.Fatal("PipeIDEmptyError", zap.Error(pipepart.PipeIDEmptyError()))
 	}
 	me.pipe.SetInput(prevID, inputChan)
 }

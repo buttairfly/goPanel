@@ -7,31 +7,32 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/buttairfly/goPanel/internal/hardware"
+	"github.com/buttairfly/goPanel/internal/pixelpipe/pipepart"
 )
 
 type simplePipeIntersection struct {
-	id         ID
-	prevIds    map[ID]ID
-	inputs     map[ID]hardware.FrameSource
+	id         pipepart.ID
+	prevIds    map[pipepart.ID]pipepart.ID
+	inputs     map[pipepart.ID]hardware.FrameSource
 	emptyInput hardware.FrameSource
-	outputs    map[ID]chan hardware.Frame
+	outputs    map[pipepart.ID]chan hardware.Frame
 	logger     *zap.Logger
 }
 
 // NewSimplePipeIntersection creates a pipe intersection which wil put each frame from any input channel to all output channels
 func NewSimplePipeIntersection(
-	id ID,
-	inputs map[ID]hardware.FrameSource,
+	id pipepart.ID,
+	inputs map[pipepart.ID]hardware.FrameSource,
 	emptyInput hardware.FrameSource,
 	numOutputChannels int,
 	logger *zap.Logger,
-) PixelPiper {
-	if IsPlaceholderID(id) {
-		logger.Fatal("PipeIDPlaceholderError", zap.Error(PipeIDPlaceholderError(id)))
+) pipepart.PixelPiper {
+	if pipepart.IsPlaceholderID(id) {
+		logger.Fatal("PipeIDPlaceholderError", zap.Error(pipepart.PipeIDPlaceholderError(id)))
 	}
-	outputs := make(map[ID]chan hardware.Frame)
+	outputs := make(map[pipepart.ID]chan hardware.Frame)
 	for num := 0; num < numOutputChannels; num++ {
-		channelID := ID(fmt.Sprintf("%s_%d", id, num))
+		channelID := pipepart.ID(fmt.Sprintf("%s_%d", id, num))
 		outputs[channelID] = make(chan hardware.Frame)
 	}
 	return &simplePipeIntersection{
@@ -54,7 +55,7 @@ func (me *simplePipeIntersection) RunPipe(wg *sync.WaitGroup) {
 	subWg.Wait()
 }
 
-func (me *simplePipeIntersection) runInput(id ID, wg *sync.WaitGroup) {
+func (me *simplePipeIntersection) runInput(id pipepart.ID, wg *sync.WaitGroup) {
 	defer wg.Done()
 	for frame := range me.inputs[id] {
 		currentOutputNum := 0
@@ -79,27 +80,27 @@ func (me *simplePipeIntersection) runInput(id ID, wg *sync.WaitGroup) {
 	}
 }
 
-func (me *simplePipeIntersection) GetOutput(id ID) hardware.FrameSource {
+func (me *simplePipeIntersection) GetOutput(id pipepart.ID) hardware.FrameSource {
 	if output, ok := me.outputs[id]; ok {
 		return output
 	}
-	me.logger.Fatal("OutputIDMismatchError", zap.Error(OutputIDMismatchError(me.GetID(), id)))
+	me.logger.Fatal("OutputIDMismatchError", zap.Error(pipepart.OutputIDMismatchError(me.GetID(), id)))
 	return nil
 }
 
-func (me *simplePipeIntersection) SetInput(prevID ID, inputChan hardware.FrameSource) {
-	if IsEmptyID(prevID) {
-		me.logger.Fatal("PipeIDEmptyError", zap.Error(PipeIDEmptyError()))
+func (me *simplePipeIntersection) SetInput(prevID pipepart.ID, inputChan hardware.FrameSource) {
+	if pipepart.IsEmptyID(prevID) {
+		me.logger.Fatal("PipeIDEmptyError", zap.Error(pipepart.PipeIDEmptyError()))
 	}
 	me.inputs[prevID] = inputChan
 	me.prevIds[prevID] = prevID
 }
 
-func (me *simplePipeIntersection) GetID() ID {
+func (me *simplePipeIntersection) GetID() pipepart.ID {
 	return me.id
 }
 
-func (me *simplePipeIntersection) GetPrevID() ID {
+func (me *simplePipeIntersection) GetPrevID() pipepart.ID {
 	// TODO fix function
 	return me.id
 }

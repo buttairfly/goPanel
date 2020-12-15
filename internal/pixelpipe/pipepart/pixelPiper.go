@@ -1,4 +1,4 @@
-package pixelpipe
+package pipepart
 
 import (
 	"sync"

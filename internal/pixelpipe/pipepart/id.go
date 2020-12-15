@@ -1,4 +1,4 @@
-package pixelpipe
+package pipepart
 
 // ID is an identifier for a pixelPiper elemement and used to name pixelPipes
 type ID string

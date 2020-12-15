@@ -7,12 +7,12 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/buttairfly/goPanel/internal/hardware"
-	"github.com/buttairfly/goPanel/internal/pixelpipe"
+	"github.com/buttairfly/goPanel/internal/pixelpipe/pipepart"
 	"github.com/buttairfly/goPanel/pkg/palette"
 )
 
 type fullFrameFadePipe struct {
-	pipe   *pixelpipe.Pipe
+	pipe   *pipepart.Pipe
 	logger *zap.Logger
 
 	numSteps int
@@ -21,13 +21,13 @@ type fullFrameFadePipe struct {
 
 // FullFrameFadePipe generates a new full frame fading frame stream
 func FullFrameFadePipe(
-	id pixelpipe.ID,
+	id pipepart.ID,
 	inputChan hardware.FrameSource,
 	wg *sync.WaitGroup,
 	logger *zap.Logger,
-) pixelpipe.PixelPiper {
-	if pixelpipe.IsPlaceholderID(id) {
-		logger.Fatal("PipeIDPlaceholderError", zap.Error(pixelpipe.PipeIDPlaceholderError(id)))
+) pipepart.PixelPiper {
+	if pipepart.IsPlaceholderID(id) {
+		logger.Fatal("PipeIDPlaceholderError", zap.Error(pipepart.PipeIDPlaceholderError(id)))
 	}
 	outputChan := make(chan hardware.Frame)
 
@@ -36,7 +36,7 @@ func FullFrameFadePipe(
 	palette.AddAt(colorful.Color{R: 0xff, G: 0xa5, B: 0}, 0.5)
 
 	return &fullFrameFadePipe{
-		pipe:     pixelpipe.NewPipe(id, outputChan),
+		pipe:     pipepart.NewPipe(id, outputChan),
 		logger:   logger,
 		numSteps: 100,
 		palette:  palette,
@@ -62,25 +62,25 @@ func (me *fullFrameFadePipe) RunPipe(wg *sync.WaitGroup) {
 	}
 }
 
-func (me *fullFrameFadePipe) GetID() pixelpipe.ID {
+func (me *fullFrameFadePipe) GetID() pipepart.ID {
 	return me.pipe.GetID()
 }
 
-func (me *fullFrameFadePipe) GetPrevID() pixelpipe.ID {
+func (me *fullFrameFadePipe) GetPrevID() pipepart.ID {
 	return me.pipe.GetPrevID()
 }
 
-func (me *fullFrameFadePipe) GetOutput(id pixelpipe.ID) hardware.FrameSource {
+func (me *fullFrameFadePipe) GetOutput(id pipepart.ID) hardware.FrameSource {
 	if id == me.GetID() {
 		return me.pipe.GetOutput(id)
 	}
-	me.logger.Fatal("OutputIDMismatchError", zap.Error(pixelpipe.OutputIDMismatchError(me.GetID(), id)))
+	me.logger.Fatal("OutputIDMismatchError", zap.Error(pipepart.OutputIDMismatchError(me.GetID(), id)))
 	return nil
 }
 
-func (me *fullFrameFadePipe) SetInput(prevID pixelpipe.ID, inputChan hardware.FrameSource) {
-	if pixelpipe.IsEmptyID(prevID) {
-		me.logger.Fatal("PipeIDEmptyError", zap.Error(pixelpipe.PipeIDEmptyError()))
+func (me *fullFrameFadePipe) SetInput(prevID pipepart.ID, inputChan hardware.FrameSource) {
+	if pipepart.IsEmptyID(prevID) {
+		me.logger.Fatal("PipeIDEmptyError", zap.Error(pipepart.PipeIDEmptyError()))
 	}
 	me.pipe.SetInput(prevID, inputChan)
 }
