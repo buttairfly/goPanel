@@ -11,6 +11,7 @@ import (
 	"github.com/buttairfly/goPanel/internal/hardware"
 	"github.com/buttairfly/goPanel/internal/leakybuffer"
 	"github.com/buttairfly/goPanel/internal/pixelpipe"
+	"github.com/buttairfly/goPanel/internal/pixelpipe/pipepart"
 	"github.com/buttairfly/goPanel/pkg/fader"
 	"github.com/buttairfly/goPanel/pkg/palette"
 )
@@ -31,7 +32,7 @@ type Panel struct {
 // NewPanel creates a new panel struct at a global variable
 func NewPanel(cancelCtx context.Context, config *config.MainConfig, device device.LedDevice, logger *zap.Logger) *Panel {
 	frameSource := leakybuffer.NewFrameSource(config.TileConfigs.ToTileConfigs(), logger)
-	emptyFramePipeID := pixelpipe.ID("mainPipe")
+	emptyFramePipeID := pipepart.ID("mainPipe")
 	panel = &Panel{
 		config:        config,
 		device:        device,
@@ -41,7 +42,7 @@ func NewPanel(cancelCtx context.Context, config *config.MainConfig, device devic
 		frameSource:   frameSource.GetFrameSource(),
 		framePipeline: pixelpipe.NewEmptyFramePipeline(cancelCtx, emptyFramePipeID, logger),
 	}
-	panel.framePipeline.SetInput(pixelpipe.SourceID, frameSource.GetFrameSource())
+	panel.framePipeline.SetInput(pipepart.SourceID, frameSource.GetFrameSource())
 	//panel.framePipeline.AddPipeBefore(EmptyFramePipeID, genera)
 	device.SetInput(panel.framePipeline.GetOutput(emptyFramePipeID))
 	return panel

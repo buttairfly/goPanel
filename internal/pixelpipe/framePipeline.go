@@ -33,14 +33,15 @@ func NewEmptyFramePipeline(destroyCtx context.Context, id pipepart.ID, logger *z
 	}
 	pixelPipes := make(map[pipepart.ID]pipepart.PixelPiper)
 	rebuild := make(chan bool)
-	outputChan := make(chan hardware.Frame)
-	internalLastPipe := pipepart.NewPipe(id, outputChan)
+	inputFrameChan := make(chan hardware.Frame)
+	internalLastPipe := pipepart.NewPipe(id, inputFrameChan)
 
 	return &FramePipeline{
 		destroyCtx:       destroyCtx,
 		rebuild:          rebuild,
 		frameWg:          new(sync.WaitGroup),
 		internalLastPipe: internalLastPipe,
+		inputFrameChan:   inputFrameChan,
 		logger:           logger,
 		pixelPipes:       pixelPipes,
 		firstPipeID:      pipepart.EmptyID,
@@ -94,8 +95,7 @@ func (me *FramePipeline) runInternalPipe() bool {
 		if !ok {
 			return true
 		}
-		// TODO problem here!!
-		me.internalLastPipe.GetInput() <- sourceFrame
+		me.inputFrameChan <- sourceFrame
 	}
 }
 
