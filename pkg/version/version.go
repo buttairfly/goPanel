@@ -10,7 +10,7 @@ import (
 
 // Version holds all compile data
 type Version struct {
-	Name        string `json:"name" yaml:"name"`
+	Name        string `json:"name"        yaml:"name"`
 	ProgramName string `json:"programName" yaml:"programName"`
 	Tag         string `json:"tag"         yaml:"tag"`
 	CompileDate string `json:"compileDate" yaml:"compileDate"`
