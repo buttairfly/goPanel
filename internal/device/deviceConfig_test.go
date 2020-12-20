@@ -44,11 +44,11 @@ func TestNewDeviceConfigFile(t *testing.T) {
 					},
 					ReadBufferSize:     1024,
 					RawFramePartNumLed: 10,
-					Verbose:            true,
+					Verbose:            false,
 					VerboseArduino:     false,
 					ParitySeed:         0xa5,
 					InitSleepTime:      30 * time.Millisecond,
-					LatchSleepTime:     5500 * time.Microsecond,
+					LatchSleepTime:     7800 * time.Microsecond, // 5.5ms when verbose = true
 				},
 			},
 			expectedFile: ".config.yaml",

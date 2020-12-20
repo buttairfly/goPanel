@@ -44,7 +44,8 @@ func NewPanel(cancelCtx context.Context, config *config.MainConfig, device devic
 	}
 	panel.framePipeline.SetInput(pipepart.SourceID, frameSource.GetFrameSource())
 	//panel.framePipeline.AddPipeBefore(EmptyFramePipeID, genera)
-	device.SetInput(panel.framePipeline.GetOutput(emptyFramePipeID))
+	//device.SetInput(panel.framePipeline.GetOutput(emptyFramePipeID))
+	device.SetInput(panel.leakySource.GetFrameSource())
 	return panel
 }
 

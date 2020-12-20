@@ -6,13 +6,13 @@ ledDeviceConfig:
       baud: 1152000
       size: 8
       readTimeout: 1s
-    verbose: true
+    verbose: false
     verboseArduino: false
     readBufferSize: 1024
     rawFramePartNumLed: 10
     paritySeed: 165
     initSleepTime: 30ms
-    latchSleepTime: 5.5ms
+    latchSleepTime: 7.8ms
     arduinoErrorConfig:
       Elati:
         name: latch timeout
