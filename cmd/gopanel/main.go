@@ -29,7 +29,7 @@ func main() {
 	defer logger.Sync()
 	ctx := context.Background()
 	cancelCtx := routine.DetectExit(ctx, logger)
-	routine.GracefulExit(cancelCtx, 3, 10*time.Second, logger)
+	routine.GracefulExit(cancelCtx, 4, 10*time.Second, logger)
 
 	goVersion := version.New("golang", "goVersion", compileDate, runtime.Version(), 0, logger)
 	goVersion.Log()
@@ -65,7 +65,7 @@ func main() {
 	wg.Add(1)
 	go panel.Run(cancelCtx, wg)
 
-	go http.RunHTTPServer(logger)
+	go http.RunHTTPServer(cancelCtx, 5*time.Second, logger)
 
 	wg.Wait()
 
