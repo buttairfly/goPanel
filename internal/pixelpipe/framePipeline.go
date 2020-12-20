@@ -61,6 +61,8 @@ func (me *FramePipeline) RunPipe(wg *sync.WaitGroup) {
 	for {
 		if rebuildInProgress := me.runInternalPipe(); rebuildInProgress {
 			select {
+			case <-me.destroyCtx.Done():
+				return
 			case <-me.rebuild:
 				continue
 			default:
@@ -91,11 +93,15 @@ func (me *FramePipeline) runInternalPipe() bool {
 		} else {
 			sourceChan = me.internalSource
 		}
-		sourceFrame, ok := <-sourceChan
-		if !ok {
-			return true
+		select {
+		case <-me.destroyCtx.Done():
+			return false
+		case sourceFrame, ok := <-sourceChan:
+			if !ok {
+				return true
+			}
+			me.inputFrameChan <- sourceFrame
 		}
-		me.inputFrameChan <- sourceFrame
 	}
 }
 

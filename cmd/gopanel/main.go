@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"runtime"
 	"sync"
 	"time"
 
@@ -27,8 +28,11 @@ func main() {
 	logger := log.NewZapDevelopLogger()
 	defer logger.Sync()
 	ctx := context.Background()
-	cancelCtx := routine.DetectExit(ctx)
+	cancelCtx := routine.DetectExit(ctx, logger)
+	routine.GracefulExit(cancelCtx, 3, 10*time.Second, logger)
 
+	goVersion := version.New("golang", "goVersion", compileDate, runtime.Version(), 0, logger)
+	goVersion.Log()
 	mainVersion := version.New("main", version.GetProgramName(), compileDate, versionTag, 10*time.Second, logger)
 	go mainVersion.Run(cancelCtx)
 

@@ -53,18 +53,23 @@ func GetVersionByName(name string) (*Version, error) {
 	return nil, fmt.Errorf("unknown version %s", name)
 }
 
+// Log loggs the logger once
+func (v *Version) Log() {
+	v.logger.Info("version")
+}
+
 // Run starts a go routine to print program details in a regular manner into the log
 func (v *Version) Run(cancelCtx context.Context) {
 	for {
 		select {
 		case <-cancelCtx.Done():
 			{
-				v.logger.Info("exit")
+				v.logger.Info("version exit")
 				return
 			}
 		case <-time.After(v.interval):
 			{
-				v.logger.Info("version")
+				v.Log()
 			}
 		}
 	}
