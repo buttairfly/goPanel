@@ -26,7 +26,7 @@ type ArduinoCom struct {
 	latched    int64
 	paritySeed byte
 	numLed     int
-	version    bool
+	hasVersion bool
 	logger     *zap.Logger
 }
 
@@ -213,13 +213,12 @@ func (a *ArduinoCom) checkInitDone(line string) {
 }
 
 func (a *ArduinoCom) checkVersion(line string) {
-	if !a.version {
+	if !a.hasVersion {
 		r := regexp.MustCompile(`^([\w]+):([\d-T:+]+\d{4})-(v\d+\.\d+\.\d+[\w+\-.]*)$`)
 		parts := r.FindStringSubmatch(line)
 		if len(parts) == 4 {
-			arduinoVersion := version.New("arduino", parts[1], parts[2], parts[3], 0, a.logger)
-			arduinoVersion.Log()
-			a.version = true
+			version.New("arduino", parts[1], parts[2], parts[3], 0, a.logger).Log()
+			a.hasVersion = true
 		}
 	}
 }
