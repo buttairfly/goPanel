@@ -29,12 +29,12 @@ func main() {
 	defer logger.Sync()
 	ctx := context.Background()
 	cancelCtx := exit.DetectSignal(ctx, logger)
-	exit.GracefulExit(cancelCtx, 4, 10*time.Second, 100*time.Millisecond, logger)
+	gracePeriod := 5 * time.Second
+	exit.GracefulExit(cancelCtx, 4, gracePeriod, 100*time.Millisecond, logger)
 
 	goVersion := version.New("golang", "goVersion", compileDate, runtime.Version(), 0, logger)
 	goVersion.Log()
-	gracePeriod := 5 * time.Second
-	mainVersion := version.New("main", version.GetProgramName(), compileDate, versionTag, gracePeriod, logger)
+	mainVersion := version.New("main", version.GetProgramName(), compileDate, versionTag, 10*time.Minute, logger)
 	go mainVersion.Run(cancelCtx)
 
 	mainConfigPath := flag.String("config", "config/main.composed.config.yaml", "path to config")

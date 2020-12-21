@@ -5,6 +5,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 
+	"github.com/buttairfly/goPanel/internal/http/weberror"
 	"github.com/buttairfly/goPanel/pkg/version"
 )
 
@@ -15,9 +16,10 @@ func GetVersions(c echo.Context) error {
 
 // GetVersionByName returns the version by name
 func GetVersionByName(c echo.Context) error {
-	version, err := version.GetVersionByName(c.Param("name"))
+	name := c.Param("name")
+	version, err := version.GetVersionByName(name)
 	if err != nil {
-		return err
+		return weberror.NotFound("version", name)
 	}
 	return c.JSON(http.StatusOK, version)
 }

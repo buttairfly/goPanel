@@ -75,7 +75,7 @@ func NewPixelFromHex(hex string) (Pixel, error) {
 		return nil, err
 	}
 	if n != 3 {
-		return nil, fmt.Errorf("color: %v is not a hex-color", hex)
+		return nil, fmt.Errorf("color: %v is not a 3-byte hex-color", hex)
 	}
 
 	slice := make(pixel, 0, NumBytePixel)

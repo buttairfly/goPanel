@@ -9,6 +9,7 @@ import (
 
 	"github.com/buttairfly/goPanel/internal/device"
 	"github.com/buttairfly/goPanel/internal/hardware"
+	"github.com/buttairfly/goPanel/internal/http/weberror"
 	"github.com/buttairfly/goPanel/pkg/marshal"
 )
 
@@ -23,11 +24,11 @@ type ColorAtFrame struct {
 func GetPixelColor(c echo.Context) error {
 	x, errX := strconv.Atoi(c.QueryParam("x"))
 	if errX != nil {
-		return errX
+		return weberror.Conversion("x", errX)
 	}
 	y, errY := strconv.Atoi(c.QueryParam("y"))
 	if errY != nil {
-		return errY
+		return weberror.Conversion("y", errY)
 	}
 	mp := marshal.Point{X: x, Y: y}
 
@@ -35,7 +36,7 @@ func GetPixelColor(c echo.Context) error {
 	// TODO: use frameID instead of currentFrame
 	frame := device.GetLedDevice().GetCurrentFrame()
 	if !mp.ToImagePoint().In(frame.Bounds()) {
-		return fmt.Errorf("Point out of bounds of frame %s x %d y %d", frameID, x, y)
+		return weberror.OutOfBounds("point in frame", fmt.Sprintf("%s x %d y %d", frameID, x, y))
 	}
 	color := hardware.NewPixelFromColor(frame.At(x, y))
 	cf := ColorAtFrame{
@@ -50,11 +51,11 @@ func GetPixelColor(c echo.Context) error {
 func SetPixelColor(c echo.Context) error {
 	x, errX := strconv.Atoi(c.QueryParam("x"))
 	if errX != nil {
-		return errX
+		return weberror.Conversion("x", errX)
 	}
 	y, errY := strconv.Atoi(c.QueryParam("y"))
 	if errY != nil {
-		return errY
+		return weberror.Conversion("y", errY)
 	}
 	mp := marshal.Point{X: x, Y: y}
 
@@ -62,12 +63,13 @@ func SetPixelColor(c echo.Context) error {
 	// TODO: use frameID instead of currentFrame
 	frame := device.GetLedDevice().GetCurrentFrame()
 	if !mp.ToImagePoint().In(frame.Bounds()) {
-		return fmt.Errorf("Point out of bounds of frame %s x %d y %d", frameID, x, y)
+		return weberror.OutOfBounds("point in frame", fmt.Sprintf("%s x %d y %d", frameID, x, y))
 	}
 
-	color, errColor := hardware.NewPixelFromHex(c.QueryParam("color"))
+	colorString := c.QueryParam("color")
+	color, errColor := hardware.NewPixelFromHex(colorString)
 	if errColor != nil {
-		return errColor
+		return weberror.ColorConversion(colorString, errColor)
 	}
 
 	// set pixel
@@ -87,10 +89,10 @@ func SetFillColor(c echo.Context) error {
 	frameID := c.Param("frameId")
 	// TODO: use frameID instead of currentFrame
 	frame := device.GetLedDevice().GetCurrentFrame()
-
-	color, errColor := hardware.NewPixelFromHex(c.QueryParam("color"))
+	colorString := c.QueryParam("color")
+	color, errColor := hardware.NewPixelFromHex(colorString)
 	if errColor != nil {
-		return errColor
+		return weberror.ColorConversion(colorString, errColor)
 	}
 
 	// set pixel

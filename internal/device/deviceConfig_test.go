@@ -47,7 +47,7 @@ func TestNewDeviceConfigFile(t *testing.T) {
 					Verbose:            false,
 					VerboseArduino:     false,
 					ParitySeed:         0xa5,
-					InitSleepTime:      50 * time.Millisecond,
+					InitSleepTime:      70 * time.Millisecond,
 					LatchSleepTime:     7800 * time.Microsecond, // 5.5ms when verbose = true
 				},
 			},

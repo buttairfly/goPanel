@@ -19,15 +19,15 @@ import (
 //
 // Set numLed to 0, when arduinoCom does not use led length
 type ArduinoCom struct {
-	config     *SerialConfig
-	stream     *serial.Port
-	initDone   chan bool
-	stats      chan *Stat
-	latched    int64
-	paritySeed byte
-	numLed     int
-	hasVersion bool
-	logger     *zap.Logger
+	config      *SerialConfig
+	stream      *serial.Port
+	initDone    chan bool
+	versionDone chan bool
+	stats       chan *Stat
+	latched     int64
+	paritySeed  byte
+	numLed      int
+	logger      *zap.Logger
 }
 
 // NewArduinoCom creates a new serial arduino communication
@@ -37,6 +37,7 @@ func NewArduinoCom(numLed int, sc *SerialConfig, logger *zap.Logger) *ArduinoCom
 	a := new(ArduinoCom)
 	a.config = sc
 	a.initDone = make(chan bool)
+	a.versionDone = make(chan bool)
 	a.stats = make(chan *Stat, 10)
 	a.numLed = numLed
 	a.paritySeed = sc.ParitySeed
@@ -76,10 +77,7 @@ func (a *ArduinoCom) Init() {
 	}()
 
 	for {
-		select {
-		case <-a.initDone:
-			return
-		default:
+		if a.needsInit() || a.needsVersion() {
 			a.stream.Flush()
 			a.sendInitComand("Q0000")
 			a.sendInitComand("V")
@@ -88,6 +86,8 @@ func (a *ArduinoCom) Init() {
 			} else {
 				close(a.initDone)
 			}
+		} else {
+			return
 		}
 	}
 }
@@ -212,20 +212,29 @@ func (a *ArduinoCom) checkInitDone(line string) {
 	}
 }
 
+func (a *ArduinoCom) needsInit() bool {
+	select {
+	case <-a.initDone:
+		return false
+	default:
+		return true
+	}
+}
+
 func (a *ArduinoCom) checkVersion(line string) {
-	if !a.hasVersion {
+	if a.needsVersion() {
 		r := regexp.MustCompile(`^([\w]+):([\d-T:+]+\d{4})-(v\d+\.\d+\.\d+[\w+\-.]*)$`)
 		parts := r.FindStringSubmatch(line)
 		if len(parts) == 4 {
 			version.New("arduino", parts[1], parts[2], parts[3], 0, a.logger).Log()
-			a.hasVersion = true
+			close(a.versionDone)
 		}
 	}
 }
 
-func (a *ArduinoCom) needsInit() bool {
+func (a *ArduinoCom) needsVersion() bool {
 	select {
-	case <-a.initDone:
+	case <-a.versionDone:
 		return false
 	default:
 		return true
