@@ -1,0 +1,7 @@
+[
+  ["goroutine 19 [chan send]:\ngithub.com/buttairfly/goPanel/internal/leakybuffer.(*Source).Run(0x14f2480)\n\t/home/keks/code/go/src/github.com/buttairfly/goPanel/internal/leakybuffer/source.go:43 +0x64\ncreated by github.com/buttairfly/goPanel/internal/panel.(*Panel).Run\n\t/home/keks/code/go/src/github.com/buttairfly/goPanel/internal/panel/panel.go:60 +0x5c\n"
+   "19"
+   "chan send"
+   "github.com/buttairfly/goPanel/internal/leakybuffer.(*Source).Run(0x14f2480)\n\t/home/keks/code/go/src/github.com/buttairfly/goPanel/internal/leakybuffer/source.go:43 +0x64\ncreated by github.com/buttairfly/goPanel/internal/panel.(*Panel).Run\n\t/home/keks/code/go/src/github.com/buttairfly/goPanel/internal/panel/panel.go:60 +0x5c"
+   ]
+]

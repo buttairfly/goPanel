@@ -57,8 +57,8 @@ func GetPanel() *Panel {
 // Run starts the panel
 func (me *Panel) Run(cancelCtx context.Context, wg *sync.WaitGroup) {
 	defer wg.Done()
-	wg.Add(2)
-	go me.leakySource.Run(cancelCtx, wg)
+	go me.leakySource.Run() // this go routine will run until program exit
+	wg.Add(1)
 	go me.framePipeline.RunPipe(wg)
 }
 

@@ -18,6 +18,7 @@ func DetectSignal(ctx context.Context, logger *zap.Logger) context.Context {
 	go func() {
 		defer cancel()
 		<-signalChannel
+		logger.Info("\n")
 		logger.Info("shutdown detedcted")
 	}()
 	return cancelCtx

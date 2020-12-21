@@ -29,11 +29,12 @@ func main() {
 	defer logger.Sync()
 	ctx := context.Background()
 	cancelCtx := exit.DetectSignal(ctx, logger)
-	exit.GracefulExit(cancelCtx, 3, 10*time.Second, logger)
+	exit.GracefulExit(cancelCtx, 4, 10*time.Second, 100*time.Millisecond, logger)
 
 	goVersion := version.New("golang", "goVersion", compileDate, runtime.Version(), 0, logger)
 	goVersion.Log()
-	mainVersion := version.New("main", version.GetProgramName(), compileDate, versionTag, 10*time.Second, logger)
+	gracePeriod := 5 * time.Second
+	mainVersion := version.New("main", version.GetProgramName(), compileDate, versionTag, gracePeriod, logger)
 	go mainVersion.Run(cancelCtx)
 
 	mainConfigPath := flag.String("config", "config/main.composed.config.yaml", "path to config")
@@ -65,9 +66,11 @@ func main() {
 	wg.Add(1)
 	go panel.Run(cancelCtx, wg)
 
-	go http.RunHTTPServer(cancelCtx, 5*time.Second, logger)
+	wg.Add(1)
+	go http.RunHTTPServer(cancelCtx, wg, gracePeriod-time.Second, logger)
 
 	wg.Wait()
 
-	logger.Info("successfully stopped")
+	time.Sleep(2 * gracePeriod)
+	logger.Panic("main not gracefully exited")
 }

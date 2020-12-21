@@ -1,9 +1,6 @@
 package leakybuffer
 
 import (
-	"context"
-	"sync"
-
 	"go.uber.org/zap"
 
 	"github.com/buttairfly/goPanel/internal/hardware"
@@ -31,22 +28,19 @@ func NewFrameSource(tileConfigs hardware.TileConfigs, logger *zap.Logger) *Sourc
 }
 
 // Run starts the Source
-func (me *Source) Run(cancelCtx context.Context, wg *sync.WaitGroup) {
-	defer wg.Done()
+func (me *Source) Run() {
 	defer close(me.outputChan)
 	for {
 		var f hardware.Frame
 		// Grab a buffer if available; allocate if not.
 		select {
-		case <-cancelCtx.Done():
-			return
 		case f = <-freeList:
 			// Got one; nothing more to do.
 		default:
 			// None free, so allocate a new one.
 			f = hardware.NewFrame(me.tileConfigs, me.logger)
 		}
-		me.outputChan <- f // Send to output.
+		me.outputChan <- f // Send to output => will wait for ever
 	}
 }
 
