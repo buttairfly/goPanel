@@ -14,8 +14,8 @@ import (
 	"github.com/buttairfly/goPanel/internal/hardware"
 	"github.com/buttairfly/goPanel/internal/http"
 	"github.com/buttairfly/goPanel/internal/panel"
+	"github.com/buttairfly/goPanel/pkg/exit"
 	"github.com/buttairfly/goPanel/pkg/log"
-	"github.com/buttairfly/goPanel/pkg/routine"
 	"github.com/buttairfly/goPanel/pkg/version"
 )
 
@@ -28,8 +28,8 @@ func main() {
 	logger := log.NewZapDevelopLogger()
 	defer logger.Sync()
 	ctx := context.Background()
-	cancelCtx := routine.DetectExit(ctx, logger)
-	routine.GracefulExit(cancelCtx, 4, 10*time.Second, logger)
+	cancelCtx := exit.DetectSignal(ctx, logger)
+	exit.GracefulExit(cancelCtx, 3, 10*time.Second, logger)
 
 	goVersion := version.New("golang", "goVersion", compileDate, runtime.Version(), 0, logger)
 	goVersion.Log()
