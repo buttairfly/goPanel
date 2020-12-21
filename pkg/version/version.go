@@ -60,16 +60,18 @@ func (v *Version) Log() {
 
 // Run starts a go routine to print program details in a regular manner into the log
 func (v *Version) Run(cancelCtx context.Context) {
-	for {
-		select {
-		case <-cancelCtx.Done():
-			{
-				v.logger.Info("version exit")
-				return
-			}
-		case <-time.After(v.interval):
-			{
-				v.Log()
+	if v.interval > 0 {
+		for {
+			select {
+			case <-cancelCtx.Done():
+				{
+					v.logger.Info("version exit")
+					return
+				}
+			case <-time.After(v.interval):
+				{
+					v.Log()
+				}
 			}
 		}
 	}

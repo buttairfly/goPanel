@@ -4,11 +4,13 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"regexp"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/buttairfly/goPanel/pkg/version"
 	"github.com/tarm/serial"
 	"go.uber.org/zap"
 )
@@ -24,6 +26,7 @@ type ArduinoCom struct {
 	latched    int64
 	paritySeed byte
 	numLed     int
+	version    bool
 	logger     *zap.Logger
 }
 
@@ -123,6 +126,7 @@ func (a *ArduinoCom) Read(cancelCtx context.Context, wg *sync.WaitGroup) {
 				if len(line) > 0 {
 					a.logger.Info("arduinoRead", zap.String("line", line))
 					a.checkInitDone(line)
+					a.checkVersion(line)
 					stat := &Stat{
 						Event:     PrintStatType,
 						TimeStamp: timeStamp,
@@ -204,6 +208,18 @@ func (a *ArduinoCom) checkInitDone(line string) {
 					a.logger.Warn("not initizalized: ", zap.Int("numLed", a.numLed), zap.Int("initLed", int(initLed)))
 				}
 			}
+		}
+	}
+}
+
+func (a *ArduinoCom) checkVersion(line string) {
+	if !a.version {
+		r := regexp.MustCompile(`^([\w]+):([\d-T:+]+\d{4})-(v\d+\.\d+\.\d+[\w+\-.]*)$`)
+		parts := r.FindStringSubmatch(line)
+		if len(parts) == 4 {
+			arduinoVersion := version.New("arduino", parts[1], parts[2], parts[3], 0, a.logger)
+			arduinoVersion.Log()
+			a.version = true
 		}
 	}
 }
