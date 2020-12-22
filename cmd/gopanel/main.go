@@ -30,7 +30,8 @@ func main() {
 	ctx := context.Background()
 	cancelCtx := exit.DetectSignal(ctx, logger)
 	gracePeriod := 5 * time.Second
-	exit.GracefulExit(cancelCtx, 4, gracePeriod, 100*time.Millisecond, logger)
+	targetExitGoroutnes := 3
+	exit.GracefulExit(cancelCtx, targetExitGoroutnes, gracePeriod, 100*time.Millisecond, logger)
 
 	goVersion := version.New("golang", "goVersion", compileDate, runtime.Version(), 0, logger)
 	goVersion.Log()
@@ -58,13 +59,13 @@ func main() {
 	defer pixelDevice.Close()
 
 	wg := new(sync.WaitGroup)
-	panel := panel.NewPanel(cancelCtx, mainConfig, pixelDevice, logger)
+	pixelPanel := panel.NewPanel(mainConfig, pixelDevice, logger)
 
 	wg.Add(1)
 	go pixelDevice.Run(cancelCtx, wg)
 
 	wg.Add(1)
-	go panel.Run(cancelCtx, wg)
+	go pixelPanel.Run(cancelCtx, wg)
 
 	wg.Add(1)
 	go http.RunHTTPServer(cancelCtx, wg, gracePeriod-time.Second, logger)

@@ -32,7 +32,7 @@ type Panel struct {
 }
 
 // NewPanel creates a new panel struct at a global variable
-func NewPanel(cancelCtx context.Context, config *config.MainConfig, device device.LedDevice, logger *zap.Logger) *Panel {
+func NewPanel(config *config.MainConfig, device device.LedDevice, logger *zap.Logger) *Panel {
 	frameSource := leakybuffer.NewFrameSource(config.TileConfigs.ToTileConfigs(), logger)
 	emptyFramePipeID := pipepart.ID("mainPipe")
 	panel = &Panel{
@@ -42,7 +42,7 @@ func NewPanel(cancelCtx context.Context, config *config.MainConfig, device devic
 		palettes:      make([]palette.Palette, 0, 1),
 		leakySource:   frameSource,
 		frameSource:   frameSource.GetFrameSource(),
-		framePipeline: pixelpipe.NewEmptyFramePipeline(cancelCtx, emptyFramePipeID, logger),
+		framePipeline: pixelpipe.NewEmptyFramePipeline(emptyFramePipeID, logger),
 	}
 	panel.framePipeline.SetInput(pipepart.SourceID, panel.frameSource)
 	device.SetInput(panel.framePipeline.GetOutput(emptyFramePipeID))
@@ -60,7 +60,7 @@ func (me *Panel) Run(cancelCtx context.Context, wg *sync.WaitGroup) {
 	defer wg.Done()
 	go me.leakySource.Run(cancelCtx)
 	wg.Add(1)
-	go me.framePipeline.RunPipe(wg)
+	go me.framePipeline.RunPipe(cancelCtx, wg)
 }
 
 // GetConfig returns the global config

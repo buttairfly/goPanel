@@ -12,7 +12,6 @@ import (
 
 // FramePipeline is a struct which defines a
 type FramePipeline struct {
-	destroyCtx       context.Context
 	running          bool
 	rebuild          chan bool
 	frameWg          *sync.WaitGroup
@@ -27,7 +26,7 @@ type FramePipeline struct {
 }
 
 // NewEmptyFramePipeline creates a new, empty FramePipeline which can hold multiple pipes end-to-end connected to each other
-func NewEmptyFramePipeline(destroyCtx context.Context, id pipepart.ID, logger *zap.Logger) *FramePipeline {
+func NewEmptyFramePipeline(id pipepart.ID, logger *zap.Logger) *FramePipeline {
 	if pipepart.IsPlaceholderID(id) {
 		logger.Fatal("PipeIDPlaceholderError", zap.Error(pipepart.PipeIDPlaceholderError(id)))
 	}
@@ -37,7 +36,6 @@ func NewEmptyFramePipeline(destroyCtx context.Context, id pipepart.ID, logger *z
 	internalLastPipe := pipepart.NewPipe(id, outputFrameChan)
 
 	return &FramePipeline{
-		destroyCtx:       destroyCtx,
 		rebuild:          rebuild,
 		frameWg:          new(sync.WaitGroup),
 		internalLastPipe: internalLastPipe,
@@ -52,7 +50,7 @@ func NewEmptyFramePipeline(destroyCtx context.Context, id pipepart.ID, logger *z
 }
 
 // RunPipe implements PixelPiper interface
-func (me *FramePipeline) RunPipe(wg *sync.WaitGroup) {
+func (me *FramePipeline) RunPipe(destroyCtx context.Context, wg *sync.WaitGroup) {
 	defer wg.Done()
 	defer close(me.internalLastPipe.GetFullOutput())
 	me.running = true
@@ -60,9 +58,9 @@ func (me *FramePipeline) RunPipe(wg *sync.WaitGroup) {
 	me.startPipePieces(me.frameWg)
 
 	for {
-		if rebuildInProgress := me.runInternalPipe(); rebuildInProgress {
+		if rebuildInProgress := me.runInternalPipe(destroyCtx); rebuildInProgress {
 			select {
-			case <-me.destroyCtx.Done():
+			case <-destroyCtx.Done():
 				me.drain()
 				return
 			case <-me.rebuild:
@@ -94,7 +92,7 @@ func (me *FramePipeline) drain() {
 	}
 }
 
-func (me *FramePipeline) runInternalPipe() bool {
+func (me *FramePipeline) runInternalPipe(destroyCtx context.Context) bool {
 	for {
 		if me.internalSource == nil {
 			return false
@@ -106,7 +104,7 @@ func (me *FramePipeline) runInternalPipe() bool {
 			sourceChan = me.internalSource
 		}
 		select {
-		case <-me.destroyCtx.Done():
+		case <-destroyCtx.Done():
 			return false
 		case sourceFrame, ok := <-sourceChan:
 			if !ok {
