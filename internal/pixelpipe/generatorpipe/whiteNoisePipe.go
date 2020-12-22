@@ -33,10 +33,10 @@ func WhiteNoisePipe(
 
 	//todo set palette via function
 	p := palette.NewPalette()
-	p.AddAt(colorful.Color{R: 0xff, G: 0, B: 0}, 0)
-	p.AddAt(colorful.Color{R: 0, G: 0xff, B: 0}, 0.3)
-	p.AddAt(colorful.Color{R: 0, G: 0, B: 0xff}, 0.6)
-	p.AddAt(colorful.Color{R: 0xff, G: 0, B: 0}, 1.0)
+	p.AddAt(colorful.Color{R: 1, G: 0, B: 0}, 0)
+	p.AddAt(colorful.Color{R: 0, G: 1, B: 0}, 1.0/3)
+	p.AddAt(colorful.Color{R: 0, G: 0, B: 1}, 2.0/3)
+	p.AddAt(colorful.Color{R: 1, G: 0, B: 0}, 1.0)
 
 	return &whiteNoisePipe{
 		pipe:    pipepart.NewPipe(id, outputChan),
@@ -58,7 +58,7 @@ func (me *whiteNoisePipe) RunPipe(wg *sync.WaitGroup) {
 			p := rand.Float64()
 			c := me.palette.Blend(p)
 			frame.Set(x, y, c)
-			me.logger.Sugar().Infof("output pixel x %d y %d c %v p %1.3f", x, y, c.Hex(), p)
+			me.logger.Sugar().Infof("output pixel x%2d y%2d p%1.3f c0x%v", x, y, p, c.Hex())
 			// TODO: frame counter logic
 			me.pipe.GetFullOutput() <- frame
 		}
