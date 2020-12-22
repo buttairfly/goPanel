@@ -171,14 +171,16 @@ func (f *frame) RGBAAt(x, y int) color.RGBA {
 }
 
 func (f *frame) updateFillTypeSetPixel(x, y int) {
-	oldChangedPixel := f.changedPixel
-	f.changedPixel = &image.Point{x, y}
-	if oldChangedPixel == nil || !oldChangedPixel.Eq(*f.changedPixel) {
-		f.numPixelChanges++
-		if f.numPixelChanges == 1 {
-			f.fillType = FillTypeSinglePixelChange
-		} else {
-			f.fillType = FillTypeFullFrame
+	if f.fillType != FillTypeFullFrame {
+		oldChangedPixel := f.changedPixel
+		f.changedPixel = &image.Point{x, y}
+		if oldChangedPixel == nil || !oldChangedPixel.Eq(*f.changedPixel) {
+			f.numPixelChanges++
+			if f.numPixelChanges == 1 {
+				f.fillType = FillTypeSinglePixelChange
+			} else {
+				f.fillType = FillTypeFullFrame
+			}
 		}
 	}
 }

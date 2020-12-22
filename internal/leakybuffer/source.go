@@ -1,8 +1,6 @@
 package leakybuffer
 
 import (
-	"image/color"
-
 	"go.uber.org/zap"
 
 	"github.com/buttairfly/goPanel/internal/hardware"
@@ -37,12 +35,12 @@ func (me *Source) Run() {
 		// Grab a buffer if available; allocate if not.
 		select {
 		case f = <-freeList:
+			f = hardware.NewCopyFrameWithEmptyImage(f)
 			// Got one; nothing more to do.
 		default:
 			// None free, so allocate a new one.
 			f = hardware.NewFrame(me.tileConfigs, me.logger)
 		}
-		f.Fill(color.Black)
 		me.outputChan <- f // Send to output => will wait for ever
 	}
 }
