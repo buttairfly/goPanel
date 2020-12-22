@@ -29,7 +29,7 @@ func main() {
 	defer logger.Sync()
 	ctx := context.Background()
 	cancelCtx := exit.DetectSignal(ctx, logger)
-	gracePeriod := 5 * time.Second
+	gracePeriod := 3 * time.Second
 	targetExitGoroutnes := 3
 	exit.GracefulExit(cancelCtx, targetExitGoroutnes, gracePeriod, 100*time.Millisecond, logger)
 
