@@ -1,6 +1,8 @@
 package leakybuffer
 
 import (
+	"context"
+
 	"go.uber.org/zap"
 
 	"github.com/buttairfly/goPanel/internal/hardware"
@@ -28,7 +30,7 @@ func NewFrameSource(tileConfigs hardware.TileConfigs, logger *zap.Logger) *Sourc
 }
 
 // Run starts the Source
-func (me *Source) Run() {
+func (me *Source) Run(destroyCtx context.Context) {
 	defer close(me.outputChan)
 	for {
 		var f hardware.Frame
@@ -36,13 +38,19 @@ func (me *Source) Run() {
 		select {
 		case f = <-freeList:
 			// frame is still filled with old contents
-			// f = hardware.NewCopyFrameWithEmptyImage(f)
-			// Got one; nothing more to do.
+		case <-destroyCtx.Done():
+			return
 		default:
 			// None free, so allocate a new one.
 			f = hardware.NewFrame(me.tileConfigs, me.logger)
 		}
-		me.outputChan <- f // Send to output => will wait for ever
+		select {
+		case me.outputChan <- f:
+			// Send to output => will wait for ever
+			continue
+		case <-destroyCtx.Done():
+			return
+		}
 	}
 }
 
