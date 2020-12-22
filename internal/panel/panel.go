@@ -3,6 +3,7 @@ package panel
 import (
 	"context"
 	"sync"
+	"time"
 
 	"go.uber.org/zap"
 
@@ -11,6 +12,7 @@ import (
 	"github.com/buttairfly/goPanel/internal/hardware"
 	"github.com/buttairfly/goPanel/internal/leakybuffer"
 	"github.com/buttairfly/goPanel/internal/pixelpipe"
+	"github.com/buttairfly/goPanel/internal/pixelpipe/generatorpipe"
 	"github.com/buttairfly/goPanel/internal/pixelpipe/pipepart"
 	"github.com/buttairfly/goPanel/pkg/fader"
 	"github.com/buttairfly/goPanel/pkg/palette"
@@ -43,9 +45,8 @@ func NewPanel(cancelCtx context.Context, config *config.MainConfig, device devic
 		framePipeline: pixelpipe.NewEmptyFramePipeline(cancelCtx, emptyFramePipeID, logger),
 	}
 	panel.framePipeline.SetInput(pipepart.SourceID, panel.frameSource)
-	//panel.framePipeline.AddPipeBefore(EmptyFramePipeID, genera)
 	device.SetInput(panel.framePipeline.GetOutput(emptyFramePipeID))
-	//device.SetInput(panel.leakySource.GetFrameSource())
+	panel.framePipeline.AddPipeBefore(emptyFramePipeID, generatorpipe.WhiteNoisePipe(pipepart.ID("whitenoise"), time.Millisecond, logger))
 	return panel
 }
 

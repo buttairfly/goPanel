@@ -22,7 +22,7 @@ func NewZapDevelopLogger() *zap.Logger {
 // NewDevelopConfig returns the develop logging config
 func NewDevelopConfig() zap.Config {
 	return zap.Config{
-		Level:       zap.NewAtomicLevelAt(zap.DebugLevel),
+		Level:       zap.NewAtomicLevelAt(zap.InfoLevel),
 		Development: true,
 		Sampling: &zap.SamplingConfig{
 			Initial:    100,

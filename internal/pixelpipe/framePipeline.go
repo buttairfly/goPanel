@@ -15,15 +15,15 @@ type FramePipeline struct {
 	destroyCtx       context.Context
 	running          bool
 	rebuild          chan bool
-	inputFrameChan   chan hardware.Frame
 	frameWg          *sync.WaitGroup
 	internalSource   hardware.FrameSource
+	outputFrameChan  chan hardware.Frame
 	internalLastPipe *pipepart.Pipe
-	logger           *zap.Logger
 	pixelPipes       map[pipepart.ID]pipepart.PixelPiper
 	lastPipeID       pipepart.ID
 	firstPipeID      pipepart.ID
 	prevID           pipepart.ID
+	logger           *zap.Logger
 }
 
 // NewEmptyFramePipeline creates a new, empty FramePipeline which can hold multiple pipes end-to-end connected to each other
@@ -33,17 +33,18 @@ func NewEmptyFramePipeline(destroyCtx context.Context, id pipepart.ID, logger *z
 	}
 	pixelPipes := make(map[pipepart.ID]pipepart.PixelPiper)
 	rebuild := make(chan bool)
-	inputFrameChan := make(chan hardware.Frame)
-	internalLastPipe := pipepart.NewPipe(id, inputFrameChan)
+	outputFrameChan := make(chan hardware.Frame)
+	internalLastPipe := pipepart.NewPipe(id, outputFrameChan)
 
 	return &FramePipeline{
 		destroyCtx:       destroyCtx,
 		rebuild:          rebuild,
 		frameWg:          new(sync.WaitGroup),
 		internalLastPipe: internalLastPipe,
-		inputFrameChan:   inputFrameChan,
+		internalSource:   nil,
 		logger:           logger,
 		pixelPipes:       pixelPipes,
+		outputFrameChan:  outputFrameChan,
 		firstPipeID:      pipepart.EmptyID,
 		lastPipeID:       pipepart.EmptyID,
 		prevID:           pipepart.EmptyID,
@@ -62,16 +63,22 @@ func (me *FramePipeline) RunPipe(wg *sync.WaitGroup) {
 		if rebuildInProgress := me.runInternalPipe(); rebuildInProgress {
 			select {
 			case <-me.destroyCtx.Done():
+				me.drain()
 				return
 			case <-me.rebuild:
+				me.running = true
+				me.startPipePieces(me.frameWg)
 				continue
 			default:
+				me.drain()
 				me.frameWg.Wait()
 				me.running = false
+				me.rebuild = make(chan bool)
 				me.frameWg = new(sync.WaitGroup)
-				return
+
 			}
 		} else {
+			me.drain()
 			return
 		}
 
@@ -79,16 +86,21 @@ func (me *FramePipeline) RunPipe(wg *sync.WaitGroup) {
 	}
 }
 
+func (me *FramePipeline) drain() {
+	if !pipepart.IsEmptyID(me.firstPipeID) {
+		fakeInput := make(chan hardware.Frame)
+		me.pixelPipes[me.firstPipeID].SetInput(pipepart.ID("Drain"), fakeInput)
+		close(fakeInput)
+	}
+}
+
 func (me *FramePipeline) runInternalPipe() bool {
-	defer func() {
-		me.rebuild = make(chan bool)
-	}()
 	for {
-		if pipepart.IsEmptyID(me.lastPipeID) || me.internalSource == nil {
+		if me.internalSource == nil {
 			return false
 		}
 		var sourceChan hardware.FrameSource
-		if pipepart.IsEmptyID(me.lastPipeID) {
+		if !pipepart.IsEmptyID(me.lastPipeID) {
 			sourceChan = me.pixelPipes[me.lastPipeID].GetOutput(me.lastPipeID)
 		} else {
 			sourceChan = me.internalSource
@@ -100,7 +112,7 @@ func (me *FramePipeline) runInternalPipe() bool {
 			if !ok {
 				return true
 			}
-			me.inputFrameChan <- sourceFrame
+			me.outputFrameChan <- sourceFrame
 		}
 	}
 }
