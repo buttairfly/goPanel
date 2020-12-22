@@ -5,7 +5,6 @@ import (
 	"sort"
 
 	"github.com/lucasb-eyer/go-colorful"
-	"go.uber.org/zap"
 )
 
 // Palette is the palette interface
@@ -115,7 +114,6 @@ func (p *palette) getInterpolatedColorFor(t float64) colorful.Color {
 		if c1.pos <= t && t <= c2.pos {
 			// We are in between c1 and c2. Go blend them!
 			t12 := (t - c1.pos) / (c2.pos - c1.pos)
-			zap.L().Info("palette", zap.Float64("t12", t12))
 			return c1.color.BlendHcl(c2.color, t12).Clamped()
 		}
 	}

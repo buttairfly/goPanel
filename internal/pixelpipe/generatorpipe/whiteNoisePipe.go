@@ -1,6 +1,7 @@
 package generatorpipe
 
 import (
+	"image/color"
 	"math/rand"
 	"sync"
 	"time"
@@ -17,6 +18,7 @@ type whiteNoisePipe struct {
 	pipe    *pipepart.Pipe
 	ticker  *time.Ticker
 	palette palette.Palette
+	picture hardware.Frame
 	logger  *zap.Logger
 }
 
@@ -42,6 +44,7 @@ func WhiteNoisePipe(
 		pipe:    pipepart.NewPipe(id, outputChan),
 		ticker:  time.NewTicker(interval),
 		palette: p,
+		picture: nil,
 		logger:  logger,
 	}
 }
@@ -50,15 +53,19 @@ func (me *whiteNoisePipe) RunPipe(wg *sync.WaitGroup) {
 	defer wg.Done()
 	defer close(me.pipe.GetFullOutput())
 	defer me.ticker.Stop()
+	me.picture = <-me.pipe.GetInput()
+	me.picture.Fill(color.Black)
+
 	for frame := range me.pipe.GetInput() {
 		select {
 		case <-me.ticker.C:
-			x := rand.Intn(frame.GetWidth())
-			y := rand.Intn(frame.GetHeight())
+
+			x := rand.Intn(me.picture.GetWidth())
+			y := rand.Intn(me.picture.GetHeight())
 			p := rand.Float64()
 			c := me.palette.Blend(p)
-			frame.Set(x, y, c)
-			me.logger.Sugar().Infof("output pixel x%2d y%2d p%1.3f c0x%v", x, y, p, c.Hex())
+			me.picture.Set(x, y, c)
+			frame.CopyFromOther(me.picture)
 			// TODO: frame counter logic
 			me.pipe.GetFullOutput() <- frame
 		}

@@ -35,7 +35,8 @@ func (me *Source) Run() {
 		// Grab a buffer if available; allocate if not.
 		select {
 		case f = <-freeList:
-			f = hardware.NewCopyFrameWithEmptyImage(f)
+			// frame is still filled with old contents
+			// f = hardware.NewCopyFrameWithEmptyImage(f)
 			// Got one; nothing more to do.
 		default:
 			// None free, so allocate a new one.
