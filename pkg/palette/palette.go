@@ -5,6 +5,7 @@ import (
 	"sort"
 
 	"github.com/lucasb-eyer/go-colorful"
+	"go.uber.org/zap"
 )
 
 // Palette is the palette interface
@@ -89,6 +90,9 @@ func (p *palette) DeleteAt(pos float64) error {
 	return nil
 }
 
+// Blend will blend colors within the palaette within [0.0,1.0]
+// when the palette does not start with 0.0 the first palette color value is returned
+// when the palette does not end with a 1.0 pos value, the last value is returned
 func (p *palette) Blend(pos float64) colorful.Color {
 	if p.Len() == 0 {
 		return colorful.Color{R: 0, G: 0, B: 0}
@@ -101,18 +105,22 @@ func (p *palette) Blend(pos float64) colorful.Color {
 // the two colors around `t`.
 // Note: It relies heavily on the fact that the gradient keypoints are sorted.
 func (p *palette) getInterpolatedColorFor(t float64) colorful.Color {
-	for i := 0; i < len(*p)-1; i++ {
+	for i := 0; i < p.Len()-1; i++ {
 		c1 := (*p)[i]
+		if c1.pos > t {
+			// palette does not start at 0.0 and t < c0.pos
+			return p.slice()[i].color
+		}
 		c2 := (*p)[i+1]
 		if c1.pos <= t && t <= c2.pos {
 			// We are in between c1 and c2. Go blend them!
-			t = (t - c1.pos) / (c2.pos - c1.pos)
-			return c1.color.BlendHcl(c2.color, t).Clamped()
+			t12 := (t - c1.pos) / (c2.pos - c1.pos)
+			zap.L().Info("palette", zap.Float64("t12", t12))
+			return c1.color.BlendHcl(c2.color, t12).Clamped()
 		}
 	}
-
 	// Nothing found? Means we're at (or past) the last gradient keypoint.
-	return (*p)[len(*p)-1].color
+	return p.slice()[p.Len()-1].color
 }
 
 func (p *palette) getIndexFromPos(pos float64) (int, error) {
@@ -138,13 +146,17 @@ func guaranteeBetween0And1(pos float64) float64 {
 	return pos
 }
 
+func (p *palette) slice() palette {
+	return (*p)
+}
+
 func (p *palette) Len() int {
-	return len(*p)
+	return len(p.slice())
 }
 func (p *palette) Less(i, j int) bool {
-	return (*p)[i].pos < (*p)[j].pos
+	return p.slice()[i].pos < p.slice()[j].pos
 }
 
 func (p *palette) Swap(i, j int) {
-	(*p)[i], (*p)[j] = (*p)[j], (*p)[i]
+	p.slice()[i], p.slice()[j] = p.slice()[j], p.slice()[i]
 }

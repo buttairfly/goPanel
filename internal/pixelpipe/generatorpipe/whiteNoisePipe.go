@@ -36,6 +36,7 @@ func WhiteNoisePipe(
 	p.AddAt(colorful.Color{R: 0xff, G: 0, B: 0}, 0)
 	p.AddAt(colorful.Color{R: 0, G: 0xff, B: 0}, 0.3)
 	p.AddAt(colorful.Color{R: 0, G: 0, B: 0xff}, 0.6)
+	p.AddAt(colorful.Color{R: 0xff, G: 0, B: 0}, 1.0)
 
 	return &whiteNoisePipe{
 		pipe:    pipepart.NewPipe(id, outputChan),
