@@ -24,6 +24,7 @@ const (
 type Frame interface {
 	draw.Image
 	CopyFromOther(other Frame)
+	CopyImageFromOther(other Frame)
 	ToLedStripe() LedStripe
 	GetSumHardwarePixel() int
 	SetRGBA(x, y int, c color.RGBA)
@@ -107,22 +108,22 @@ func NewCopyFrameFromImage(other Frame, pictureToCopy *image.RGBA) Frame {
 	}
 }
 
-func (f *frame) CopyFromOther(other Frame) {
-	newImage := image.NewRGBA(other.Bounds())
+func (f *frame) CopyImageFromOther(other Frame) {
 	for x := 0; x < other.GetWidth(); x++ {
 		for y := 0; y < other.GetHeight(); y++ {
-			newImage.SetRGBA(x, y, other.RGBAAt(x, y))
+			f.image.SetRGBA(x, y, other.RGBAAt(x, y))
 		}
 	}
-	f = &frame{
-		image:            newImage,
-		tiles:            other.getTiles(),
-		sumHardwarePixel: other.GetSumHardwarePixel(),
-		width:            other.GetWidth(),
-		height:           other.GetHeight(),
-		fillType:         other.GetFillType(),
-		logger:           other.GetLogger(),
-	}
+	f.fillType = other.GetFillType()
+}
+
+func (f *frame) CopyFromOther(other Frame) {
+	f.CopyImageFromOther(other)
+	f.tiles = other.getTiles()
+	f.sumHardwarePixel = other.GetSumHardwarePixel()
+	f.width = other.GetWidth()
+	f.height = other.GetHeight()
+	f.logger = other.GetLogger()
 }
 
 func (f *frame) ToLedStripe() LedStripe {
@@ -252,7 +253,9 @@ func (f *frame) mapChangedPixelToStripePosition() []int {
 	if f.fillType == FillTypeSinglePixelChange {
 		posArray := make([]int, 1)
 		if f.changedPixel == nil {
-			f.logger.Fatal("fillType must not be FillTypeSinglePixelChange with changedPixel unset")
+			f.logger.Warn("fillType must not be FillTypeSinglePixelChange with changedPixel unset")
+			f.fillType = FillTypeFullFrame
+			return stipePositions
 		}
 		for _, tile := range f.tiles {
 			pos, err := tile.MapFramePixelToStripePosition(*f.changedPixel)

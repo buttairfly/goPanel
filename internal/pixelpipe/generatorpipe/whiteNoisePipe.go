@@ -10,6 +10,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/buttairfly/goPanel/internal/hardware"
+	"github.com/buttairfly/goPanel/internal/leakybuffer"
 	"github.com/buttairfly/goPanel/internal/pixelpipe/pipepart"
 	"github.com/buttairfly/goPanel/pkg/palette"
 )
@@ -35,10 +36,10 @@ func WhiteNoisePipe(
 
 	//todo set palette via function
 	p := palette.NewPalette()
-	p.AddAt(colorful.Color{R: 1, G: 0, B: 0}, 0)
-	p.AddAt(colorful.Color{R: 0, G: 1, B: 0}, 1.0/3)
-	p.AddAt(colorful.Color{R: 0, G: 0, B: 1}, 2.0/3)
-	p.AddAt(colorful.Color{R: 1, G: 0, B: 0}, 1.0)
+	p.AddAt(colorful.Color{R: 0.1, G: 0, B: 0}, 0)
+	p.AddAt(colorful.Color{R: 0, G: 0.1, B: 0}, 1.0/3)
+	p.AddAt(colorful.Color{R: 0, G: 0, B: 0.1}, 2.0/3)
+	p.AddAt(colorful.Color{R: 0.1, G: 0, B: 0}, 1.0)
 
 	return &whiteNoisePipe{
 		pipe:    pipepart.NewPipe(id, outputChan),
@@ -53,19 +54,20 @@ func (me *whiteNoisePipe) RunPipe(wg *sync.WaitGroup) {
 	defer wg.Done()
 	defer close(me.pipe.GetFullOutput())
 	defer me.ticker.Stop()
+
 	me.picture = <-me.pipe.GetInput()
+	defer leakybuffer.DumpFrame(me.picture)
 	me.picture.Fill(color.Black)
 
 	for frame := range me.pipe.GetInput() {
 		select {
 		case <-me.ticker.C:
-
 			x := rand.Intn(me.picture.GetWidth())
 			y := rand.Intn(me.picture.GetHeight())
 			p := rand.Float64()
 			c := me.palette.Blend(p)
 			me.picture.Set(x, y, c)
-			frame.CopyFromOther(me.picture)
+			frame.CopyImageFromOther(me.picture)
 			// TODO: frame counter logic
 			me.pipe.GetFullOutput() <- frame
 		}
