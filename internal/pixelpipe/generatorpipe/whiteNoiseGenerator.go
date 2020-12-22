@@ -4,7 +4,6 @@ import (
 	"image/color"
 	"math/rand"
 	"sync"
-	"time"
 
 	"github.com/lucasb-eyer/go-colorful"
 	"go.uber.org/zap"
@@ -16,17 +15,17 @@ import (
 )
 
 type whiteNoisePipe struct {
-	pipe    *pipepart.Pipe
-	ticker  *time.Ticker
-	palette palette.Palette
-	picture hardware.Frame
-	logger  *zap.Logger
+	pipe     *pipepart.Pipe
+	newPixel int
+	palette  palette.Palette
+	picture  hardware.Frame
+	logger   *zap.Logger
 }
 
 // WhiteNoisePipe generates for each tick interval a random pixel is drawn with a random color of the palette
 func WhiteNoisePipe(
 	id pipepart.ID,
-	interval time.Duration,
+	newPixel int,
 	logger *zap.Logger,
 ) pipepart.PixelPiper {
 	if pipepart.IsPlaceholderID(id) {
@@ -37,45 +36,39 @@ func WhiteNoisePipe(
 	//todo set palette via function
 	p := palette.NewPalette()
 	p.AddAt(colorful.Color{R: 0.1, G: 0, B: 0}, 0)
-	p.AddAt(colorful.Color{R: 0, G: 0.1, B: 0}, 1.0/3)
-	p.AddAt(colorful.Color{R: 0, G: 0, B: 0.1}, 2.0/3)
-	p.AddAt(colorful.Color{R: 0.1, G: 0, B: 0}, 1.0)
+	p.AddAt(colorful.Color{R: 0.5, G: 0.1, B: 0}, 1.0/3)
+	p.AddAt(colorful.Color{R: 0.3, G: 0, B: 0}, 2.0/3)
+	p.AddAt(colorful.Color{R: 0.4, G: 0.1, B: 0}, 1.0)
 
 	return &whiteNoisePipe{
-		pipe:    pipepart.NewPipe(id, outputChan),
-		ticker:  time.NewTicker(interval),
-		palette: p,
-		picture: nil,
-		logger:  logger,
+		pipe:     pipepart.NewPipe(id, outputChan),
+		newPixel: newPixel,
+		palette:  p,
+		picture:  nil,
+		logger:   logger,
 	}
 }
 
 func (me *whiteNoisePipe) RunPipe(wg *sync.WaitGroup) {
 	defer wg.Done()
 	defer close(me.pipe.GetFullOutput())
-	defer me.ticker.Stop()
 
 	me.picture = <-me.pipe.GetInput()
 	defer leakybuffer.DumpFrame(me.picture)
 	me.picture.Fill(color.Black)
 
 	for frame := range me.pipe.GetInput() {
-		select {
-		case <-me.ticker.C:
+		for n := 0; n < me.newPixel; n++ {
 			x := rand.Intn(me.picture.GetWidth())
 			y := rand.Intn(me.picture.GetHeight())
 			p := rand.Float64()
 			c := me.palette.Blend(p)
 			me.picture.Set(x, y, c)
-			frame.CopyImageFromOther(me.picture)
-			// TODO: frame counter logic
-			me.pipe.GetFullOutput() <- frame
 		}
+		frame.CopyImageFromOther(me.picture)
+		// TODO: frame counter logic
+		me.pipe.GetFullOutput() <- frame
 	}
-}
-
-func (me *whiteNoisePipe) SetTickPeriod(period time.Duration) {
-	me.ticker.Reset(period)
 }
 
 func (me *whiteNoisePipe) GetID() pipepart.ID {

@@ -12,7 +12,7 @@ import (
 	"github.com/buttairfly/goPanel/internal/pixelpipe/pipepart"
 )
 
-type lastBlackFramePipe struct {
+type lastBlackFrameGenerator struct {
 	cancelCtx context.Context
 	pipe      *pipepart.Pipe
 	logger    *zap.Logger
@@ -29,14 +29,14 @@ func NewLastBlackFramePipe(
 	}
 
 	outputChan := make(chan hardware.Frame)
-	return &lastBlackFramePipe{
+	return &lastBlackFrameGenerator{
 		cancelCtx: cancelCtx,
 		pipe:      pipepart.NewPipe(id, outputChan),
 		logger:    logger,
 	}
 }
 
-func (me *lastBlackFramePipe) RunPipe(wg *sync.WaitGroup) {
+func (me *lastBlackFrameGenerator) RunPipe(wg *sync.WaitGroup) {
 	defer wg.Done()
 	defer close(me.pipe.GetFullOutput())
 
@@ -63,15 +63,15 @@ func (me *lastBlackFramePipe) RunPipe(wg *sync.WaitGroup) {
 	}
 }
 
-func (me *lastBlackFramePipe) GetID() pipepart.ID {
+func (me *lastBlackFrameGenerator) GetID() pipepart.ID {
 	return me.pipe.GetID()
 }
 
-func (me *lastBlackFramePipe) GetPrevID() pipepart.ID {
+func (me *lastBlackFrameGenerator) GetPrevID() pipepart.ID {
 	return me.pipe.GetPrevID()
 }
 
-func (me *lastBlackFramePipe) GetOutput(id pipepart.ID) hardware.FrameSource {
+func (me *lastBlackFrameGenerator) GetOutput(id pipepart.ID) hardware.FrameSource {
 	if id == me.GetID() {
 		return me.pipe.GetOutput(id)
 	}
@@ -79,7 +79,7 @@ func (me *lastBlackFramePipe) GetOutput(id pipepart.ID) hardware.FrameSource {
 	return nil
 }
 
-func (me *lastBlackFramePipe) SetInput(prevID pipepart.ID, inputChan hardware.FrameSource) {
+func (me *lastBlackFrameGenerator) SetInput(prevID pipepart.ID, inputChan hardware.FrameSource) {
 	if pipepart.IsEmptyID(prevID) {
 		me.logger.Fatal("PipeIDEmptyError", zap.Error(pipepart.PipeIDEmptyError()))
 	}

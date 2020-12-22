@@ -11,7 +11,7 @@ import (
 	"github.com/buttairfly/goPanel/pkg/palette"
 )
 
-type fullFrameFadePipe struct {
+type fullFrameFadeGenerator struct {
 	pipe   *pipepart.Pipe
 	logger *zap.Logger
 
@@ -19,8 +19,8 @@ type fullFrameFadePipe struct {
 	palette  palette.Palette
 }
 
-// FullFrameFadePipe generates a new full frame fading frame stream
-func FullFrameFadePipe(
+// FullFrameFadeGenerator generates a new full frame fading frame stream
+func FullFrameFadeGenerator(
 	id pipepart.ID,
 	inputChan hardware.FrameSource,
 	wg *sync.WaitGroup,
@@ -35,7 +35,7 @@ func FullFrameFadePipe(
 	palette.AddAt(colorful.Color{R: 0xff, G: 0, B: 0}, 0)
 	palette.AddAt(colorful.Color{R: 0xff, G: 0xa5, B: 0}, 0.5)
 
-	return &fullFrameFadePipe{
+	return &fullFrameFadeGenerator{
 		pipe:     pipepart.NewPipe(id, outputChan),
 		logger:   logger,
 		numSteps: 100,
@@ -43,7 +43,7 @@ func FullFrameFadePipe(
 	}
 }
 
-func (me *fullFrameFadePipe) RunPipe(wg *sync.WaitGroup) {
+func (me *fullFrameFadeGenerator) RunPipe(wg *sync.WaitGroup) {
 	defer wg.Done()
 	defer close(me.pipe.GetFullOutput())
 
@@ -62,15 +62,15 @@ func (me *fullFrameFadePipe) RunPipe(wg *sync.WaitGroup) {
 	}
 }
 
-func (me *fullFrameFadePipe) GetID() pipepart.ID {
+func (me *fullFrameFadeGenerator) GetID() pipepart.ID {
 	return me.pipe.GetID()
 }
 
-func (me *fullFrameFadePipe) GetPrevID() pipepart.ID {
+func (me *fullFrameFadeGenerator) GetPrevID() pipepart.ID {
 	return me.pipe.GetPrevID()
 }
 
-func (me *fullFrameFadePipe) GetOutput(id pipepart.ID) hardware.FrameSource {
+func (me *fullFrameFadeGenerator) GetOutput(id pipepart.ID) hardware.FrameSource {
 	if id == me.GetID() {
 		return me.pipe.GetOutput(id)
 	}
@@ -78,7 +78,7 @@ func (me *fullFrameFadePipe) GetOutput(id pipepart.ID) hardware.FrameSource {
 	return nil
 }
 
-func (me *fullFrameFadePipe) SetInput(prevID pipepart.ID, inputChan hardware.FrameSource) {
+func (me *fullFrameFadeGenerator) SetInput(prevID pipepart.ID, inputChan hardware.FrameSource) {
 	if pipepart.IsEmptyID(prevID) {
 		me.logger.Fatal("PipeIDEmptyError", zap.Error(pipepart.PipeIDEmptyError()))
 	}

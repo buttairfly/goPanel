@@ -19,15 +19,15 @@ var pos float64
 // DrawCommand is a command to draw on a frame
 type DrawCommand string
 
-type drawPipe struct {
+type drawGenerator struct {
 	pipe   *pipepart.Pipe
 	logger *zap.Logger
 
 	commandInput <-chan DrawCommand
 }
 
-// DrawPipe generates for each command a draw step and draws a new frame
-func DrawPipe(
+// DrawGenerator generates for each command a draw step and draws a new frame
+func DrawGenerator(
 	id pipepart.ID,
 	logger *zap.Logger,
 	commandInput <-chan DrawCommand,
@@ -43,14 +43,14 @@ func DrawPipe(
 	p.AddAt(colorful.Color{R: 0, G: 0, B: 0xff}, 0.5)
 	pos = 0.0
 
-	return &drawPipe{
+	return &drawGenerator{
 		pipe:         pipepart.NewPipe(id, outputChan),
 		logger:       logger,
 		commandInput: commandInput,
 	}
 }
 
-func (me *drawPipe) RunPipe(wg *sync.WaitGroup) {
+func (me *drawGenerator) RunPipe(wg *sync.WaitGroup) {
 	defer wg.Done()
 	defer close(me.pipe.GetFullOutput())
 	for frame := range me.pipe.GetInput() {
@@ -65,15 +65,15 @@ func (me *drawPipe) RunPipe(wg *sync.WaitGroup) {
 	}
 }
 
-func (me *drawPipe) GetID() pipepart.ID {
+func (me *drawGenerator) GetID() pipepart.ID {
 	return me.pipe.GetID()
 }
 
-func (me *drawPipe) GetPrevID() pipepart.ID {
+func (me *drawGenerator) GetPrevID() pipepart.ID {
 	return me.pipe.GetPrevID()
 }
 
-func (me *drawPipe) GetOutput(id pipepart.ID) hardware.FrameSource {
+func (me *drawGenerator) GetOutput(id pipepart.ID) hardware.FrameSource {
 	if id == me.GetID() {
 		return me.pipe.GetOutput(id)
 	}
@@ -81,14 +81,14 @@ func (me *drawPipe) GetOutput(id pipepart.ID) hardware.FrameSource {
 	return nil
 }
 
-func (me *drawPipe) SetInput(prevID pipepart.ID, inputChan hardware.FrameSource) {
+func (me *drawGenerator) SetInput(prevID pipepart.ID, inputChan hardware.FrameSource) {
 	if pipepart.IsEmptyID(prevID) {
 		me.logger.Fatal("PipeIDEmptyError", zap.Error(pipepart.PipeIDEmptyError()))
 	}
 	me.pipe.SetInput(prevID, inputChan)
 }
 
-func (me *drawPipe) interpretCommand(frame hardware.Frame) bool {
+func (me *drawGenerator) interpretCommand(frame hardware.Frame) bool {
 	_, ok := <-me.commandInput
 	if !ok {
 		return true

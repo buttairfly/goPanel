@@ -32,7 +32,7 @@ func TestNewEmptyFramePipeline_AddPipeAfter(t *testing.T) {
 			desc: "single pipe added",
 			pipes: []PipeAdder{
 				{
-					pipe:      generatorpipe.DrawPipe("drawPipe", logger, make(chan generatorpipe.DrawCommand, 0)),
+					pipe:      generatorpipe.DrawGenerator("drawGenerator", logger, make(chan generatorpipe.DrawCommand, 0)),
 					addBefore: "pipeline",
 				},
 			},
