@@ -45,7 +45,15 @@ func NewPanel(config *config.MainConfig, device device.LedDevice, logger *zap.Lo
 	}
 	panel.framePipeline.SetInput(pipepart.SourceID, panel.frameSource)
 	device.SetInput(panel.framePipeline.GetOutput(emptyFramePipeID))
-	panel.framePipeline.AddPipeBefore(emptyFramePipeID, generatorpipe.WhiteNoisePipe(pipepart.ID("whitenoise"), 50, logger))
+	panel.framePipeline.AddPipeBefore(
+		emptyFramePipeID,
+		generatorpipe.RainbowGenerator(
+			"rainbow",
+			0.0009,
+			0.0014,
+			logger,
+		),
+	)
 	return panel
 }
 
