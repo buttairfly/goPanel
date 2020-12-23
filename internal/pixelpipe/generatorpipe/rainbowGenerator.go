@@ -36,7 +36,7 @@ func RainbowGenerator(
 	//todo set palette via function
 	p := palette.NewPalette()
 	p.AddAt(colorful.Color{R: 1, G: 0, B: 0}, 0)
-	p.AddAt(colorful.Color{R: 0, G: 4, B: 0}, 1.0/3)
+	p.AddAt(colorful.Color{R: 0, G: 1, B: 0}, 1.0/3)
 	p.AddAt(colorful.Color{R: 0, G: 0, B: 1}, 2.0/3)
 	p.AddAt(colorful.Color{R: 1, G: 0, B: 0}, 1.0)
 

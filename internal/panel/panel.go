@@ -49,8 +49,8 @@ func NewPanel(config *config.MainConfig, device device.LedDevice, logger *zap.Lo
 		emptyFramePipeID,
 		generatorpipe.RainbowGenerator(
 			"rainbow",
-			0.0009,
-			0.0014,
+			0.005,
+			0.01,
 			logger,
 		),
 	)
