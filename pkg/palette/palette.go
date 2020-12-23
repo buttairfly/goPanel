@@ -41,7 +41,7 @@ func (p *palette) Clear() {
 
 func (p *palette) AddAt(c colorful.Color, pos float64) {
 	pos = guaranteeBetween0And1(pos)
-	*p = append(*p, paletteColor{color: c, pos: pos})
+	*p = append(p.slice(), paletteColor{color: c, pos: pos})
 	sort.Sort(p)
 }
 
@@ -50,7 +50,7 @@ func (p *palette) ReplaceAt(c colorful.Color, pos float64) error {
 	if err != nil {
 		return err
 	}
-	(*p)[index].color = c
+	p.slice()[index].color = c
 	return nil
 }
 
@@ -65,7 +65,7 @@ func (p *palette) GetKeyColorAtPos(pos float64) (*colorful.Color, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &((*p)[index].color), nil
+	return &(p.slice()[index].color), nil
 }
 
 func (p *palette) MoveAt(pos, toPos float64) error {
@@ -85,7 +85,7 @@ func (p *palette) DeleteAt(pos float64) error {
 	if err != nil {
 		return err
 	}
-	*p = append((*p)[:index], (*p)[index+1:]...)
+	*p = append(p.slice()[:index], p.slice()[index+1:]...)
 	return nil
 }
 
@@ -105,12 +105,12 @@ func (p *palette) Blend(pos float64) colorful.Color {
 // Note: It relies heavily on the fact that the gradient keypoints are sorted.
 func (p *palette) getInterpolatedColorFor(t float64) colorful.Color {
 	for i := 0; i < p.Len()-1; i++ {
-		c1 := (*p)[i]
+		c1 := p.slice()[i]
 		if c1.pos > t {
 			// palette does not start at 0.0 and t < c0.pos
 			return p.slice()[i].color
 		}
-		c2 := (*p)[i+1]
+		c2 := p.slice()[i+1]
 		if c1.pos <= t && t <= c2.pos {
 			// We are in between c1 and c2. Go blend them!
 			t12 := (t - c1.pos) / (c2.pos - c1.pos)
@@ -123,7 +123,7 @@ func (p *palette) getInterpolatedColorFor(t float64) colorful.Color {
 
 func (p *palette) getIndexFromPos(pos float64) (int, error) {
 	pos = guaranteeBetween0And1(pos)
-	for i, pc := range *p {
+	for i, pc := range p.slice() {
 		if pc.pos == pos {
 			return i, nil
 		}
