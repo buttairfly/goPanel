@@ -12,8 +12,10 @@ import (
 type FrameFillType int
 
 const (
+	// FilTypeDoNothing should not update a frame
+	FilTypeDoNothing FrameFillType = iota
 	// FillTypeFullFrame is used when a full frame needs transferring
-	FillTypeFullFrame FrameFillType = iota
+	FillTypeFullFrame
 	// FillTypeSinglePixelChange is used when only a single pixel changed
 	FillTypeSinglePixelChange
 	// FillTypeSingleFillColor is used when the frame consists of one color only
@@ -32,11 +34,15 @@ type Frame interface {
 	Fill(c color.Color)
 	RGBAAt(x, y int) color.RGBA
 	GetFillType() FrameFillType
+	SetFillTypeFullFrame()
+	SetFillTypeDoNothing()
 	GetWidth() int
 	GetHeight() int
 	GetLogger() *zap.Logger
 
 	getTiles() []Tile
+	getNumPixelChanges() int
+	getChangedPixel() *image.Point
 }
 
 type frame struct {
@@ -115,6 +121,8 @@ func (f *frame) CopyImageFromOther(other Frame) {
 		}
 	}
 	f.fillType = other.GetFillType()
+	f.numPixelChanges = other.getNumPixelChanges()
+	f.changedPixel = other.getChangedPixel()
 }
 
 func (f *frame) CopyFromOther(other Frame) {
@@ -171,8 +179,28 @@ func (f *frame) RGBAAt(x, y int) color.RGBA {
 	return f.image.RGBAAt(x, y)
 }
 
+func (f *frame) SetFillTypeDoNothing() {
+	f.numPixelChanges = 0
+	f.changedPixel = nil
+	f.fillType = FilTypeDoNothing
+}
+
+func (f *frame) SetFillTypeFillColor() {
+	f.numPixelChanges = 0
+	f.changedPixel = nil
+	f.fillType = FillTypeSingleFillColor
+}
+
+func (f *frame) SetFillTypeFullFrame() {
+	f.numPixelChanges = 0
+	f.changedPixel = nil
+	f.fillType = FillTypeFullFrame
+}
+
 func (f *frame) updateFillTypeSetPixel(x, y int) {
-	if f.fillType != FillTypeFullFrame {
+	switch f.fillType {
+	case FillTypeSinglePixelChange:
+	case FilTypeDoNothing:
 		oldChangedPixel := f.changedPixel
 		f.changedPixel = &image.Point{x, y}
 		if oldChangedPixel == nil || !oldChangedPixel.Eq(*f.changedPixel) {
@@ -180,9 +208,12 @@ func (f *frame) updateFillTypeSetPixel(x, y int) {
 			if f.numPixelChanges == 1 {
 				f.fillType = FillTypeSinglePixelChange
 			} else {
-				f.fillType = FillTypeFullFrame
+				f.SetFillTypeFullFrame()
 			}
 		}
+	case FillTypeSingleFillColor:
+	case FillTypeFullFrame:
+		f.SetFillTypeFullFrame()
 	}
 }
 
@@ -198,15 +229,9 @@ func (f *frame) SetRGBA(x, y int, c color.RGBA) {
 	f.image.SetRGBA(x, y, c)
 }
 
-func (f *frame) updateFillTypeFillColor() {
-	f.numPixelChanges = 0
-	f.changedPixel = nil
-	f.fillType = FillTypeSingleFillColor
-}
-
 // Fill fills the whole image with a color
 func (f *frame) Fill(c color.Color) {
-	f.updateFillTypeFillColor()
+	f.SetFillTypeFillColor()
 	for y := 0; y < f.height; y++ {
 		for x := 0; x < f.width; x++ {
 			f.image.Set(x, y, c)
@@ -216,7 +241,7 @@ func (f *frame) Fill(c color.Color) {
 
 // FillRGBA fills the whole image with a RGBA color
 func (f *frame) FillRGBA(c color.RGBA) {
-	f.updateFillTypeFillColor()
+	f.SetFillTypeFillColor()
 	for y := 0; y < f.height; y++ {
 		for x := 0; x < f.width; x++ {
 			f.image.SetRGBA(x, y, c)
@@ -248,13 +273,21 @@ func (f *frame) getTiles() []Tile {
 	return f.tiles
 }
 
+func (f *frame) getNumPixelChanges() int {
+	return f.numPixelChanges
+}
+
+func (f *frame) getChangedPixel() *image.Point {
+	return f.changedPixel
+}
+
 func (f *frame) mapChangedPixelToStripePosition() []int {
 	var stipePositions []int
 	if f.fillType == FillTypeSinglePixelChange {
 		posArray := make([]int, 1)
 		if f.changedPixel == nil {
 			f.logger.Warn("fillType must not be FillTypeSinglePixelChange with changedPixel unset")
-			f.fillType = FillTypeFullFrame
+			f.SetFillTypeFullFrame()
 			return stipePositions
 		}
 		for _, tile := range f.tiles {

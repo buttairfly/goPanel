@@ -51,6 +51,7 @@ func (me *whiteNoisePipe) RunPipe(wg *sync.WaitGroup) {
 	me.picture.Fill(color.Black)
 
 	for frame := range me.pipe.GetInput() {
+		me.picture.SetFillTypeDoNothing()
 		for n := 0; n < me.newPixel; n++ {
 			x := rand.Intn(me.picture.GetWidth())
 			y := rand.Intn(me.picture.GetHeight())
