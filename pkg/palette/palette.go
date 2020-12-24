@@ -17,6 +17,7 @@ type Palette interface {
 	GetKeyColorAtPos(pos float64) (*colorful.Color, error)
 	DeleteAt(pos float64) error
 	MoveAt(pos, toPos float64) error
+	ToMarshal() Marshal
 	Clear()
 }
 
@@ -157,4 +158,8 @@ func (p *palette) Less(i, j int) bool {
 
 func (p *palette) Swap(i, j int) {
 	p.slice()[i], p.slice()[j] = p.slice()[j], p.slice()[i]
+}
+
+func (p *palette) Marshal() Marshal {
+	return p.ToMarshal()
 }

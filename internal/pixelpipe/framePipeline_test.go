@@ -5,6 +5,7 @@ import (
 
 	"github.com/buttairfly/goPanel/internal/pixelpipe/generatorpipe"
 	"github.com/buttairfly/goPanel/internal/pixelpipe/pipepart"
+	"github.com/buttairfly/goPanel/pkg/palette"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 )
@@ -32,7 +33,7 @@ func TestNewEmptyFramePipeline_AddPipeAfter(t *testing.T) {
 			desc: "single pipe added",
 			pipes: []PipeAdder{
 				{
-					pipe:      generatorpipe.DrawGenerator("drawGenerator", logger, make(chan generatorpipe.DrawCommand, 0)),
+					pipe:      generatorpipe.DrawGenerator("drawGenerator", palette.NewPalette(), logger, make(chan generatorpipe.DrawCommand, 0)),
 					addBefore: "pipeline",
 				},
 			},

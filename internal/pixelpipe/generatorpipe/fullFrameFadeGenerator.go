@@ -3,7 +3,6 @@ package generatorpipe
 import (
 	"sync"
 
-	"github.com/lucasb-eyer/go-colorful"
 	"go.uber.org/zap"
 
 	"github.com/buttairfly/goPanel/internal/hardware"
@@ -12,16 +11,17 @@ import (
 )
 
 type fullFrameFadeGenerator struct {
-	pipe   *pipepart.Pipe
-	logger *zap.Logger
+	pipe    *pipepart.Pipe
+	palette palette.Palette
+	logger  *zap.Logger
 
 	numSteps int
-	palette  palette.Palette
 }
 
 // FullFrameFadeGenerator generates a new full frame fading frame stream
 func FullFrameFadeGenerator(
 	id pipepart.ID,
+	palette palette.Palette,
 	inputChan hardware.FrameSource,
 	wg *sync.WaitGroup,
 	logger *zap.Logger,
@@ -30,10 +30,6 @@ func FullFrameFadeGenerator(
 		logger.Fatal("PipeIDPlaceholderError", zap.Error(pipepart.PipeIDPlaceholderError(id)))
 	}
 	outputChan := make(chan hardware.Frame)
-
-	palette := palette.NewPalette()
-	palette.AddAt(colorful.Color{R: 0xff, G: 0, B: 0}, 0)
-	palette.AddAt(colorful.Color{R: 0xff, G: 0xa5, B: 0}, 0.5)
 
 	return &fullFrameFadeGenerator{
 		pipe:     pipepart.NewPipe(id, outputChan),

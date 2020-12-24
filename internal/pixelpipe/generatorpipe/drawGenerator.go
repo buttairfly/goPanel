@@ -3,7 +3,6 @@ package generatorpipe
 import (
 	"sync"
 
-	"github.com/lucasb-eyer/go-colorful"
 	"go.uber.org/zap"
 
 	"github.com/buttairfly/goPanel/internal/hardware"
@@ -12,16 +11,16 @@ import (
 	"github.com/buttairfly/goPanel/pkg/palette"
 )
 
-//TODO: replace p and pos with real draw commands
-var p palette.Palette
+//TODO: replace pos with real draw commands
 var pos float64
 
 // DrawCommand is a command to draw on a frame
 type DrawCommand string
 
 type drawGenerator struct {
-	pipe   *pipepart.Pipe
-	logger *zap.Logger
+	pipe    *pipepart.Pipe
+	logger  *zap.Logger
+	palette palette.Palette
 
 	commandInput <-chan DrawCommand
 }
@@ -29,6 +28,7 @@ type drawGenerator struct {
 // DrawGenerator generates for each command a draw step and draws a new frame
 func DrawGenerator(
 	id pipepart.ID,
+	palette palette.Palette,
 	logger *zap.Logger,
 	commandInput <-chan DrawCommand,
 ) pipepart.PixelPiper {
@@ -37,14 +37,9 @@ func DrawGenerator(
 	}
 	outputChan := make(chan hardware.Frame)
 
-	//TODO: replace p and pos with real draw commands
-	p = palette.NewPalette()
-	p.AddAt(colorful.Color{R: 0xff, G: 0, B: 0}, 0)
-	p.AddAt(colorful.Color{R: 0, G: 0, B: 0xff}, 0.5)
-	pos = 0.0
-
 	return &drawGenerator{
 		pipe:         pipepart.NewPipe(id, outputChan),
+		palette:      palette,
 		logger:       logger,
 		commandInput: commandInput,
 	}
@@ -55,7 +50,7 @@ func (me *drawGenerator) RunPipe(wg *sync.WaitGroup) {
 	defer close(me.pipe.GetFullOutput())
 	for frame := range me.pipe.GetInput() {
 		isClosed := me.interpretCommand(frame)
-		if !isClosed {
+		if isClosed {
 			leakybuffer.DumpFrame(frame)
 			return
 		}
@@ -94,11 +89,11 @@ func (me *drawGenerator) interpretCommand(frame hardware.Frame) bool {
 		return true
 	}
 
-	//TODO: replace p and pos with real draw commands
+	//TODO: replace pos with real draw commands, use xy properly
 	pos += 0.01
 	if pos > 1 {
 		pos = 0
 	}
-	frame.Set(0, 0, p.Blend(pos))
+	frame.Set(0, 0, me.palette.Blend(pos))
 	return false
 }

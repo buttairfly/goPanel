@@ -3,7 +3,6 @@ package generatorpipe
 import (
 	"sync"
 
-	"github.com/lucasb-eyer/go-colorful"
 	"go.uber.org/zap"
 
 	"github.com/buttairfly/goPanel/internal/hardware"
@@ -24,6 +23,7 @@ type rainbowGenerator struct {
 // the color palette should be circular to avoid hard color changes
 func RainbowGenerator(
 	id pipepart.ID,
+	palette palette.Palette,
 	dx float64,
 	dy float64,
 	logger *zap.Logger,
@@ -33,16 +33,9 @@ func RainbowGenerator(
 	}
 	outputChan := make(chan hardware.Frame)
 
-	//todo set palette via function
-	p := palette.NewPalette()
-	p.AddAt(colorful.Color{R: 1, G: 0, B: 0}, 0)
-	p.AddAt(colorful.Color{R: 0, G: 1, B: 0}, 1.0/3)
-	p.AddAt(colorful.Color{R: 0, G: 0, B: 1}, 2.0/3)
-	p.AddAt(colorful.Color{R: 1, G: 0, B: 0}, 1.0)
-
 	return &rainbowGenerator{
 		pipe:    pipepart.NewPipe(id, outputChan),
-		palette: p,
+		palette: palette,
 		dx:      dx,
 		dy:      dy,
 		logger:  logger,

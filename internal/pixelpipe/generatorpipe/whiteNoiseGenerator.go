@@ -5,7 +5,6 @@ import (
 	"math/rand"
 	"sync"
 
-	"github.com/lucasb-eyer/go-colorful"
 	"go.uber.org/zap"
 
 	"github.com/buttairfly/goPanel/internal/hardware"
@@ -25,6 +24,7 @@ type whiteNoisePipe struct {
 // WhiteNoisePipe generates for each tick interval a random pixel is drawn with a random color of the palette
 func WhiteNoisePipe(
 	id pipepart.ID,
+	palette palette.Palette,
 	newPixel int,
 	logger *zap.Logger,
 ) pipepart.PixelPiper {
@@ -33,17 +33,10 @@ func WhiteNoisePipe(
 	}
 	outputChan := make(chan hardware.Frame)
 
-	//todo set palette via function
-	p := palette.NewPalette()
-	p.AddAt(colorful.Color{R: 0.1, G: 0, B: 0}, 0)
-	p.AddAt(colorful.Color{R: 0.5, G: 0.1, B: 0}, 1.0/3)
-	p.AddAt(colorful.Color{R: 0.3, G: 0, B: 0}, 2.0/3)
-	p.AddAt(colorful.Color{R: 0.4, G: 0.1, B: 0}, 1.0)
-
 	return &whiteNoisePipe{
 		pipe:     pipepart.NewPipe(id, outputChan),
 		newPixel: newPixel,
-		palette:  p,
+		palette:  palette,
 		picture:  nil,
 		logger:   logger,
 	}

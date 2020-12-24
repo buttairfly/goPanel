@@ -10,7 +10,8 @@ import (
 func Router(e *echo.Echo) {
 	g := e.Group("/api/v1")
 
-	apiv1.Version(g)
 	apiv1.Config(g)
-	apiv1.Paint(g)
+	apiv1.Panel(g)
+	apiv1.Panel(g)
+	apiv1.Version(g)
 }

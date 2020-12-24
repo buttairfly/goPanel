@@ -2,6 +2,7 @@ package panel
 
 import (
 	"context"
+	"errors"
 	"sync"
 
 	"go.uber.org/zap"
@@ -15,6 +16,7 @@ import (
 	"github.com/buttairfly/goPanel/internal/pixelpipe/pipepart"
 	"github.com/buttairfly/goPanel/pkg/fader"
 	"github.com/buttairfly/goPanel/pkg/palette"
+	"github.com/lucasb-eyer/go-colorful"
 )
 
 var panel *Panel
@@ -23,8 +25,8 @@ var panel *Panel
 type Panel struct {
 	config        *config.MainConfig
 	device        device.LedDevice
-	faders        []fader.Fader
-	palettes      []palette.Palette
+	faders        map[string]fader.Fader
+	palettes      map[string]palette.Palette
 	leakySource   *leakybuffer.Source
 	frameSource   hardware.FrameSource
 	framePipeline *pixelpipe.FramePipeline
@@ -37,18 +39,36 @@ func NewPanel(config *config.MainConfig, device device.LedDevice, logger *zap.Lo
 	panel = &Panel{
 		config:        config,
 		device:        device,
-		faders:        make([]fader.Fader, 0, 1),
-		palettes:      make([]palette.Palette, 0, 1),
+		faders:        make(map[string]fader.Fader, 0),
+		palettes:      make(map[string]palette.Palette, 0),
 		leakySource:   frameSource,
 		frameSource:   frameSource.GetFrameSource(),
 		framePipeline: pixelpipe.NewEmptyFramePipeline(emptyFramePipeID, logger),
 	}
+
+	fire := palette.NewPalette()
+	fire.AddAt(colorful.Color{R: 0.1, G: 0, B: 0}, 0)
+	fire.AddAt(colorful.Color{R: 0.5, G: 0.1, B: 0}, 1.0/3)
+	fire.AddAt(colorful.Color{R: 0.3, G: 0, B: 0}, 2.0/3)
+	fire.AddAt(colorful.Color{R: 0.4, G: 0.1, B: 0}, 1.0)
+	panel.palettes["fire"] = fire
+
+	rainbowPalette := palette.NewPalette()
+	rainbowPalette.AddAt(colorful.Color{R: 1, G: 0, B: 0}, 0)
+	rainbowPalette.AddAt(colorful.Color{R: 0, G: 1, B: 0}, 1.0/3)
+	rainbowPalette.AddAt(colorful.Color{R: 0, G: 0, B: 1}, 2.0/3)
+	rainbowPalette.AddAt(colorful.Color{R: 1, G: 0, B: 0}, 1.0)
+	panel.palettes["rainbow"] = rainbowPalette
+
 	panel.framePipeline.SetInput(pipepart.SourceID, panel.frameSource)
+
 	device.SetInput(panel.framePipeline.GetOutput(emptyFramePipeID))
+
 	panel.framePipeline.AddPipeBefore(
 		emptyFramePipeID,
 		generatorpipe.RainbowGenerator(
 			"rainbow",
+			rainbowPalette,
 			0.005,
 			0.01,
 			logger,
@@ -86,6 +106,33 @@ func (me *Panel) GetFramePipeline() *pixelpipe.FramePipeline {
 }
 
 // GetFaders returns the panel faders
-func (me *Panel) GetFaders() []fader.Fader {
+func (me *Panel) GetFaders() map[string]fader.Fader {
 	return me.faders
+}
+
+// GetFaderByID returns the panel fader by id
+func (me *Panel) GetFaderByID(id string) (*fader.Fader, error) {
+	fader, exists := me.faders[id]
+	if exists {
+		return &fader, nil
+	}
+	return nil, errors.New("not found")
+}
+
+// GetPalettes returns the panel palettes
+func (me *Panel) GetPalettes() map[string]palette.Marshal {
+	p := make(map[string]palette.Marshal, len(me.palettes))
+	for id, palette := range me.palettes {
+		p[id] = palette.ToMarshal()
+	}
+	return p
+}
+
+// GetPaletteByID returns the panel palette by id
+func (me *Panel) GetPaletteByID(id string) (palette.Marshal, error) {
+	palette, exists := me.palettes[id]
+	if exists {
+		return palette.ToMarshal(), nil
+	}
+	return nil, errors.New("not found")
 }
