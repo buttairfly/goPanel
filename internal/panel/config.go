@@ -14,13 +14,13 @@ type ConsumerConfig struct {
 }
 
 // GetMainConfig returns the parsed main config
-func (p *Panel) GetMainConfig() *config.MainConfig {
-	return p.config
+func (me *Panel) GetMainConfig() *config.MainConfig {
+	return me.config
 }
 
 // GetConsumerConfig returns the parsed main config
-func (p *Panel) GetConsumerConfig() *ConsumerConfig {
-	mc := p.GetMainConfig()
+func (me *Panel) GetConsumerConfig() *ConsumerConfig {
+	mc := me.GetMainConfig()
 	frame := image.Rectangle{}
 	tileFrames := make([]marshal.Rectangle, len(mc.TileConfigs))
 	for i, tile := range mc.TileConfigs {

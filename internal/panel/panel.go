@@ -2,7 +2,6 @@ package panel
 
 import (
 	"context"
-	"errors"
 	"sync"
 
 	"go.uber.org/zap"
@@ -46,6 +45,7 @@ func NewPanel(config *config.MainConfig, device device.LedDevice, logger *zap.Lo
 		framePipeline: pixelpipe.NewEmptyFramePipeline(emptyFramePipeID, logger),
 	}
 
+	// TODO: move to file
 	fire := palette.NewPalette()
 	fire.AddAt(colorful.Color{R: 0.1, G: 0, B: 0}, 0)
 	fire.AddAt(colorful.Color{R: 0.5, G: 0.1, B: 0}, 1.0/3)
@@ -53,6 +53,7 @@ func NewPanel(config *config.MainConfig, device device.LedDevice, logger *zap.Lo
 	fire.AddAt(colorful.Color{R: 0.4, G: 0.1, B: 0}, 1.0)
 	panel.palettes["fire"] = fire
 
+	// TODO: move to file
 	rainbowPalette := palette.NewPalette()
 	rainbowPalette.AddAt(colorful.Color{R: 1, G: 0, B: 0}, 0)
 	rainbowPalette.AddAt(colorful.Color{R: 0, G: 1, B: 0}, 1.0/3)
@@ -64,6 +65,7 @@ func NewPanel(config *config.MainConfig, device device.LedDevice, logger *zap.Lo
 
 	device.SetInput(panel.framePipeline.GetOutput(emptyFramePipeID))
 
+	// TODO: load from file
 	panel.framePipeline.AddPipeBefore(
 		emptyFramePipeID,
 		generatorpipe.RainbowGenerator(
@@ -103,36 +105,4 @@ func (me *Panel) GetDevice() device.LedDevice {
 // GetFramePipeline returns the panel FramePipeline
 func (me *Panel) GetFramePipeline() *pixelpipe.FramePipeline {
 	return me.framePipeline
-}
-
-// GetFaders returns the panel faders
-func (me *Panel) GetFaders() map[string]fader.Fader {
-	return me.faders
-}
-
-// GetFaderByID returns the panel fader by id
-func (me *Panel) GetFaderByID(id string) (*fader.Fader, error) {
-	fader, exists := me.faders[id]
-	if exists {
-		return &fader, nil
-	}
-	return nil, errors.New("not found")
-}
-
-// GetPalettes returns the panel palettes
-func (me *Panel) GetPalettes() map[string]palette.Marshal {
-	p := make(map[string]palette.Marshal, len(me.palettes))
-	for id, palette := range me.palettes {
-		p[id] = palette.ToMarshal()
-	}
-	return p
-}
-
-// GetPaletteByID returns the panel palette by id
-func (me *Panel) GetPaletteByID(id string) (palette.Marshal, error) {
-	palette, exists := me.palettes[id]
-	if exists {
-		return palette.ToMarshal(), nil
-	}
-	return nil, errors.New("not found")
 }
