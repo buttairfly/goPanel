@@ -73,7 +73,7 @@ func (s *serialDevice) runFrameProcessor(wg *sync.WaitGroup) {
 
 	s.logger.Sugar().Infof("numLed ledStripe %d", s.numLed)
 	for frame := range s.inputChan {
-		s.currentFrame = frame
+		s.currentFrame = frame // this is unsafe
 		ledStripe := frame.ToLedStripe()
 
 		ledStripeAction := ledStripe.GetAction()
@@ -113,7 +113,7 @@ func (s *serialDevice) GetType() Type {
 }
 
 func (s *serialDevice) GetCurrentFrame() hardware.Frame {
-	return s.currentFrame
+	return s.currentFrame // this is unsafe
 }
 
 func (s *serialDevice) printLatches(cancelCtx context.Context, wg *sync.WaitGroup) {
@@ -122,23 +122,28 @@ func (s *serialDevice) printLatches(cancelCtx context.Context, wg *sync.WaitGrou
 
 	start := time.Now()
 	lastLapLatches := int64(0)
+
+	timerDuration := 30 * time.Second
+	ticker := time.NewTicker(timerDuration)
+	defer ticker.Stop()
+
 	for {
 		select {
 		case <-cancelCtx.Done():
 			return
-		case <-time.After(30 * time.Second):
+		case now := <-ticker.C:
 			{
-				timeDiff := time.Now().Sub(start)
+				timeDiff := now.Sub(start)
+				currentLapLatched := s.latched - lastLapLatches
 				s.logger.Info("latch summary",
-					zap.String("frames", fmt.Sprintf("%f.2/s", float64(s.latched)*float64(time.Second)/float64(timeDiff))),
-					zap.Int64("lastLap", s.latched-lastLapLatches),
-					zap.Duration("lastDiff", timeDiff),
+					zap.String("frames", fmt.Sprintf("%d (%2.3f/s)", s.latched, float64(s.latched)/float64(timeDiff.Seconds()))),
+					zap.String("lap frames", fmt.Sprintf("%d (%2.3f/s)", currentLapLatched, float64(currentLapLatched)/float64(timerDuration.Seconds()))),
+					zap.Duration("diff", timeDiff),
 				)
 				lastLapLatches = s.latched
 			}
 		}
 	}
-
 }
 
 func (s *serialDevice) setPixel(pixelNum int, buffer []uint8) {
@@ -186,6 +191,7 @@ func (s *serialDevice) rawFramePart(pixel, pixelOffset, currentRawFramePart, cur
 }
 
 func (s *serialDevice) latchFrame() {
+	s.latched++
 	command := "L"
 	s.Write(command)
 }
