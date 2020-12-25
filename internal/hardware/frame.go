@@ -200,6 +200,7 @@ func (f *frame) SetFillTypeFullFrame() {
 func (f *frame) updateFillTypeSetPixel(x, y int) {
 	switch f.fillType {
 	case FillTypeSinglePixelChange:
+		fallthrough
 	case FilTypeDoNothing:
 		oldChangedPixel := f.changedPixel
 		f.changedPixel = &image.Point{x, y}
@@ -212,8 +213,11 @@ func (f *frame) updateFillTypeSetPixel(x, y int) {
 			}
 		}
 	case FillTypeSingleFillColor:
+		fallthrough
 	case FillTypeFullFrame:
 		f.SetFillTypeFullFrame()
+	default:
+		f.logger.Panic("Unknown filltype at frame.updateFillTypeSetPixel", zap.Any("fillType", f.fillType))
 	}
 }
 

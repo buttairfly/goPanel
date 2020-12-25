@@ -66,26 +66,26 @@ func NewPanel(config *config.MainConfig, device device.LedDevice, logger *zap.Lo
 	device.SetInput(panel.framePipeline.GetOutput(emptyFramePipeID))
 
 	// TODO: load from file
-	// panel.framePipeline.AddPipeBefore(
-	// 	emptyFramePipeID,
-	// 	generatorpipe.RainbowGenerator(
-	// 		"rainbow",
-	// 		rainbowPalette,
-	// 		0.005,
-	// 		0.01,
-	// 		logger,
-	// 	),
-	// )
-
 	panel.framePipeline.AddPipeBefore(
 		emptyFramePipeID,
-		generatorpipe.SnakeGenerator(
+		generatorpipe.RainbowGenerator(
 			"rainbow",
 			rainbowPalette,
-			0.007,
+			0.005,
+			0.01,
 			logger,
 		),
 	)
+
+	// panel.framePipeline.AddPipeBefore(
+	// 	emptyFramePipeID,
+	// 	generatorpipe.SnakeGenerator(
+	// 		"rainbow",
+	// 		rainbowPalette,
+	// 		195.0/200,
+	// 		logger,
+	// 	),
+	// )
 	return panel
 }
 
