@@ -10,5 +10,5 @@ serialConfig:
   readBufferSize: 1024
   rawFramePartNumLed: 10
   paritySeed: 165
-  initSleepTime: 70ms
-  latchSleepTime: 7.8ms
+  initSleepTime: 7ms
+  latchSleepTime: 3ms

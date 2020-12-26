@@ -1,6 +1,7 @@
 package palette
 
 import (
+	"fmt"
 	"math"
 	"sort"
 
@@ -11,14 +12,12 @@ import (
 type Palette interface {
 	sort.Interface
 	Blend(pos float64) colorful.Color
-	AddAt(c colorful.Color, pos float64)
 	PutAt(c colorful.Color, pos float64)
-	ReplaceAt(c colorful.Color, pos float64) error
 	GetKeyColorAtPos(pos float64) (*colorful.Color, error)
 	DeleteAt(pos float64) error
-	MoveAt(pos, toPos float64) error
+	MoveAt(move ColorMoveMarshal) error
 	ToMarshal() Marshal
-	Clear()
+	Clear() Palette
 }
 
 type palette []paletteColor
@@ -31,22 +30,22 @@ type paletteColor struct {
 // NewPalette generates a new Palette
 func NewPalette() Palette {
 	p := new(palette)
-	p.Clear()
+	return p.Clear()
+}
+
+func (p *palette) Clear() Palette {
+	plaetteSlice := make(palette, 0, 0)
+	p = &plaetteSlice
 	return p
 }
 
-func (p *palette) Clear() {
-	plaetteSlice := make(palette, 0, 0)
-	p = &plaetteSlice
-}
-
-func (p *palette) AddAt(c colorful.Color, pos float64) {
+func (p *palette) addAt(c colorful.Color, pos float64) {
 	pos = guaranteeBetween0And1(pos)
 	*p = append(p.slice(), paletteColor{color: c, pos: pos})
 	sort.Sort(p)
 }
 
-func (p *palette) ReplaceAt(c colorful.Color, pos float64) error {
+func (p *palette) replaceAt(c colorful.Color, pos float64) error {
 	index, err := p.getIndexFromPos(pos)
 	if err != nil {
 		return err
@@ -56,8 +55,8 @@ func (p *palette) ReplaceAt(c colorful.Color, pos float64) error {
 }
 
 func (p *palette) PutAt(c colorful.Color, pos float64) {
-	if err := p.ReplaceAt(c, pos); err != nil {
-		p.AddAt(c, pos)
+	if err := p.replaceAt(c, pos); err != nil {
+		p.addAt(c, pos)
 	}
 }
 
@@ -69,14 +68,18 @@ func (p *palette) GetKeyColorAtPos(pos float64) (*colorful.Color, error) {
 	return &(p.slice()[index].color), nil
 }
 
-func (p *palette) MoveAt(pos, toPos float64) error {
-	index, err := p.getIndexFromPos(pos)
-	if err != nil {
-		return err
+func (p *palette) MoveAt(move ColorMoveMarshal) error {
+	index, errFrom := p.getIndexFromPos(move.From)
+	if errFrom != nil {
+		return fmt.Errorf("Move from %v", errFrom)
 	}
 
-	toPos = guaranteeBetween0And1(toPos)
-	(*p)[index].pos = toPos
+	toPos := guaranteeBetween0And1(move.To)
+	_, errTo := p.getIndexFromPos(toPos)
+	if errTo == nil {
+		return fmt.Errorf("Move to already used")
+	}
+	p.slice()[index].pos = toPos
 	sort.Sort(p)
 	return nil
 }

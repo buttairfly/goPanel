@@ -15,7 +15,7 @@ var (
 	pGreen              = colorful.Color{R: 0, G: 1.0, B: 0}
 	pBlue               = colorful.Color{R: 0, G: 0, B: 1.00}
 	cgRedGreen          = colorful.Color{R: 0.8415372297953739, G: 0.6529456392653107, B: 0}
-	emptyPalette        = []paletteColor(nil)
+	emptyPalette        = []paletteColor{}
 	green0Palette       = []paletteColor{{pos: 0.0, color: pGreen}}
 	green1Palette       = []paletteColor{{pos: 1.0, color: pGreen}}
 	red0green1Palette   = []paletteColor{{pos: 0.0, color: pRed}, {pos: 1.0, color: pGreen}}
@@ -129,7 +129,7 @@ func TestPaletteAdd(t *testing.T) {
 		t.Run(c.desc, func(t *testing.T) {
 			palette := NewPalette()
 			for _, paletteColor := range c.paletteColors {
-				palette.AddAt(paletteColor.color, paletteColor.pos)
+				palette.PutAt(paletteColor.color, paletteColor.pos)
 			}
 			assert.Equal(t, &(c.expected), palette)
 			for step, expectedColor := range c.stepMap {
