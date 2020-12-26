@@ -71,13 +71,13 @@ func (p *palette) GetKeyColorAtPos(pos float64) (*colorful.Color, error) {
 func (p *palette) MoveAt(move ColorMoveMarshal) error {
 	index, errFrom := p.getIndexFromPos(move.From)
 	if errFrom != nil {
-		return fmt.Errorf("Move from %v", errFrom)
+		return fmt.Errorf("move from %v", errFrom)
 	}
 
 	toPos := guaranteeBetween0And1(move.To)
-	_, errTo := p.getIndexFromPos(toPos)
+	toIndex, errTo := p.getIndexFromPos(toPos)
 	if errTo == nil {
-		return fmt.Errorf("Move to already used")
+		return fmt.Errorf("move to index %d already used toPos: %f (%+v)", toIndex, toPos, move)
 	}
 	p.slice()[index].pos = toPos
 	sort.Sort(p)

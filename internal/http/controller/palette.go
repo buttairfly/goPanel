@@ -48,7 +48,7 @@ func PostColorAtPosToPaletteByID(c echo.Context) error {
 		return weberror.BodyNotFound(c, errDecode)
 	}
 	p.PutAt(paletteColor.Color, paletteColor.Pos)
-	return c.JSON(http.StatusOK, p)
+	return c.JSON(http.StatusOK, p.ToMarshal())
 }
 
 // PutMoveColorAtPaletteByID moves a color fixpoint within the palette scale
@@ -76,5 +76,5 @@ func PutMoveColorAtPaletteByID(c echo.Context) error {
 	if errMove != nil {
 		return weberror.NotPossible("move not possible", errMove)
 	}
-	return c.JSON(http.StatusOK, p)
+	return c.JSON(http.StatusOK, p.ToMarshal())
 }
