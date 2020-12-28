@@ -2,6 +2,9 @@
 gopanel*
 extractnoise*
 
+# exclude the flutter framework
+ledpanel/
+
 #ide
 .idea/
 .vscode/
