@@ -11,6 +11,7 @@ import (
 	"github.com/buttairfly/goPanel/internal/hardware"
 	"github.com/buttairfly/goPanel/internal/leakybuffer"
 	"github.com/buttairfly/goPanel/internal/pixelpipe"
+	"github.com/buttairfly/goPanel/internal/pixelpipe/alphablender"
 	"github.com/buttairfly/goPanel/internal/pixelpipe/generatorpipe"
 	"github.com/buttairfly/goPanel/internal/pixelpipe/pipepart"
 	"github.com/buttairfly/goPanel/pkg/fader"
@@ -54,11 +55,12 @@ func NewPanel(config *config.MainConfig, device device.LedDevice, logger *zap.Lo
 	panel.palettes["fire"] = fire
 
 	// TODO: move to file
+	const c = float64(0.5)
 	rainbowPalette := palette.NewPalette()
-	rainbowPalette.PutAt(colorful.Color{R: 1, G: 0, B: 0}, 0)
-	rainbowPalette.PutAt(colorful.Color{R: 0, G: 1, B: 0}, 1.0/3)
-	rainbowPalette.PutAt(colorful.Color{R: 0, G: 0, B: 1}, 2.0/3)
-	rainbowPalette.PutAt(colorful.Color{R: 1, G: 0, B: 0}, 1.0)
+	rainbowPalette.PutAt(colorful.Color{R: c, G: 0, B: 0}, 0)
+	rainbowPalette.PutAt(colorful.Color{R: 0, G: c, B: 0}, 1.0/3)
+	rainbowPalette.PutAt(colorful.Color{R: 0, G: 0, B: c}, 2.0/3)
+	rainbowPalette.PutAt(colorful.Color{R: c, G: 0, B: 0}, 1.0)
 	panel.palettes["rainbow"] = rainbowPalette
 
 	panel.framePipeline.SetInput(pipepart.SourceID, panel.frameSource)
@@ -71,8 +73,18 @@ func NewPanel(config *config.MainConfig, device device.LedDevice, logger *zap.Lo
 		generatorpipe.RainbowGenerator(
 			"rainbow",
 			rainbowPalette,
-			0.005,
-			0.01,
+			0.009,
+			0.02,
+			logger,
+		),
+	)
+
+	panel.framePipeline.AddPipeBefore(
+		emptyFramePipeID,
+		alphablender.NewClockBlender(
+			"24h_clock",
+			0.1,
+			0.9,
 			logger,
 		),
 	)

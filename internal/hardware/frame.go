@@ -39,6 +39,7 @@ type Frame interface {
 	GetWidth() int
 	GetHeight() int
 	GetLogger() *zap.Logger
+	AlphaBlend(alphaFrame *image.Alpha)
 
 	getTiles() []Tile
 	getNumPixelChanges() int
@@ -158,6 +159,36 @@ func (f *frame) ToLedStripe() LedStripe {
 		}
 	}
 	return ledStripe
+}
+
+func (f *frame) AlphaBlend(alphaFrame *image.Alpha) {
+	intersection := alphaFrame.Bounds().Intersect(f.Bounds())
+	if intersection.Empty() {
+		return
+	}
+	xOffset := intersection.Bounds().Min.X
+	yOffset := intersection.Bounds().Min.Y
+	for y := yOffset; y < intersection.Bounds().Max.Y; y++ {
+		for x := xOffset; x < intersection.Bounds().Max.X; x++ {
+			a := alphaFrame.AlphaAt(x, y).A
+
+			if a == 0xff {
+				continue
+			}
+			if a == 0x00 {
+				f.Set(x, y, color.Transparent)
+				continue
+			}
+
+			c := f.RGBAAt(x, y)
+			alpha := float64(a) / 255.0
+			c.R = uint8(float64(c.R) * alpha)
+			c.G = uint8(float64(c.G) * alpha)
+			c.B = uint8(float64(c.B) * alpha)
+			c.A = a
+			f.SetRGBA(x, y, c)
+		}
+	}
 }
 
 // ColorModel implements image interface
