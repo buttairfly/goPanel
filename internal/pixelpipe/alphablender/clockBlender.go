@@ -89,7 +89,9 @@ func (me *clockFilter) changeBlendFrame(bounds image.Rectangle) {
 			}
 		}
 	}
+	me.logger.Debug("clock", zap.String("frame", fmt.Sprintf("%x", me.blendFrame.Pix)))
 	me.applyDimmerAndInvert()
+	me.logger.Debug("dimmer", zap.String("frame", fmt.Sprintf("%x", me.blendFrame.Pix)))
 }
 
 func (me *clockFilter) applyDimmerAndInvert() {
@@ -105,7 +107,6 @@ func (me *clockFilter) applyDimmerAndInvert() {
 			}
 		}
 	}
-	me.logger.Info("dimmer", zap.String("frame", fmt.Sprintf("%x", me.blendFrame.Pix)))
 }
 
 func (me *clockFilter) mapDigitPosition(bounds image.Rectangle, digitBounds image.Rectangle, numDigit int) image.Rectangle {

@@ -2,8 +2,13 @@
 gopanel*
 extractnoise*
 
-# exclude the flutter framework
+# include service files
+!*.service
+
+# exclude the flutter framework but include pubspec
 ledpanel/
+#ledpanel/*
+#!ledpanel/pubspec.yaml
 
 #ide
 .idea/
