@@ -73,7 +73,13 @@ func (s *serialDevice) runFrameProcessor(wg *sync.WaitGroup) {
 
 	s.logger.Sugar().Infof("numLed ledStripe %d", s.numLed)
 	for frame := range s.inputChan {
+		//TODO: hot area
+		if s.currentFrame != nil {
+			leakybuffer.DumpFrame(s.currentFrame)
+		}
 		s.currentFrame = frame // this is unsafe
+		// TODO: exit hot area
+
 		ledStripe := frame.ToLedStripe()
 
 		ledStripeAction := ledStripe.GetAction()
@@ -104,7 +110,6 @@ func (s *serialDevice) runFrameProcessor(wg *sync.WaitGroup) {
 				s.latchFrame()
 			}
 		}
-		leakybuffer.DumpFrame(frame)
 	}
 }
 

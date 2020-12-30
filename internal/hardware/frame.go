@@ -41,6 +41,7 @@ type Frame interface {
 	GetLogger() *zap.Logger
 	AlphaBlend(alphaFrame *image.Alpha)
 
+	getBuffer() []uint8
 	getTiles() []Tile
 	getNumPixelChanges() int
 	getChangedPixel() *image.Point
@@ -48,6 +49,7 @@ type Frame interface {
 
 type frame struct {
 	image            *image.RGBA
+	buffer           []uint8
 	tiles            []Tile
 	sumHardwarePixel int
 	width, height    int
@@ -68,8 +70,11 @@ func NewFrame(tileConfigs TileConfigs, logger *zap.Logger) Frame {
 		numPreviousLedsOnStripe += tileConfig.NumHardwarePixel()
 	}
 	frameBounds.Canon()
+	bufferCap := numPreviousLedsOnStripe * NumBytePixel
+	buffer := make([]uint8, bufferCap, bufferCap)
 	return &frame{
 		image:            image.NewRGBA(frameBounds),
+		buffer:           buffer,
 		tiles:            tiles,
 		sumHardwarePixel: numPreviousLedsOnStripe,
 		width:            frameBounds.Dx(),
@@ -84,6 +89,7 @@ func NewFrame(tileConfigs TileConfigs, logger *zap.Logger) Frame {
 func NewCopyFrameWithEmptyImage(other Frame) Frame {
 	return &frame{
 		image:            image.NewRGBA(other.Bounds()),
+		buffer:           other.getBuffer(),
 		tiles:            other.getTiles(),
 		sumHardwarePixel: other.GetSumHardwarePixel(),
 		width:            other.GetWidth(),
@@ -106,6 +112,7 @@ func NewCopyFrameFromImage(other Frame, pictureToCopy *image.RGBA) Frame {
 	copy(picture.Pix, pictureToCopy.Pix)
 	return &frame{
 		image:            picture,
+		buffer:           other.getBuffer(),
 		tiles:            other.getTiles(),
 		sumHardwarePixel: other.GetSumHardwarePixel(),
 		width:            other.GetWidth(),
@@ -116,6 +123,7 @@ func NewCopyFrameFromImage(other Frame, pictureToCopy *image.RGBA) Frame {
 }
 
 func (f *frame) CopyImageFromOther(other Frame) {
+	// TODO: check image bounds
 	for x := 0; x < other.GetWidth(); x++ {
 		for y := 0; y < other.GetHeight(); y++ {
 			f.image.SetRGBA(x, y, other.RGBAAt(x, y))
@@ -138,6 +146,7 @@ func (f *frame) CopyFromOther(other Frame) {
 func (f *frame) ToLedStripe() LedStripe {
 	ledStripe := NewLedStripe(
 		f.sumHardwarePixel,
+		f.buffer,
 		f.numPixelChanges,
 		f.mapChangedPixelToStripePosition(),
 		f.fillType,
@@ -306,6 +315,10 @@ func (f *frame) GetLogger() *zap.Logger {
 
 func (f *frame) getTiles() []Tile {
 	return f.tiles
+}
+
+func (f *frame) getBuffer() []uint8 {
+	return f.buffer
 }
 
 func (f *frame) getNumPixelChanges() int {

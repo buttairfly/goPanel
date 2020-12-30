@@ -58,10 +58,9 @@ func (me *FramePipeline) RunPipe(destroyCtx context.Context, wg *sync.WaitGroup)
 	me.startPipePieces(me.frameWg)
 
 	for {
-		if rebuildInProgress := me.runInternalPipe(destroyCtx); rebuildInProgress {
+		if rebuildInProgress := me.runInternalPipe(); rebuildInProgress {
 			select {
 			case <-destroyCtx.Done():
-				me.drain()
 				return
 			case <-me.rebuild:
 				me.running = true
@@ -92,7 +91,7 @@ func (me *FramePipeline) drain() {
 	}
 }
 
-func (me *FramePipeline) runInternalPipe(destroyCtx context.Context) bool {
+func (me *FramePipeline) runInternalPipe() bool {
 	for {
 		if me.internalSource == nil {
 			return false
@@ -104,8 +103,6 @@ func (me *FramePipeline) runInternalPipe(destroyCtx context.Context) bool {
 			sourceChan = me.internalSource
 		}
 		select {
-		case <-destroyCtx.Done():
-			return false
 		case sourceFrame, ok := <-sourceChan:
 			if !ok {
 				return true
