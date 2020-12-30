@@ -79,7 +79,7 @@ func (me *clockFilter) changeBlendFrame(bounds image.Rectangle) {
 		if digitNum > 9 || digitNum < 0 {
 			me.logger.Fatal("digitNum out of range", zap.String("digit", string(digit)), zap.Int64("digitNum", digitNum))
 		}
-		digitFrame := imagefilter.Digits3x7[digitNum]
+		digitFrame := imagefilter.Digits3x8[digitNum]
 
 		r := me.mapDigitPosition(bounds, digitFrame.Rect, numDigit)
 		for y := 0; y < r.Dy(); y++ {

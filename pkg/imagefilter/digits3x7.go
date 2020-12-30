@@ -108,66 +108,66 @@ var ninePix3x7 = []uint8{
 }
 
 // helper vars to create image.Alpha
-const x = 3
-const y = 7
+const x3x7 = 3
+const y3x7 = 7
 
-var rect3x7 = image.Rect(0, 0, x, y)
+var rect3x7 = image.Rect(0, 0, x3x7, y3x7)
 var zero3x7 = image.Alpha{
-	Stride: x,
+	Stride: x3x7,
 	Rect:   rect3x7,
 	Pix:    zeroPix3x7,
 }
 
 var one3x7 = image.Alpha{
-	Stride: x,
+	Stride: x3x7,
 	Rect:   rect3x7,
 	Pix:    onePix3x7,
 }
 
 var two3x7 = image.Alpha{
-	Stride: x,
+	Stride: x3x7,
 	Rect:   rect3x7,
 	Pix:    twoPix3x7,
 }
 
 var tree3x7 = image.Alpha{
-	Stride: x,
+	Stride: x3x7,
 	Rect:   rect3x7,
 	Pix:    treePix3x7,
 }
 
 var four3x7 = image.Alpha{
-	Stride: x,
+	Stride: x3x7,
 	Rect:   rect3x7,
 	Pix:    fourPix3x7,
 }
 
 var five3x7 = image.Alpha{
-	Stride: x,
+	Stride: x3x7,
 	Rect:   rect3x7,
 	Pix:    fivePix3x7,
 }
 
 var six3x7 = image.Alpha{
-	Stride: x,
+	Stride: x3x7,
 	Rect:   rect3x7,
 	Pix:    sixPix3x7,
 }
 
 var seven3x7 = image.Alpha{
-	Stride: x,
+	Stride: x3x7,
 	Rect:   rect3x7,
 	Pix:    sevenPix3x7,
 }
 
 var eight3x7 = image.Alpha{
-	Stride: x,
+	Stride: x3x7,
 	Rect:   rect3x7,
 	Pix:    eightPix3x7,
 }
 
 var nine3x7 = image.Alpha{
-	Stride: x,
+	Stride: x3x7,
 	Rect:   rect3x7,
 	Pix:    ninePix3x7,
 }
