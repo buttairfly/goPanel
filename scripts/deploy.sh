@@ -31,6 +31,8 @@ if BUILD; then
     echo -e "build  ${BLUE}${BINARY}${NC}"
     if COPY ${BINDIR}/${BINARY} pi@ledpix:~ ; then
         echo -e "deploy ${BLUE}${BINARY}${NC}"
+
+        source ${PROJECT_DIR}/scripts/ssh.sh bash -c "'[ ! -d ./config ] && mkdir ./config && echo config folder created'"
         COPY ${PROJECT_DIR}/config/ pi@ledpix:~/config
         echo -e "deploy ${BLUE}config folder${NC}"
         exit 0

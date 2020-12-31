@@ -1,0 +1,16 @@
+[Unit]
+Description=gopanel service
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+ExecStart=/home/pi/service/gopanel-arm
+WorkingDirectory=/home/pi/service
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+User=pi
+
+[Install]
+WantedBy=multi-user.target
