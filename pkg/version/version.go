@@ -60,6 +60,9 @@ func (v *Version) Log() {
 
 // Run starts a go routine to print program details in a regular manner into the log
 func (v *Version) Run(cancelCtx context.Context) {
+	ticker := time.NewTicker(v.interval)
+	defer ticker.Stop()
+
 	if v.interval > 0 {
 		for {
 			select {
@@ -68,7 +71,7 @@ func (v *Version) Run(cancelCtx context.Context) {
 					v.logger.Info("version exit")
 					return
 				}
-			case <-time.After(v.interval):
+			case <-ticker.C:
 				{
 					v.Log()
 				}
