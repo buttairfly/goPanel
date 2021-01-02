@@ -1,6 +1,6 @@
 [Unit]
 Description=gopanel service
-After=network.target
+After=network.target time-sync.target
 StartLimitIntervalSec=0
 
 [Service]
