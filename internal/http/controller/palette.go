@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"github.com/lucasb-eyer/go-colorful"
 
 	"github.com/buttairfly/goPanel/internal/http/weberror"
 	"github.com/buttairfly/goPanel/internal/panel"
@@ -47,8 +48,12 @@ func PostColorAtPosToPaletteByID(c echo.Context) error {
 		}
 		return weberror.BodyNotFound(c, errDecode)
 	}
-	p.PutAt(paletteColor.Color, paletteColor.Pos)
-	return c.JSON(http.StatusOK, p.ToMarshal())
+	col, err := colorful.Hex(paletteColor.Color)
+	if err != nil {
+		return weberror.InvalidColorString("palette", id, paletteColor.Color, err)
+	}
+	p.PutAt(col, paletteColor.Pos)
+	return c.JSON(http.StatusOK, p.Marshal())
 }
 
 // PutMoveColorAtPaletteByID moves a color fixpoint within the palette scale
@@ -76,5 +81,5 @@ func PutMoveColorAtPaletteByID(c echo.Context) error {
 	if errMove != nil {
 		return weberror.NotPossible("move not possible", errMove)
 	}
-	return c.JSON(http.StatusOK, p.ToMarshal())
+	return c.JSON(http.StatusOK, p.Marshal())
 }

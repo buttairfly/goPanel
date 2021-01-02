@@ -10,7 +10,7 @@ import (
 func (me *Panel) GetMarshalledPalettes() map[string]palette.Marshal {
 	p := make(map[string]palette.Marshal, len(me.palettes))
 	for id, palette := range me.palettes {
-		p[id] = palette.ToMarshal()
+		p[id] = palette.Marshal()
 	}
 	return p
 }
@@ -22,7 +22,7 @@ func (me *Panel) GetMarshaledPaletteByID(id string) (palette.Marshal, error) {
 
 		return nil, err
 	}
-	return palette.ToMarshal(), nil
+	return palette.Marshal(), nil
 }
 
 // GetPaletteByID returns the panel palette by id
