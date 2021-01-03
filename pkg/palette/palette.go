@@ -18,30 +18,44 @@ type Palette interface {
 	MoveAt(move ColorMoveMarshal) error
 	Marshal() Marshal
 	Clear() Palette
+	GetName() string
+	GetColors() []fixColor
 }
 
-type palette []paletteColor
+type palette struct {
+	fixColors []fixColor
+	name      string
+}
 
-type paletteColor struct {
+type fixColor struct {
 	color colorful.Color
 	pos   float64
 }
 
 // NewPalette generates a new Palette
-func NewPalette() Palette {
+func NewPalette(name string) Palette {
 	p := new(palette)
+	p.name = name
 	return p.Clear()
 }
 
 func (p *palette) Clear() Palette {
-	plaetteSlice := make(palette, 0, 0)
-	p = &plaetteSlice
+	fixColorSlice := make([]fixColor, 0, 0)
+	p.fixColors = fixColorSlice
 	return p
+}
+
+func (p *palette) GetName() string {
+	return p.name
+}
+
+func (p *palette) GetColors() []fixColor {
+	return p.fixColors
 }
 
 func (p *palette) addAt(c colorful.Color, pos float64) {
 	pos = guaranteeBetween0And1(pos)
-	*p = append(p.slice(), paletteColor{color: c, pos: pos})
+	p.fixColors = append(p.slice(), fixColor{color: c, pos: pos})
 	sort.Sort(p)
 }
 
@@ -89,7 +103,7 @@ func (p *palette) DeleteAt(pos float64) error {
 	if err != nil {
 		return err
 	}
-	*p = append(p.slice()[:index], p.slice()[index+1:]...)
+	p.fixColors = append(p.slice()[:index], p.slice()[index+1:]...)
 	return nil
 }
 
@@ -148,8 +162,8 @@ func guaranteeBetween0And1(pos float64) float64 {
 	return pos
 }
 
-func (p *palette) slice() palette {
-	return (*p)
+func (p *palette) slice() []fixColor {
+	return (p.fixColors)
 }
 
 func (p *palette) Len() int {

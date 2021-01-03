@@ -1,6 +1,7 @@
 package pipepart
 
 import (
+	"context"
 	"sync"
 
 	"go.uber.org/zap"
@@ -28,7 +29,7 @@ func NewPipe(id ID, outputChan chan hardware.Frame) *Pipe {
 }
 
 // RunPipe implements PixelPiper interface, but is not useable
-func (me *Pipe) RunPipe(wg *sync.WaitGroup) {
+func (me *Pipe) RunPipe(ctx context.Context, wg *sync.WaitGroup) {
 	defer wg.Done()
 	defer close(me.GetFullOutput())
 	// input chan is closed
@@ -71,6 +72,11 @@ func (me *Pipe) GetInput() hardware.FrameSource {
 // GetPrevID gets the input
 func (me *Pipe) GetPrevID() ID {
 	return me.prevID
+}
+
+// GetParams implements PixelPiper interface
+func (me *Pipe) GetParams() []PipeParam {
+	return nil
 }
 
 // GetID returns the id

@@ -34,25 +34,26 @@ echo -e "deploy service ${GREEN}${BINARY}${NC}: compiled at ${BLUE}${DATE}${NC} 
 
 if BUILD; then
     echo -e "service build  ${BLUE}${BINARY}${NC}"
-    if SSH test ! -d ./service ; then
-      echo -e "servive folder ${RED}not available${NC}"
-      exit 1
-    fi
+    SSH test ! -d ./service && SSH mkdir ./service && echo servive folder created
     if COPY ${BINDIR}/${BINARY} pi@ledpix:~/service/ ; then
         COPY ${PROJECT_DIR}/scripts/service.sh pi@ledpix:~/
 
         echo -e "service deploy ${BLUE}${BINARY}${NC}"
-        if SSH test ! -d ./service/config ; then
-          echo -e "service config folder ${RED}not available${NC}"
-          exit 1
-        fi
+        SSH test ! -d ./service/config && SSH mkdir ./service/config && echo servive/config folder created
 
         COPY ${PROJECT_DIR}/config/* pi@ledpix:~/service/config/
         echo -e "service deploy ${BLUE}config folder${NC}"
 
-        echo -e "restart service ${BLUE}${PACKAGE}${NC}"
+        COPY ${PROJECT_DIR}/scripts/${PACKAGE}.service pi@ledpix:~/service/
+        echo -e "service deploy ${BLUE}${PACKAGE}.service systemd file${NC}"
+
+        SSH sudo rsync -acE --progress ./service/${PACKAGE}.service /etc/systemd/system/${PACKAGE}.service
+        echo -e "service deploy ${BLUE}systemd file${NC}"
+
+        echo -e "enable and restart service ${BLUE}${PACKAGE}${NC}"
         SSH "sudo systemctl restart ${PACKAGE}.service"
-        echo -e "restarted service ${BLUE}${PACKAGE}${NC}"
+        SSH "sudo systemctl enable ${PACKAGE}"
+        echo -e "enabled and started service ${BLUE}${PACKAGE}${NC}"
         exit 0
     else
         echo -e "service deploy ${RED}failed${NC}"

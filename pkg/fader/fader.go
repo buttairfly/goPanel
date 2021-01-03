@@ -14,7 +14,7 @@ type Fader struct {
 func NewEmptyFader(name string, start float64, granularity int, wrapping bool) *Fader {
 	return &Fader{
 		name:        name,
-		palette:     palette.NewPalette(),
+		palette:     palette.NewPalette(name),
 		currentPos:  start,
 		granularity: granularity,
 		wrapping:    wrapping,

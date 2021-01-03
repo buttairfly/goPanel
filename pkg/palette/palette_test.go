@@ -15,13 +15,13 @@ var (
 	pGreen              = colorful.Color{R: 0, G: 1.0, B: 0}
 	pBlue               = colorful.Color{R: 0, G: 0, B: 1.00}
 	cgRedGreen          = colorful.Color{R: 0.8415372297953739, G: 0.6529456392653107, B: 0}
-	emptyPalette        = []paletteColor{}
-	green0Palette       = []paletteColor{{pos: 0.0, color: pGreen}}
-	green1Palette       = []paletteColor{{pos: 1.0, color: pGreen}}
-	red0green1Palette   = []paletteColor{{pos: 0.0, color: pRed}, {pos: 1.0, color: pGreen}}
-	red0green0_5Palette = []paletteColor{{pos: 0.0, color: pRed}, {pos: 0.5, color: pGreen}}
-	red0_5green1Palette = []paletteColor{{pos: 0.5, color: pRed}, {pos: 1.0, color: pGreen}}
-	green1red0Palette   = []paletteColor{{pos: 1.0, color: pGreen}, {pos: 0.0, color: pRed}}
+	emptyPalette        = []fixColor{}
+	green0Palette       = []fixColor{{pos: 0.0, color: pGreen}}
+	green1Palette       = []fixColor{{pos: 1.0, color: pGreen}}
+	red0green1Palette   = []fixColor{{pos: 0.0, color: pRed}, {pos: 1.0, color: pGreen}}
+	red0green0_5Palette = []fixColor{{pos: 0.0, color: pRed}, {pos: 0.5, color: pGreen}}
+	red0_5green1Palette = []fixColor{{pos: 0.5, color: pRed}, {pos: 1.0, color: pGreen}}
+	green1red0Palette   = []fixColor{{pos: 1.0, color: pGreen}, {pos: 0.0, color: pRed}}
 
 	pRGB0_1    = colorful.Color{R: 0.9451598952119228, G: 0.4773624195946065, B: 0}
 	pRGB0_2    = colorful.Color{R: 0.7692833682910185, G: 0.731063820539255, B: 0}
@@ -32,7 +32,7 @@ var (
 	pRGB0_7    = colorful.Color{R: 0.515587672665168, G: 0, B: 0.912547403000855}
 	pRGB0_8    = colorful.Color{R: 0.9209495225040252, G: 0, B: 0.6063025156213984}
 	pRGB0_9    = colorful.Color{R: 1, G: 0, B: 0.31337268895733733}
-	rgbPalette = []paletteColor{{pos: 0.0, color: pRed}, {pos: 1.0 / 3.0, color: pGreen}, {pos: 2.0 / 3.0, color: pBlue}, {pos: 1.0, color: pRed}}
+	rgbPalette = []fixColor{{pos: 0.0, color: pRed}, {pos: 1.0 / 3.0, color: pGreen}, {pos: 2.0 / 3.0, color: pBlue}, {pos: 1.0, color: pRed}}
 )
 
 var _ Palette = (*palette)(nil)
@@ -40,8 +40,8 @@ var _ Palette = (*palette)(nil)
 func TestPaletteAdd(t *testing.T) {
 	cases := []struct {
 		desc          string
-		paletteColors []paletteColor
-		expected      palette
+		paletteColors []fixColor
+		expected      []fixColor
 		stepMap       map[float64]colorful.Color
 	}{
 		{
@@ -127,11 +127,12 @@ func TestPaletteAdd(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(c.desc, func(t *testing.T) {
-			palette := NewPalette()
+			palette := NewPalette(c.desc)
+			assert.Equal(t, palette.GetName(), c.desc, "Name is correct")
 			for _, paletteColor := range c.paletteColors {
 				palette.PutAt(paletteColor.color, paletteColor.pos)
 			}
-			assert.Equal(t, &(c.expected), palette)
+			assert.Equal(t, c.expected, palette.GetColors())
 			for step, expectedColor := range c.stepMap {
 				t.Run(fmt.Sprintf("%1.3f", step), func(t *testing.T) {
 					calculatedColor := palette.Blend(step)

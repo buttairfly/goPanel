@@ -43,7 +43,7 @@ func NewEmptyFramePipeline(id pipepart.ID, logger *zap.Logger) *FramePipeline {
 		logger:           logger,
 		pixelPipes:       pixelPipes,
 		outputFrameChan:  outputFrameChan,
-		firstPipeID:      pipepart.EmptyID,
+		firstPipeID:      id,
 		lastPipeID:       pipepart.EmptyID,
 		prevID:           pipepart.EmptyID,
 	}
@@ -115,7 +115,7 @@ func (me *FramePipeline) runInternalPipe() bool {
 func (me *FramePipeline) startPipePieces(wg *sync.WaitGroup) {
 	wg.Add(len(me.pixelPipes))
 	for _, pipe := range me.pixelPipes {
-		go pipe.RunPipe(wg)
+		go pipe.RunPipe(context.TODO(), wg)
 	}
 }
 
@@ -134,7 +134,7 @@ func (me *FramePipeline) SetInput(prevID pipepart.ID, inputChan hardware.FrameSo
 		me.logger.Fatal("PipeIDEmptyError", zap.Error(pipepart.PipeIDEmptyError()))
 	}
 	me.internalSource = inputChan
-	if me.firstPipeID == pipepart.EmptyID {
+	if me.firstPipeID == me.GetID() {
 		me.internalLastPipe.SetInput(prevID, inputChan)
 	} else {
 		me.pixelPipes[me.firstPipeID].SetInput(prevID, inputChan)
@@ -145,6 +145,16 @@ func (me *FramePipeline) SetInput(prevID pipepart.ID, inputChan hardware.FrameSo
 // GetID implements PixelPiper interface
 func (me *FramePipeline) GetID() pipepart.ID {
 	return me.internalLastPipe.GetID()
+}
+
+// GetPrevID implements PixelPiper interface
+func (me *FramePipeline) GetPrevID() pipepart.ID {
+	return me.prevID
+}
+
+// GetParams implements PixelPiper interface
+func (me *FramePipeline) GetParams() []pipepart.PipeParam {
+	return nil
 }
 
 // AddPipeBefore adds a pipe segment before id
@@ -163,38 +173,36 @@ func (me *FramePipeline) AddPipeBefore(id pipepart.ID, newPipe pipepart.PixelPip
 		}
 	}
 	me.addPipeBefore(id, newPipe)
-
 }
 
 func (me *FramePipeline) addPipeBefore(id pipepart.ID, newPipe pipepart.PixelPiper) {
 
 	// actually insert pipe or preplace itself
-
 	afterPipe, ok := me.pixelPipes[id]
 	if !ok {
 		if id != me.GetID() {
 			me.logger.Fatal("PipeIDMismatchError afterPipe", zap.Error(pipepart.PipeIDMismatchError(id, me.GetID())))
 		} else {
+			// afterPipe is this FramePipeline => internalLastPipe
 			afterPipe = me.internalLastPipe
 			me.lastPipeID = newPipe.GetID()
 		}
 	}
+
 	prevID := afterPipe.GetPrevID()
 
-	if !pipepart.IsEmptyID(prevID) {
-		if me.prevID == prevID {
-			newPipe.SetInput(prevID, me.internalSource)
-		} else {
-			var prevPipe pipepart.PixelPiper
-			prevPipe, ok = me.pixelPipes[prevID]
-			if !ok {
-				me.logger.Fatal("PipeIDMismatchError prevPipe", zap.Error(pipepart.PipeIDMismatchError(prevID, me.prevID)))
-			}
-			if prevID == me.firstPipeID {
-				me.firstPipeID = newPipe.GetID()
-			}
-			newPipe.SetInput(prevID, prevPipe.GetOutput(prevID))
+	if afterPipe.GetID() == me.firstPipeID {
+		if !pipepart.IsEmptyID(prevID) {
+			newPipe.SetInput(me.prevID, me.internalSource)
 		}
+		me.firstPipeID = newPipe.GetID()
+	} else {
+		var prevPipe pipepart.PixelPiper
+		prevPipe, ok = me.pixelPipes[prevID]
+		if !ok {
+			me.logger.Fatal("PipeIDMismatchError prevPipe", zap.Error(pipepart.PipeIDMismatchError(prevID, me.prevID)))
+		}
+		newPipe.SetInput(prevID, prevPipe.GetOutput(prevID))
 	}
 
 	afterPipe.SetInput(newPipe.GetID(), newPipe.GetOutput(newPipe.GetID()))

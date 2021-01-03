@@ -158,7 +158,24 @@ func (me *clockBlender) Marshal() pipepart.Marshal {
 	return pipepart.Marshal{
 		ID:     me.GetID(),
 		PrevID: me.GetPrevID(),
+		Params: me.GetParams(),
 	}
+}
+
+// GetParams implements PixelPiper interface
+func (me *clockBlender) GetParams() []pipepart.PipeParam {
+	pp := make([]pipepart.PipeParam, 2)
+	pp[0] = pipepart.PipeParam{
+		Name:  "minDimmer",
+		Type:  pipepart.Gauge0to1,
+		Value: fmt.Sprintf("%f", me.minDimmer),
+	}
+	pp[1] = pipepart.PipeParam{
+		Name:  "maxDimmer",
+		Type:  pipepart.Gauge0to1,
+		Value: fmt.Sprintf("%f", me.minDimmer),
+	}
+	return pp
 }
 
 func (me *clockBlender) GetOutput(id pipepart.ID) hardware.FrameSource {

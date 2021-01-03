@@ -1,6 +1,8 @@
 package generatorpipe
 
 import (
+	"context"
+	"fmt"
 	"sync"
 
 	"go.uber.org/zap"
@@ -34,12 +36,12 @@ func FullFrameFadeGenerator(
 	return &fullFrameFadeGenerator{
 		pipe:     pipepart.NewPipe(id, outputChan),
 		logger:   logger,
-		numSteps: 100,
 		palette:  palette,
+		numSteps: 100,
 	}
 }
 
-func (me *fullFrameFadeGenerator) RunPipe(wg *sync.WaitGroup) {
+func (me *fullFrameFadeGenerator) RunPipe(ctx context.Context, wg *sync.WaitGroup) {
 	defer wg.Done()
 	defer close(me.pipe.GetFullOutput())
 
@@ -64,6 +66,30 @@ func (me *fullFrameFadeGenerator) GetID() pipepart.ID {
 
 func (me *fullFrameFadeGenerator) GetPrevID() pipepart.ID {
 	return me.pipe.GetPrevID()
+}
+
+func (me *fullFrameFadeGenerator) Marshal() pipepart.Marshal {
+	return pipepart.Marshal{
+		ID:     me.GetID(),
+		PrevID: me.GetPrevID(),
+		Params: me.GetParams(),
+	}
+}
+
+// GetParams implements PixelPiper interface
+func (me *fullFrameFadeGenerator) GetParams() []pipepart.PipeParam {
+	pp := make([]pipepart.PipeParam, 2)
+	pp[0] = pipepart.PipeParam{
+		Name:  "palette",
+		Type:  pipepart.NameID,
+		Value: me.palette.GetName(),
+	}
+	pp[1] = pipepart.PipeParam{
+		Name:  "numSteps",
+		Type:  pipepart.UInteger,
+		Value: fmt.Sprintf("%d", me.numSteps),
+	}
+	return pp
 }
 
 func (me *fullFrameFadeGenerator) GetOutput(id pipepart.ID) hardware.FrameSource {

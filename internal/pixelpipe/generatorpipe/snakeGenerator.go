@@ -1,6 +1,8 @@
 package generatorpipe
 
 import (
+	"context"
+	"fmt"
 	"sync"
 
 	"go.uber.org/zap"
@@ -41,7 +43,7 @@ func SnakeGenerator(
 	}
 }
 
-func (me *snakeGenerator) RunPipe(wg *sync.WaitGroup) {
+func (me *snakeGenerator) RunPipe(ctx context.Context, wg *sync.WaitGroup) {
 	defer wg.Done()
 	defer close(me.pipe.GetFullOutput())
 	me.picture = <-me.pipe.GetInput()
@@ -91,6 +93,30 @@ func (me *snakeGenerator) GetOutput(id pipepart.ID) hardware.FrameSource {
 	}
 	me.logger.Fatal("OutputIDMismatchError", zap.Error(pipepart.OutputIDMismatchError(me.GetID(), id)))
 	return nil
+}
+
+func (me *snakeGenerator) Marshal() pipepart.Marshal {
+	return pipepart.Marshal{
+		ID:     me.GetID(),
+		PrevID: me.GetPrevID(),
+		Params: me.GetParams(),
+	}
+}
+
+// GetParams implements PixelPiper interface
+func (me *snakeGenerator) GetParams() []pipepart.PipeParam {
+	pp := make([]pipepart.PipeParam, 2)
+	pp[0] = pipepart.PipeParam{
+		Name:  "palette",
+		Type:  pipepart.NameID,
+		Value: me.palette.GetName(),
+	}
+	pp[1] = pipepart.PipeParam{
+		Name:  "colorDiff",
+		Type:  pipepart.Gauge0to1,
+		Value: fmt.Sprintf("%f", me.colorDiff),
+	}
+	return pp
 }
 
 func (me *snakeGenerator) SetInput(prevID pipepart.ID, inputChan hardware.FrameSource) {

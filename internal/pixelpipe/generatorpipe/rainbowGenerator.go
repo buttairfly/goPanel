@@ -1,6 +1,8 @@
 package generatorpipe
 
 import (
+	"context"
+	"fmt"
 	"sync"
 
 	"go.uber.org/zap"
@@ -42,7 +44,7 @@ func RainbowGenerator(
 	}
 }
 
-func (me *rainbowGenerator) RunPipe(wg *sync.WaitGroup) {
+func (me *rainbowGenerator) RunPipe(ctx context.Context, wg *sync.WaitGroup) {
 	defer wg.Done()
 	defer close(me.pipe.GetFullOutput())
 
@@ -84,6 +86,35 @@ func (me *rainbowGenerator) GetID() pipepart.ID {
 
 func (me *rainbowGenerator) GetPrevID() pipepart.ID {
 	return me.pipe.GetPrevID()
+}
+
+func (me *rainbowGenerator) Marshal() pipepart.Marshal {
+	return pipepart.Marshal{
+		ID:     me.GetID(),
+		PrevID: me.GetPrevID(),
+		Params: me.GetParams(),
+	}
+}
+
+// GetParams implements PixelPiper interface
+func (me *rainbowGenerator) GetParams() []pipepart.PipeParam {
+	pp := make([]pipepart.PipeParam, 3)
+	pp[0] = pipepart.PipeParam{
+		Type:  pipepart.NameID,
+		Name:  "palette",
+		Value: me.palette.GetName(),
+	}
+	pp[1] = pipepart.PipeParam{
+		Type:  pipepart.Float64,
+		Name:  "dx",
+		Value: fmt.Sprintf("%g", me.dx),
+	}
+	pp[2] = pipepart.PipeParam{
+		Type:  pipepart.Float64,
+		Name:  "dy",
+		Value: fmt.Sprintf("%g", me.dy),
+	}
+	return pp
 }
 
 func (me *rainbowGenerator) GetOutput(id pipepart.ID) hardware.FrameSource {

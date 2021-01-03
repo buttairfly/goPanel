@@ -24,17 +24,30 @@ function COPY {
 function BUILD {
   return $(`${ENV} go build -ldflags "-X main.compileDate=${DATE} -X main.versionTag=${VERSION}" -o ${BINDIR}/${BINARY} ${PROJECT_DIR}/cmd/${PACKAGE}`)
 }
+function SSH {
+  ssh -t pi@ledpix $@
+}
 
 echo -e "${GREEN}${BINARY}${NC}: compiled at ${BLUE}${DATE}${NC} with version ${LIGHT_BLUE}${VERSION}${NC}"
 
 if BUILD; then
     echo -e "build  ${BLUE}${BINARY}${NC}"
+
+    echo -e "stop service ${BLUE}${PACKAGE}${NC}, when available"
+    SSH "sudo systemctl stop ${PACKAGE}.service"
+
     if COPY ${BINDIR}/${BINARY} pi@ledpix:~ ; then
         echo -e "deploy ${BLUE}${BINARY}${NC}"
 
-        source ${PROJECT_DIR}/scripts/ssh.sh bash -c "'[ ! -d ./config ] && mkdir ./config && echo config folder created'"
+        SSH test ! -d ./config && SSH mkdir ./config && echo "~/config folder created"
+
         COPY ${PROJECT_DIR}/config/ pi@ledpix:~/config
         echo -e "deploy ${BLUE}config folder${NC}"
+
+
+        echo -e "start ${GREEN}${BINARY}${NC} ${LIGHT_BLUE}${VERSION}${NC}"
+        SSH ./${BINARY}
+
         exit 0
     else
         echo -e "deploy ${RED}failed${NC}"

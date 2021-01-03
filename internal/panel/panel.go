@@ -47,21 +47,21 @@ func NewPanel(config *config.MainConfig, device device.LedDevice, logger *zap.Lo
 	}
 
 	// TODO: move to file
-	fire := palette.NewPalette()
+	fire := palette.NewPalette("fire")
 	fire.PutAt(colorful.Color{R: 0.1, G: 0, B: 0}, 0)
 	fire.PutAt(colorful.Color{R: 0.5, G: 0.1, B: 0}, 1.0/3)
 	fire.PutAt(colorful.Color{R: 0.3, G: 0, B: 0}, 2.0/3)
 	fire.PutAt(colorful.Color{R: 0.4, G: 0.1, B: 0}, 1.0)
-	panel.palettes["fire"] = fire
+	panel.palettes[fire.GetName()] = fire
 
 	// TODO: move to file
 	const c = float64(0.5)
-	rainbowPalette := palette.NewPalette()
+	rainbowPalette := palette.NewPalette("rainbow")
 	rainbowPalette.PutAt(colorful.Color{R: c, G: 0, B: 0}, 0)
 	rainbowPalette.PutAt(colorful.Color{R: 0, G: c, B: 0}, 1.0/3)
 	rainbowPalette.PutAt(colorful.Color{R: 0, G: 0, B: c}, 2.0/3)
 	rainbowPalette.PutAt(colorful.Color{R: c, G: 0, B: 0}, 1.0)
-	panel.palettes["rainbow"] = rainbowPalette
+	panel.palettes[rainbowPalette.GetName()] = rainbowPalette
 
 	panel.framePipeline.SetInput(pipepart.SourceID, panel.frameSource)
 

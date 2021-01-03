@@ -1,6 +1,8 @@
 package generatorpipe
 
 import (
+	"context"
+	"fmt"
 	"image/color"
 	"math/rand"
 	"sync"
@@ -42,7 +44,7 @@ func WhiteNoisePipe(
 	}
 }
 
-func (me *whiteNoisePipe) RunPipe(wg *sync.WaitGroup) {
+func (me *whiteNoisePipe) RunPipe(ctx context.Context, wg *sync.WaitGroup) {
 	defer wg.Done()
 	defer close(me.pipe.GetFullOutput())
 
@@ -71,6 +73,30 @@ func (me *whiteNoisePipe) GetID() pipepart.ID {
 
 func (me *whiteNoisePipe) GetPrevID() pipepart.ID {
 	return me.pipe.GetPrevID()
+}
+
+func (me *whiteNoisePipe) Marshal() pipepart.Marshal {
+	return pipepart.Marshal{
+		ID:     me.GetID(),
+		PrevID: me.GetPrevID(),
+		Params: me.GetParams(),
+	}
+}
+
+// GetParams implements PixelPiper interface
+func (me *whiteNoisePipe) GetParams() []pipepart.PipeParam {
+	pp := make([]pipepart.PipeParam, 2)
+	pp[0] = pipepart.PipeParam{
+		Name:  "palette",
+		Type:  pipepart.NameID,
+		Value: me.palette.GetName(),
+	}
+	pp[1] = pipepart.PipeParam{
+		Name:  "newPixel",
+		Type:  pipepart.UInteger,
+		Value: fmt.Sprintf("%d", me.newPixel),
+	}
+	return pp
 }
 
 func (me *whiteNoisePipe) GetOutput(id pipepart.ID) hardware.FrameSource {

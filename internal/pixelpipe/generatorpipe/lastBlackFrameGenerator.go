@@ -36,7 +36,7 @@ func NewLastBlackFramePipe(
 	}
 }
 
-func (me *lastBlackFrameGenerator) RunPipe(wg *sync.WaitGroup) {
+func (me *lastBlackFrameGenerator) RunPipe(ctx context.Context, wg *sync.WaitGroup) {
 	defer wg.Done()
 	defer close(me.pipe.GetFullOutput())
 
@@ -69,6 +69,19 @@ func (me *lastBlackFrameGenerator) GetID() pipepart.ID {
 
 func (me *lastBlackFrameGenerator) GetPrevID() pipepart.ID {
 	return me.pipe.GetPrevID()
+}
+
+func (me *lastBlackFrameGenerator) Marshal() pipepart.Marshal {
+	return pipepart.Marshal{
+		ID:     me.GetID(),
+		PrevID: me.GetPrevID(),
+		Params: me.GetParams(),
+	}
+}
+
+// GetParams implements PixelPiper interface
+func (me *lastBlackFrameGenerator) GetParams() []pipepart.PipeParam {
+	return nil
 }
 
 func (me *lastBlackFrameGenerator) GetOutput(id pipepart.ID) hardware.FrameSource {

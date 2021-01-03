@@ -1,6 +1,7 @@
 package pixelpipe
 
 import (
+	"context"
 	"fmt"
 	"sync"
 
@@ -44,7 +45,7 @@ func NewSimplePipeIntersection(
 	}
 }
 
-func (me *simplePipeIntersection) RunPipe(wg *sync.WaitGroup) {
+func (me *simplePipeIntersection) RunPipe(ctx context.Context, wg *sync.WaitGroup) {
 	defer wg.Done()
 	defer me.close()
 	subWg := new(sync.WaitGroup)
@@ -103,6 +104,19 @@ func (me *simplePipeIntersection) GetID() pipepart.ID {
 func (me *simplePipeIntersection) GetPrevID() pipepart.ID {
 	// TODO fix function
 	return me.id
+}
+
+// GetParams implements PixelPiper interface
+func (me *simplePipeIntersection) GetParams() []pipepart.PipeParam {
+	return nil
+}
+
+func (me *simplePipeIntersection) Marshal() pipepart.Marshal {
+	// TODO fix function
+	return pipepart.Marshal{
+		ID:     me.GetID(),
+		PrevID: me.GetPrevID(),
+	}
 }
 
 func (me *simplePipeIntersection) close() {

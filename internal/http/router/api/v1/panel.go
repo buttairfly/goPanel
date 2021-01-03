@@ -9,5 +9,6 @@ import (
 func Panel(g *echo.Group) {
 	panelGroup := g.Group("/panel")
 
+	apipanel.Pipe(panelGroup)
 	apipanel.Palette(panelGroup)
 }
