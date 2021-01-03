@@ -36,6 +36,11 @@ if BUILD; then
     echo -e "stop service ${BLUE}${PACKAGE}${NC}, when available"
     SSH "sudo systemctl stop ${PACKAGE}.service"
 
+    if SSH test "$( ps a | grep ${BINARY} | wc -l )" -ne "1" ; then
+      echo -e "program ${BINARY} ${RED}already running${NC}"
+      exit 1
+    fi
+
     if COPY ${BINDIR}/${BINARY} pi@ledpix:~ ; then
         echo -e "deploy ${BLUE}${BINARY}${NC}"
 
@@ -43,7 +48,6 @@ if BUILD; then
 
         COPY ${PROJECT_DIR}/config/ pi@ledpix:~/config
         echo -e "deploy ${BLUE}config folder${NC}"
-
 
         echo -e "start ${GREEN}${BINARY}${NC} ${LIGHT_BLUE}${VERSION}${NC}"
         SSH ./${BINARY}
