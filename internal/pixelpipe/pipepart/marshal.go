@@ -10,8 +10,8 @@ type Marshal struct {
 // Marshal marshals a PixelPiper and Pipe
 func (me *Pipe) Marshal() Marshal {
 	return Marshal{
-		ID:     me.id,
-		PrevID: me.prevID,
+		ID:     me.GetID(),
+		PrevID: me.GetPrevID(),
 		Params: me.GetParams(),
 	}
 }

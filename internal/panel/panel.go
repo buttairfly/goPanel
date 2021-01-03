@@ -42,7 +42,7 @@ func NewPanel(config *config.MainConfig, device device.LedDevice, logger *zap.Lo
 		faders:        make(map[string]fader.Fader, 0),
 		palettes:      make(map[string]palette.Palette, 0),
 		leakySource:   frameSource,
-		frameSource:   frameSource.GetFrameSource(),
+		frameSource:   frameSource.GetOutput(frameSource.GetID()),
 		framePipeline: pixelpipe.NewEmptyFramePipeline(emptyFramePipeID, logger),
 	}
 
@@ -55,12 +55,13 @@ func NewPanel(config *config.MainConfig, device device.LedDevice, logger *zap.Lo
 	panel.palettes[fire.GetName()] = fire
 
 	// TODO: move to file
-	const c = float64(0.5)
+	const c1 = float64(1.0)
+	const c0 = float64(1.0 / 255.0)
 	rainbowPalette := palette.NewPalette("rainbow")
-	rainbowPalette.PutAt(colorful.Color{R: c, G: 0, B: 0}, 0)
-	rainbowPalette.PutAt(colorful.Color{R: 0, G: c, B: 0}, 1.0/3)
-	rainbowPalette.PutAt(colorful.Color{R: 0, G: 0, B: c}, 2.0/3)
-	rainbowPalette.PutAt(colorful.Color{R: c, G: 0, B: 0}, 1.0)
+	rainbowPalette.PutAt(colorful.Color{R: c1, G: c0, B: c0}, 0)
+	rainbowPalette.PutAt(colorful.Color{R: c0, G: c1, B: c0}, 1.0/3)
+	rainbowPalette.PutAt(colorful.Color{R: c0, G: c0, B: c1}, 2.0/3)
+	rainbowPalette.PutAt(colorful.Color{R: c1, G: c0, B: c0}, 1.0)
 	panel.palettes[rainbowPalette.GetName()] = rainbowPalette
 
 	panel.framePipeline.SetInput(pipepart.SourceID, panel.frameSource)
@@ -109,7 +110,8 @@ func GetPanel() *Panel {
 // Run starts the panel
 func (me *Panel) Run(cancelCtx context.Context, wg *sync.WaitGroup) {
 	defer wg.Done()
-	go me.leakySource.Run(cancelCtx)
+	// do not increment wg for leakySource
+	go me.leakySource.RunPipe(cancelCtx, wg)
 	wg.Add(1)
 	go me.framePipeline.RunPipe(cancelCtx, wg)
 }

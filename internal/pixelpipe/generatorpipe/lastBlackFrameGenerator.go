@@ -8,7 +8,6 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/buttairfly/goPanel/internal/hardware"
-	"github.com/buttairfly/goPanel/internal/leakybuffer"
 	"github.com/buttairfly/goPanel/internal/pixelpipe/pipepart"
 )
 
@@ -39,7 +38,7 @@ func (me *lastBlackFrameGenerator) RunPipe(cancelCtx context.Context, wg *sync.W
 	case <-cancelCtx.Done():
 		me.logger.Warn("got cancelCtx.Done() before emptyframe")
 		return
-	case emptyFrame, ok := <-leakybuffer.GetFrameSource():
+	case emptyFrame, ok := <-me.pipe.GetInput():
 		if !ok {
 			me.logger.Warn("got closed leakybuffer.GetFrameSource() before emptyframe")
 			return

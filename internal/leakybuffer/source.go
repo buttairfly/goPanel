@@ -2,6 +2,7 @@ package leakybuffer
 
 import (
 	"context"
+	"sync"
 
 	"go.uber.org/zap"
 
@@ -29,8 +30,10 @@ func NewFrameSource(tileConfigs hardware.TileConfigs, logger *zap.Logger) *Sourc
 	return source
 }
 
-// Run starts the Source
-func (me *Source) Run(destroyCtx context.Context) {
+// RunPipe starts the Source
+func (me *Source) RunPipe(destroyCtx context.Context, wg *sync.WaitGroup) {
+	// wg is only here to implement the PixelPiper interface
+	// wg must not get incremented
 	defer close(me.outputChan)
 	for {
 		var f hardware.Frame
@@ -54,17 +57,48 @@ func (me *Source) Run(destroyCtx context.Context) {
 	}
 }
 
-// GetFrameSource returns the frame producer chan
-func (me *Source) GetFrameSource() hardware.FrameSource {
-	return me.outputChan
+// GetOutput returns the frame producer chan
+func (me *Source) GetOutput(id pipepart.ID) hardware.FrameSource {
+	if id == me.GetID() {
+		return me.outputChan
+	}
+	me.logger.Fatal("OutputIDMismatchError", zap.Error(pipepart.OutputIDMismatchError(me.GetID(), id)))
+	return nil
 }
 
 // GetFrameSource returns the frame producer chan from the global var source
-func GetFrameSource() hardware.FrameSource {
-	return source.outputChan
+func GetFrameSource(id pipepart.ID) hardware.FrameSource {
+	return source.GetOutput(id)
 }
 
 // GetID returns the frame producer chan
 func (me *Source) GetID() pipepart.ID {
 	return pipepart.SourceID
+}
+
+// GetPrevID returns an EmptyID by definition
+func (me *Source) GetPrevID() pipepart.ID {
+	return pipepart.EmptyID
+}
+
+// Marshal returns the Marshalled description of Source
+func (me *Source) Marshal() pipepart.Marshal {
+	return pipepart.Marshal{
+		ID:     me.GetID(),
+		PrevID: me.GetPrevID(),
+		Params: me.GetParams(),
+	}
+}
+
+// GetParams implements PixelPiper interface
+func (me *Source) GetParams() []pipepart.PipeParam {
+	return nil
+}
+
+// SetInput implements PixelPiper interface and is otherwise useless for Source
+func (me *Source) SetInput(prevID pipepart.ID, inputChan hardware.FrameSource) {
+	if pipepart.IsEmptyID(prevID) {
+		me.logger.Fatal("PipeIDEmptyError", zap.Error(pipepart.PipeIDEmptyError()))
+	}
+	// do nothing
 }

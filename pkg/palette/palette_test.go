@@ -35,9 +35,9 @@ var (
 	rgbPalette = []fixColor{{pos: 0.0, color: pRed}, {pos: 1.0 / 3.0, color: pGreen}, {pos: 2.0 / 3.0, color: pBlue}, {pos: 1.0, color: pRed}}
 )
 
-var _ Palette = (*palette)(nil)
-
 func TestPaletteAdd(t *testing.T) {
+	var _ Palette = (*palette)(nil)
+
 	cases := []struct {
 		desc          string
 		paletteColors []fixColor
