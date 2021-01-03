@@ -1,13 +1,12 @@
 package device
 
 import (
-	"context"
 	"fmt"
-	"sync"
 
 	"go.uber.org/zap"
 
 	"github.com/buttairfly/goPanel/internal/hardware"
+	"github.com/buttairfly/goPanel/internal/pixelpipe/pipepart"
 )
 
 const (
@@ -21,11 +20,10 @@ var ledDevice LedDevice
 
 // LedDevice interface for all
 type LedDevice interface {
+	pipepart.PixelPiperSink
 	Open() error
-	Run(cancelCtx context.Context, wg *sync.WaitGroup)
 	Write(command string) (int, error)
 	Close() error
-	SetInput(hardware.FrameSource)
 	GetType() Type
 	GetCurrentFrame() hardware.Frame
 }

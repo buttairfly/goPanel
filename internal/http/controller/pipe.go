@@ -12,7 +12,7 @@ import (
 
 // GetPipes returns all panel pipes
 func GetPipes(c echo.Context) error {
-	return c.JSON(http.StatusOK, panel.GetPanel().GetFramePipeline().MarshalFramePipeline())
+	return c.JSON(http.StatusOK, panel.GetPanel().Marshal())
 }
 
 // GetPipeByID returns the panel pipe by id

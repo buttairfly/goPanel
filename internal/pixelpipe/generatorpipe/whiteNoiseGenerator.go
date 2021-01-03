@@ -15,7 +15,7 @@ import (
 	"github.com/buttairfly/goPanel/pkg/palette"
 )
 
-type whiteNoisePipe struct {
+type whiteNoiseGenerator struct {
 	pipe     *pipepart.Pipe
 	newPixel int
 	palette  palette.Palette
@@ -23,8 +23,8 @@ type whiteNoisePipe struct {
 	logger   *zap.Logger
 }
 
-// WhiteNoisePipe generates for each tick interval a random pixel is drawn with a random color of the palette
-func WhiteNoisePipe(
+// WhiteNoiseGenerator generates for each tick interval a random pixel is drawn with a random color of the palette
+func WhiteNoiseGenerator(
 	id pipepart.ID,
 	palette palette.Palette,
 	newPixel int,
@@ -33,7 +33,7 @@ func WhiteNoisePipe(
 	pipepart.CheckNoPlaceholderID(id, logger)
 	outputChan := make(chan hardware.Frame)
 
-	return &whiteNoisePipe{
+	return &whiteNoiseGenerator{
 		pipe:     pipepart.NewPipe(id, outputChan),
 		newPixel: newPixel,
 		palette:  palette,
@@ -42,7 +42,7 @@ func WhiteNoisePipe(
 	}
 }
 
-func (me *whiteNoisePipe) RunPipe(ctx context.Context, wg *sync.WaitGroup) {
+func (me *whiteNoiseGenerator) RunPipe(ctx context.Context, wg *sync.WaitGroup) {
 	defer wg.Done()
 	defer close(me.pipe.GetFullOutput())
 
@@ -65,15 +65,15 @@ func (me *whiteNoisePipe) RunPipe(ctx context.Context, wg *sync.WaitGroup) {
 	}
 }
 
-func (me *whiteNoisePipe) GetID() pipepart.ID {
+func (me *whiteNoiseGenerator) GetID() pipepart.ID {
 	return me.pipe.GetID()
 }
 
-func (me *whiteNoisePipe) GetPrevID() pipepart.ID {
+func (me *whiteNoiseGenerator) GetPrevID() pipepart.ID {
 	return me.pipe.GetPrevID()
 }
 
-func (me *whiteNoisePipe) Marshal() pipepart.Marshal {
+func (me *whiteNoiseGenerator) Marshal() pipepart.Marshal {
 	return pipepart.Marshal{
 		ID:     me.GetID(),
 		PrevID: me.GetPrevID(),
@@ -82,7 +82,7 @@ func (me *whiteNoisePipe) Marshal() pipepart.Marshal {
 }
 
 // GetParams implements PixelPiper interface
-func (me *whiteNoisePipe) GetParams() []pipepart.PipeParam {
+func (me *whiteNoiseGenerator) GetParams() []pipepart.PipeParam {
 	pp := make([]pipepart.PipeParam, 2)
 	pp[0] = pipepart.PipeParam{
 		Name:  "palette",
@@ -97,7 +97,7 @@ func (me *whiteNoisePipe) GetParams() []pipepart.PipeParam {
 	return pp
 }
 
-func (me *whiteNoisePipe) GetOutput(id pipepart.ID) hardware.FrameSource {
+func (me *whiteNoiseGenerator) GetOutput(id pipepart.ID) hardware.FrameSource {
 	if id == me.GetID() {
 		return me.pipe.GetOutput(id)
 	}
@@ -105,7 +105,7 @@ func (me *whiteNoisePipe) GetOutput(id pipepart.ID) hardware.FrameSource {
 	return nil
 }
 
-func (me *whiteNoisePipe) SetInput(prevID pipepart.ID, inputChan hardware.FrameSource) {
+func (me *whiteNoiseGenerator) SetInput(prevID pipepart.ID, inputChan hardware.FrameSource) {
 	if pipepart.IsEmptyID(prevID) {
 		me.logger.Fatal("PipeIDEmptyError", zap.Error(pipepart.PipeIDEmptyError()))
 	}

@@ -6,35 +6,18 @@ import (
 	"github.com/buttairfly/goPanel/internal/pixelpipe/pipepart"
 )
 
-// Marshal is a mapping struct to marshal a FramePipeline
-type Marshal struct {
-	PixelPipes  map[pipepart.ID]pipepart.Marshal `json:"pipes" yaml:"pipes"`
-	ID          pipepart.ID                      `json:"id" yaml:"id"`
-	LastPipeID  pipepart.ID                      `json:"lastPipeId" yaml:"lastPipeId"`
-	FirstPipeID pipepart.ID                      `json:"firstPipeId" yaml:"firstPipeId"`
-	PrevID      pipepart.ID                      `json:"prevId" yaml:"prevId"`
-}
-
-// MarshalFramePipeline converts a marshalable palette to palette.Marshal
-func (me *FramePipeline) MarshalFramePipeline() Marshal {
+// Marshal implements PixelPiper interface
+func (me *FramePipeline) Marshal() pipepart.Marshal {
 	pp := make(map[pipepart.ID]pipepart.Marshal, len(me.pixelPipes))
 	for id, p := range me.pixelPipes {
 		pp[id] = p.Marshal()
 	}
-	return Marshal{
-		PixelPipes:  pp,
+	return pipepart.Marshal{
 		ID:          me.GetID(),
+		PrevID:      me.GetPrevID(),
 		FirstPipeID: me.firstPipeID,
 		LastPipeID:  me.lastPipeID,
-		PrevID:      me.GetPrevID(),
-	}
-}
-
-// Marshal implements PixelPiper interface
-func (me *FramePipeline) Marshal() pipepart.Marshal {
-	return pipepart.Marshal{
-		ID:     me.GetID(),
-		PrevID: me.GetPrevID(),
+		PixelPipes:  pp,
 	}
 }
 

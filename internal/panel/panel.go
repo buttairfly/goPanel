@@ -36,6 +36,7 @@ type Panel struct {
 func NewPanel(config *config.MainConfig, device device.LedDevice, logger *zap.Logger) *Panel {
 	frameSource := leakybuffer.NewFrameSource(config.TileConfigs.ToTileConfigs(), logger)
 	emptyFramePipeID := pipepart.ID("mainPipe")
+
 	panel = &Panel{
 		config:        config,
 		device:        device,
@@ -66,7 +67,7 @@ func NewPanel(config *config.MainConfig, device device.LedDevice, logger *zap.Lo
 
 	panel.framePipeline.SetInput(pipepart.SourceID, panel.frameSource)
 
-	device.SetInput(panel.framePipeline.GetOutput(emptyFramePipeID))
+	device.SetInput(panel.framePipeline.GetID(), panel.framePipeline.GetOutput(emptyFramePipeID))
 
 	// TODO: load from file
 	panel.framePipeline.AddPipeBefore(
@@ -107,13 +108,39 @@ func GetPanel() *Panel {
 	return panel
 }
 
-// Run starts the panel
-func (me *Panel) Run(cancelCtx context.Context, wg *sync.WaitGroup) {
+// RunPipe starts the panel
+func (me *Panel) RunPipe(cancelCtx context.Context, wg *sync.WaitGroup) {
 	defer wg.Done()
 	// do not increment wg for leakySource
 	go me.leakySource.RunPipe(cancelCtx, wg)
 	wg.Add(1)
 	go me.framePipeline.RunPipe(cancelCtx, wg)
+}
+
+// Marshal returns the Marshalled Panel and implements PixelPiper interface
+func (me *Panel) Marshal() pipepart.Marshal {
+	pp := make(map[pipepart.ID]pipepart.Marshal)
+	pp[me.leakySource.GetID()] = me.leakySource.Marshal()
+	pp[me.framePipeline.GetID()] = me.framePipeline.Marshal()
+	pp[me.device.GetID()] = me.device.Marshal()
+	return pipepart.Marshal{
+		ID:          me.GetID(),
+		PrevID:      pipepart.EmptyID,
+		FirstPipeID: me.leakySource.GetID(),
+		LastPipeID:  me.device.GetID(),
+		PixelPipes:  pp,
+		Params:      me.GetParams(),
+	}
+}
+
+// GetID implements PixelPiper interface
+func (me *Panel) GetID() pipepart.ID {
+	return pipepart.PanelID
+}
+
+// GetParams implements PixelPiper interface
+func (me *Panel) GetParams() []pipepart.PipeParam {
+	return nil
 }
 
 // GetConfig returns the global config

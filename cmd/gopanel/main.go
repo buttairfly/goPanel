@@ -62,10 +62,10 @@ func main() {
 	pixelPanel := panel.NewPanel(mainConfig, pixelDevice, logger)
 
 	wg.Add(1)
-	go pixelDevice.Run(cancelCtx, wg)
+	go pixelDevice.RunPipe(cancelCtx, wg)
 
 	wg.Add(1)
-	go pixelPanel.Run(cancelCtx, wg)
+	go pixelPanel.RunPipe(cancelCtx, wg)
 
 	wg.Add(1)
 	go http.RunHTTPServer(cancelCtx, wg, gracePeriod-time.Second, logger)

@@ -6,6 +6,6 @@ import (
 	"github.com/buttairfly/goPanel/internal/pixelpipe/pipepart"
 )
 
-func TestSourceIntefaces(t *testing.T) {
-	var _ pipepart.PixelPiper = (*Source)(nil)
+func TestPixelPiperSourceInteface(t *testing.T) {
+	var _ pipepart.PixelPiperSource = (*Source)(nil)
 }

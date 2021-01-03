@@ -11,85 +11,117 @@ import (
 
 	"github.com/buttairfly/goPanel/internal/hardware"
 	"github.com/buttairfly/goPanel/internal/leakybuffer"
+	"github.com/buttairfly/goPanel/internal/pixelpipe/pipepart"
 )
 
 type printDevice struct {
 	inputChan    hardware.FrameSource
 	currentFrame hardware.Frame
+	prevID       pipepart.ID
 	numPix       int
 	lenHex       int
 	printConfig  *PrintConfig
+	params       []pipepart.PipeParam
 	logger       *zap.Logger
 }
 
 // NewPrintDevice creates a new printDevice as LedDevice
 func NewPrintDevice(numPix int, printConfig *PrintConfig, logger *zap.Logger) LedDevice {
-	pd := new(printDevice)
-	pd.numPix = numPix
-	pd.lenHex = numPix * NumBytePerColor * NumByteToRepresentHex
-	pd.printConfig = printConfig
-	pd.logger = logger
-	return pd
+	me := new(printDevice)
+	me.numPix = numPix
+	me.lenHex = numPix * NumBytePerColor * NumByteToRepresentHex
+	me.printConfig = printConfig
+	params := make([]pipepart.PipeParam, 1)
+	params[0] = pipepart.PipeParam{
+		Name:     "type",
+		Type:     pipepart.NameID,
+		Value:    string(me.GetType()),
+		Readonly: true,
+	}
+	me.params = params
+	me.logger = logger
+	return me
 }
 
-func (pd *printDevice) Open() error {
-	pd.logger.Info("open print device")
+func (me *printDevice) Open() error {
+	me.logger.Info("open print device")
 	return nil
 }
 
-func (pd *printDevice) Close() error {
+func (me *printDevice) Close() error {
 	return nil
 }
 
-func (pd *printDevice) Write(data string) (int, error) {
-	if !pd.printConfig.Quiet {
+func (me *printDevice) Write(data string) (int, error) {
+	if !me.printConfig.Quiet {
 		hexData := fmt.Sprintf("%x", data)
-		if len(hexData) != pd.lenHex {
+		if len(hexData) != me.lenHex {
 			return 0, fmt.Errorf(
 				"len write hexData %v/numBytePerColor=%v/numByteToRepresentHex=%v does not equal numPix %v",
 				len(hexData),
-				pd.numPix,
+				me.numPix,
 				NumBytePerColor,
 				NumByteToRepresentHex,
 			)
 		}
-		pd.logger.Info("printDevice", zap.String("frame", hexData))
+		me.logger.Info("printDevice", zap.String("frame", hexData))
 	}
 	return len(data), nil
 }
 
-func (pd *printDevice) SetInput(inputChan hardware.FrameSource) {
-	pd.logger.Debug("printDevice SetInput")
-	pd.inputChan = inputChan
+func (me *printDevice) SetInput(prevID pipepart.ID, inputChan hardware.FrameSource) {
+	me.logger.Debug("printDevice SetInput")
+	me.inputChan = inputChan
+	me.prevID = prevID
 }
 
-func (pd *printDevice) Run(cancelCtx context.Context, wg *sync.WaitGroup) {
+func (me *printDevice) RunPipe(cancelCtx context.Context, wg *sync.WaitGroup) {
 	defer wg.Done()
-	defer pd.Close()
-	frameDuration := time.Second / time.Duration(pd.printConfig.FramesPerSecond)
+	defer me.Close()
+	frameDuration := time.Second / time.Duration(me.printConfig.FramesPerSecond)
 	lastFrameTime := time.Unix(0, 0)
-	for frame := range pd.inputChan {
+	for frame := range me.inputChan {
 		now := time.Now()
-		pd.currentFrame = frame
+		me.currentFrame = frame
 		// TODO: fix frame input
 		sleepDuration := frameDuration - now.Sub(lastFrameTime)
-		pd.logger.Sugar().Infof("sleepDuration %d, %v, %v", runtime.NumGoroutine(), sleepDuration, lastFrameTime)
+		me.logger.Sugar().Infof("sleepDuration %d, %v, %v", runtime.NumGoroutine(), sleepDuration, lastFrameTime)
 
 		if sleepDuration > 0 {
 			time.Sleep(sleepDuration)
 		}
-		if _, err := pd.Write(string(frame.ToLedStripe().GetBuffer())); err != nil {
-			pd.logger.Fatal("write error", zap.Error(err))
+		if _, err := me.Write(string(frame.ToLedStripe().GetBuffer())); err != nil {
+			me.logger.Fatal("write error", zap.Error(err))
 		}
 		leakybuffer.DumpFrame(frame)
 		lastFrameTime = now
 	}
 }
 
-func (pd *printDevice) GetType() Type {
+func (me *printDevice) GetID() pipepart.ID {
+	return pipepart.SinkID
+}
+
+func (me *printDevice) GetPrevID() pipepart.ID {
+	return me.prevID
+}
+
+func (me *printDevice) Marshal() pipepart.Marshal {
+	return pipepart.Marshal{
+		ID:     me.GetID(),
+		PrevID: me.GetPrevID(),
+		Params: me.GetParams(),
+	}
+}
+
+func (me *printDevice) GetParams() []pipepart.PipeParam {
+	return me.params
+}
+
+func (me *printDevice) GetType() Type {
 	return Print
 }
 
-func (pd *printDevice) GetCurrentFrame() hardware.Frame {
-	return pd.currentFrame
+func (me *printDevice) GetCurrentFrame() hardware.Frame {
+	return me.currentFrame
 }
