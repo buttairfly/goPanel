@@ -1,6 +1,7 @@
 package alphablender
 
 import (
+	"context"
 	"fmt"
 	"image"
 	"image/color"
@@ -16,7 +17,7 @@ import (
 	"go.uber.org/zap"
 )
 
-type clockFilter struct {
+type clockBlender struct {
 	pipe        *pipepart.Pipe
 	minDimmer   float64
 	maxDimmer   float64
@@ -42,7 +43,7 @@ func NewClockBlender(id pipepart.ID, minDimmer float64, maxDimmer float64, logge
 		maxDimmer = 1.0
 	}
 	outputChan := make(chan hardware.Frame)
-	return &clockFilter{
+	return &clockBlender{
 		pipe:      pipepart.NewPipe(id, outputChan),
 		minDimmer: minDimmer,
 		maxDimmer: maxDimmer,
@@ -50,7 +51,7 @@ func NewClockBlender(id pipepart.ID, minDimmer float64, maxDimmer float64, logge
 	}
 }
 
-func (me *clockFilter) RunPipe(wg *sync.WaitGroup) {
+func (me *clockBlender) RunPipe(ctx context.Context, wg *sync.WaitGroup) {
 	defer wg.Done()
 	defer close(me.pipe.GetFullOutput())
 
@@ -69,7 +70,7 @@ func (me *clockFilter) RunPipe(wg *sync.WaitGroup) {
 	}
 }
 
-func (me *clockFilter) changeBlendFrame(bounds image.Rectangle) {
+func (me *clockBlender) changeBlendFrame(bounds image.Rectangle) {
 	me.blendFrame = image.NewAlpha(bounds)
 	for numDigit, digit := range me.currentTime {
 		digitNum, err := strconv.ParseInt(string(digit), 10, 64)
@@ -94,7 +95,7 @@ func (me *clockFilter) changeBlendFrame(bounds image.Rectangle) {
 	me.logger.Debug("dimmer", zap.String("frame", fmt.Sprintf("%x", me.blendFrame.Pix)))
 }
 
-func (me *clockFilter) applyDimmerAndInvert() {
+func (me *clockBlender) applyDimmerAndInvert() {
 	if me.maxDimmer != 1.0 && me.minDimmer != 0.0 {
 		for y := 0; y < me.blendFrame.Rect.Dy(); y++ {
 			for x := 0; x < me.blendFrame.Rect.Dx(); x++ {
@@ -109,7 +110,7 @@ func (me *clockFilter) applyDimmerAndInvert() {
 	}
 }
 
-func (me *clockFilter) mapDigitPosition(bounds image.Rectangle, digitBounds image.Rectangle, numDigit int) image.Rectangle {
+func (me *clockBlender) mapDigitPosition(bounds image.Rectangle, digitBounds image.Rectangle, numDigit int) image.Rectangle {
 	if numDigit >= numClockDigits {
 		me.logger.Fatal("numDigit exeeds numClockDigits", zap.Int("numDigit", numDigit), zap.Int("numClockDigits", numClockDigits))
 	}
@@ -145,15 +146,22 @@ func (me *clockFilter) mapDigitPosition(bounds image.Rectangle, digitBounds imag
 	return b
 }
 
-func (me *clockFilter) GetID() pipepart.ID {
+func (me *clockBlender) GetID() pipepart.ID {
 	return me.pipe.GetID()
 }
 
-func (me *clockFilter) GetPrevID() pipepart.ID {
+func (me *clockBlender) GetPrevID() pipepart.ID {
 	return me.pipe.GetPrevID()
 }
 
-func (me *clockFilter) GetOutput(id pipepart.ID) hardware.FrameSource {
+func (me *clockBlender) Marshal() pipepart.Marshal {
+	return pipepart.Marshal{
+		ID:     me.GetID(),
+		PrevID: me.GetPrevID(),
+	}
+}
+
+func (me *clockBlender) GetOutput(id pipepart.ID) hardware.FrameSource {
 	if id == me.GetID() {
 		return me.pipe.GetOutput(id)
 	}
@@ -161,7 +169,7 @@ func (me *clockFilter) GetOutput(id pipepart.ID) hardware.FrameSource {
 	return nil
 }
 
-func (me *clockFilter) SetInput(prevID pipepart.ID, inputChan hardware.FrameSource) {
+func (me *clockBlender) SetInput(prevID pipepart.ID, inputChan hardware.FrameSource) {
 	if pipepart.IsEmptyID(prevID) {
 		me.logger.Fatal("PipeIDEmptyError", zap.Error(pipepart.PipeIDEmptyError()))
 	}
