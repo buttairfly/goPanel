@@ -26,7 +26,7 @@ func (me *FramePipeline) MarshalFramePipeline() Marshal {
 		ID:          me.GetID(),
 		FirstPipeID: me.firstPipeID,
 		LastPipeID:  me.lastPipeID,
-		PrevID:      me.prevID,
+		PrevID:      me.GetPrevID(),
 	}
 }
 
@@ -34,7 +34,7 @@ func (me *FramePipeline) MarshalFramePipeline() Marshal {
 func (me *FramePipeline) Marshal() pipepart.Marshal {
 	return pipepart.Marshal{
 		ID:     me.GetID(),
-		PrevID: me.prevID,
+		PrevID: me.GetPrevID(),
 	}
 }
 

@@ -98,6 +98,8 @@ func TestNewEmptyFramePipeline_AddPipeAfter(t *testing.T) {
 			for _, pipe := range c.pipes {
 				fp.AddPipeBefore(pipe.addBefore, pipe.pipe)
 			}
+
+			assert.Equal(t, sourceID, fp.GetPrevID())
 			assert.Equal(t, c.expectedFirstPipeID, fp.firstPipeID)
 			assert.Equal(t, c.expectedLastPipeID, fp.lastPipeID)
 			for _, pipe := range c.pipes {

@@ -28,9 +28,7 @@ func FullFrameFadeGenerator(
 	wg *sync.WaitGroup,
 	logger *zap.Logger,
 ) pipepart.PixelPiper {
-	if pipepart.IsPlaceholderID(id) {
-		logger.Fatal("PipeIDPlaceholderError", zap.Error(pipepart.PipeIDPlaceholderError(id)))
-	}
+	pipepart.CheckNoPlaceholderID(id, logger)
 	outputChan := make(chan hardware.Frame)
 
 	return &fullFrameFadeGenerator{

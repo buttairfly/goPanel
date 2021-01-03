@@ -33,9 +33,7 @@ func DrawGenerator(
 	logger *zap.Logger,
 	commandInput <-chan DrawCommand,
 ) pipepart.PixelPiper {
-	if pipepart.IsPlaceholderID(id) {
-		logger.Fatal("PipeIDPlaceholderError", zap.Error(pipepart.PipeIDPlaceholderError(id)))
-	}
+	pipepart.CheckNoPlaceholderID(id, logger)
 	outputChan := make(chan hardware.Frame)
 
 	return &drawGenerator{

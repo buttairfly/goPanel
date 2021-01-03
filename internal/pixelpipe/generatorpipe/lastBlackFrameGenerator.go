@@ -13,36 +13,30 @@ import (
 )
 
 type lastBlackFrameGenerator struct {
-	cancelCtx context.Context
-	pipe      *pipepart.Pipe
-	logger    *zap.Logger
+	pipe   *pipepart.Pipe
+	logger *zap.Logger
 }
 
 // NewLastBlackFramePipe generates a black frame after the input channel was closed
 func NewLastBlackFramePipe(
-	cancelCtx context.Context,
 	id pipepart.ID,
 	logger *zap.Logger,
 ) pipepart.PixelPiper {
-	if pipepart.IsPlaceholderID(id) {
-		logger.Fatal("PipeIDPlaceholderError", zap.Error(pipepart.PipeIDPlaceholderError(id)))
-	}
-
+	pipepart.CheckNoPlaceholderID(id, logger)
 	outputChan := make(chan hardware.Frame)
 	return &lastBlackFrameGenerator{
-		cancelCtx: cancelCtx,
-		pipe:      pipepart.NewPipe(id, outputChan),
-		logger:    logger,
+		pipe:   pipepart.NewPipe(id, outputChan),
+		logger: logger,
 	}
 }
 
-func (me *lastBlackFrameGenerator) RunPipe(ctx context.Context, wg *sync.WaitGroup) {
+func (me *lastBlackFrameGenerator) RunPipe(cancelCtx context.Context, wg *sync.WaitGroup) {
 	defer wg.Done()
 	defer close(me.pipe.GetFullOutput())
 
 	// first get a frame; if not, just return
 	select {
-	case <-me.cancelCtx.Done():
+	case <-cancelCtx.Done():
 		me.logger.Warn("got cancelCtx.Done() before emptyframe")
 		return
 	case emptyFrame, ok := <-leakybuffer.GetFrameSource():

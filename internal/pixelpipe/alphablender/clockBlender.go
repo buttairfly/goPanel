@@ -31,17 +31,9 @@ const clockDigitTimeDevider = 2
 
 // NewClockBlender adds a clock over the current frame
 func NewClockBlender(id pipepart.ID, minDimmer float64, maxDimmer float64, logger *zap.Logger) pipepart.PixelPiper {
-	if pipepart.IsPlaceholderID(id) {
-		logger.Fatal("PipeIDPlaceholderError", zap.Error(pipepart.PipeIDPlaceholderError(id)))
-	}
-	if minDimmer > 1.0 || minDimmer < 0.0 {
-		logger.Warn("ClockMinDimmer out of bounds, set to 0.0", zap.Float64("minDimmer", minDimmer))
-		minDimmer = 0.0
-	}
-	if maxDimmer > 1.0 || maxDimmer < 0.0 {
-		logger.Warn("ClockMaxDimmer out of bounds, set to 1.0", zap.Float64("maxDimmer", maxDimmer))
-		maxDimmer = 1.0
-	}
+	pipepart.CheckNoPlaceholderID(id, logger)
+	minDimmer = checkDimmer("minDimmer", minDimmer, 0.0, logger)
+	maxDimmer = checkDimmer("maxDimmer", maxDimmer, 1.0, logger)
 	outputChan := make(chan hardware.Frame)
 	return &clockBlender{
 		pipe:      pipepart.NewPipe(id, outputChan),
@@ -191,4 +183,12 @@ func (me *clockBlender) SetInput(prevID pipepart.ID, inputChan hardware.FrameSou
 		me.logger.Fatal("PipeIDEmptyError", zap.Error(pipepart.PipeIDEmptyError()))
 	}
 	me.pipe.SetInput(prevID, inputChan)
+}
+
+func checkDimmer(name string, dimmer float64, defaultValue float64, logger *zap.Logger) float64 {
+	if dimmer > 1.0 || dimmer < 0.0 {
+		logger.Warn("dimmer out of bounds, set to default", zap.String("name", name), zap.Float64("dimmer", dimmer), zap.Float64("default", defaultValue))
+		dimmer = 0.0
+	}
+	return dimmer
 }
