@@ -7,6 +7,8 @@ import (
 	"sync"
 	"time"
 
+	_ "net/http/pprof"
+
 	"go.uber.org/zap"
 
 	"github.com/buttairfly/goPanel/internal/config"
@@ -17,6 +19,7 @@ import (
 	"github.com/buttairfly/goPanel/pkg/exit"
 	"github.com/buttairfly/goPanel/pkg/log"
 	"github.com/buttairfly/goPanel/pkg/version"
+	echopprof "github.com/dududko/echo-pprof"
 )
 
 var (
@@ -27,6 +30,9 @@ var (
 func main() {
 	logger := log.NewZapDevelopLogger()
 	defer logger.Sync()
+	echo := http.NewHTTPServer()
+	echopprof.Wrap(echo)
+
 	ctx := context.Background()
 	cancelCtx := exit.DetectSignal(ctx, logger)
 	gracePeriod := 3 * time.Second
@@ -68,7 +74,7 @@ func main() {
 	go pixelPanel.RunPipe(cancelCtx, wg)
 
 	wg.Add(1)
-	go http.RunHTTPServer(cancelCtx, wg, gracePeriod-time.Second, logger)
+	go http.RunHTTPServer(cancelCtx, echo, wg, gracePeriod-time.Second, logger)
 
 	wg.Wait()
 
