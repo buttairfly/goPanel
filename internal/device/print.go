@@ -17,11 +17,11 @@ import (
 type printDevice struct {
 	inputChan    hardware.FrameSource
 	currentFrame hardware.Frame
+	params       []pipepart.PipeParam
 	prevID       pipepart.ID
 	numPix       int
 	lenHex       int
 	printConfig  *PrintConfig
-	params       []pipepart.PipeParam
 	logger       *zap.Logger
 }
 
@@ -35,7 +35,7 @@ func NewPrintDevice(numPix int, printConfig *PrintConfig, logger *zap.Logger) Le
 	params[0] = pipepart.PipeParam{
 		Name:     "type",
 		Type:     pipepart.NameID,
-		Value:    string(me.GetType()),
+		Value:    string(me.GetDeviceType()),
 		Readonly: true,
 	}
 	me.params = params
@@ -106,20 +106,20 @@ func (me *printDevice) GetPrevID() pipepart.ID {
 	return me.prevID
 }
 
-func (me *printDevice) Marshal() pipepart.Marshal {
-	return pipepart.Marshal{
-		ID:     me.GetID(),
-		PrevID: me.GetPrevID(),
-		Params: me.GetParams(),
-	}
+func (me *printDevice) Marshal() *pipepart.Marshal {
+	return pipepart.MarshalFromPixelPiperSinkInterface(me)
 }
 
 func (me *printDevice) GetParams() []pipepart.PipeParam {
 	return me.params
 }
 
-func (me *printDevice) GetType() Type {
+func (me *printDevice) GetDeviceType() Type {
 	return Print
+}
+
+func (me *printDevice) GetType() pipepart.PipeType {
+	return pipepart.Sink
 }
 
 func (me *printDevice) GetCurrentFrame() hardware.Frame {

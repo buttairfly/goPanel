@@ -97,6 +97,10 @@ func (me *simplePipeIntersection) SetInput(prevID pipepart.ID, inputChan hardwar
 	me.prevIds[prevID] = prevID
 }
 
+func (me *simplePipeIntersection) GetType() pipepart.PipeType {
+	return pipepart.PipeIntersection
+}
+
 func (me *simplePipeIntersection) GetID() pipepart.ID {
 	return me.id
 }
@@ -111,9 +115,10 @@ func (me *simplePipeIntersection) GetParams() []pipepart.PipeParam {
 	return nil
 }
 
-func (me *simplePipeIntersection) Marshal() pipepart.Marshal {
+func (me *simplePipeIntersection) Marshal() *pipepart.Marshal {
 	// TODO fix function
-	return pipepart.Marshal{
+	return &pipepart.Marshal{
+		Type:   me.GetType(),
 		ID:     me.GetID(),
 		PrevID: me.GetPrevID(),
 	}

@@ -23,7 +23,7 @@ func GetPaletteByID(c echo.Context) error {
 	id := c.Param("id")
 	palette, err := panel.GetPanel().GetMarshaledPaletteByID(palette.ID(id))
 	if err != nil {
-		return weberror.NotFound("palette", id)
+		return weberror.NotFound("palette", id, err)
 	}
 	return c.JSON(http.StatusOK, palette)
 }
@@ -33,7 +33,7 @@ func PostColorAtPosToPaletteByID(c echo.Context) error {
 	id := c.Param("id")
 	p, err := panel.GetPanel().GetPaletteByID(palette.ID(id))
 	if err != nil {
-		return weberror.NotFound("palette", id)
+		return weberror.NotFound("palette", id, err)
 	}
 
 	var fixColor palette.FixColor
@@ -61,7 +61,7 @@ func PutMoveColorAtPaletteByID(c echo.Context) error {
 	id := c.Param("id")
 	p, err := panel.GetPanel().GetPaletteByID(palette.ID(id))
 	if err != nil {
-		return weberror.NotFound("palette", id)
+		return weberror.NotFound("palette", id, err)
 	}
 
 	var paletteMove palette.ColorMoveMarshal

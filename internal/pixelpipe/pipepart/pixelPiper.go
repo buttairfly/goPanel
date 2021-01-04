@@ -9,27 +9,54 @@ import (
 
 // PixelPiper is a interface to generate a pixelPipeline from several pipe segments
 type PixelPiper interface {
-	PixelPiperSink
-	PixelPiperSource
+	PixelPiperBase
+	pixelPiperSink
+	pixelPiperSource
 }
 
 // PixelPiperSink is a basic sink PixelPiper
 type PixelPiperSink interface {
-	PixelPiperBasic
+	PixelPiperBase
+	pixelPiperSink
+}
+
+type pixelPiperSink interface {
 	SetInput(inputID ID, inputChan hardware.FrameSource)
 	GetPrevID() ID
 }
 
 // PixelPiperSource is a basic source PixelPiper
 type PixelPiperSource interface {
-	PixelPiperBasic
+	PixelPiperBase
+	pixelPiperSource
+}
+
+type pixelPiperSource interface {
 	GetOutput(outputID ID) hardware.FrameSource
 }
 
-// PixelPiperBasic is a base PixelPiper
-type PixelPiperBasic interface {
+// PixelPiperBase is a base PixelPiper
+type PixelPiperBase interface {
+	pixelPiperMarshaller
 	RunPipe(cancelCtx context.Context, wg *sync.WaitGroup)
-	GetID() ID
-	Marshal() Marshal
+	GetType() PipeType
 	GetParams() []PipeParam
+}
+
+// PixelPiperAddableSubPipe is a PixelPiperWithSubPipes which can add new PixelPiper
+type PixelPiperAddableSubPipe interface {
+	PixelPiperWithSubPipes
+	AddPipeBefore(id ID, newPipe PixelPiper)
+}
+
+// PixelPiperWithSubPipes is a PixelPiper with SubPipes
+type PixelPiperWithSubPipes interface {
+	pixelPiperMarshaller
+	GetPipes() PipesMarshal
+	GetPipeByID(id ID) (PixelPiper, error)
+}
+
+type pixelPiperMarshaller interface {
+	Marshal() *Marshal
+	GetID() ID
 }

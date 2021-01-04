@@ -16,12 +16,12 @@ import (
 
 type serialDevice struct {
 	com          *arduinocom.ArduinoCom
-	numLed       int
 	inputChan    hardware.FrameSource
+	params       []pipepart.PipeParam
 	prevID       pipepart.ID
 	currentFrame hardware.Frame
+	numLed       int
 	latched      int64
-	params       []pipepart.PipeParam
 	logger       *zap.Logger
 }
 
@@ -34,7 +34,7 @@ func NewSerialDevice(numLed int, serialDeviceConfig *arduinocom.SerialConfig, lo
 	params[0] = pipepart.PipeParam{
 		Name:     "type",
 		Type:     pipepart.NameID,
-		Value:    string(me.GetType()),
+		Value:    string(me.GetDeviceType()),
 		Readonly: true,
 	}
 	me.params = params
@@ -125,8 +125,12 @@ func (me *serialDevice) runFrameProcessor(wg *sync.WaitGroup) {
 	}
 }
 
-func (me *serialDevice) GetType() Type {
+func (me *serialDevice) GetDeviceType() Type {
 	return Serial
+}
+
+func (me *serialDevice) GetType() pipepart.PipeType {
+	return pipepart.Sink
 }
 
 func (me *serialDevice) GetID() pipepart.ID {
@@ -137,12 +141,8 @@ func (me *serialDevice) GetPrevID() pipepart.ID {
 	return me.prevID
 }
 
-func (me *serialDevice) Marshal() pipepart.Marshal {
-	return pipepart.Marshal{
-		ID:     me.GetID(),
-		PrevID: me.GetPrevID(),
-		Params: me.GetParams(),
-	}
+func (me *serialDevice) Marshal() *pipepart.Marshal {
+	return pipepart.MarshalFromPixelPiperSinkInterface(me)
 }
 
 func (me *serialDevice) GetParams() []pipepart.PipeParam {

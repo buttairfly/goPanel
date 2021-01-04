@@ -2,6 +2,7 @@ package panel
 
 import (
 	"context"
+	"fmt"
 	"sync"
 
 	"go.uber.org/zap"
@@ -25,7 +26,7 @@ var panel *Panel
 type Panel struct {
 	config        *config.MainConfig
 	device        device.LedDevice
-	faders        map[fader.ID]fader.Fader
+	faders        map[fader.ID]*fader.Fader
 	palettes      map[palette.ID]palette.Palette
 	leakySource   *leakybuffer.Source
 	frameSource   hardware.FrameSource
@@ -40,7 +41,7 @@ func NewPanel(config *config.MainConfig, device device.LedDevice, logger *zap.Lo
 	panel = &Panel{
 		config:        config,
 		device:        device,
-		faders:        make(map[fader.ID]fader.Fader, 0),
+		faders:        make(map[fader.ID]*fader.Fader, 0),
 		palettes:      make(map[palette.ID]palette.Palette, 0),
 		leakySource:   frameSource,
 		frameSource:   frameSource.GetOutput(frameSource.GetID()),
@@ -57,7 +58,7 @@ func NewPanel(config *config.MainConfig, device device.LedDevice, logger *zap.Lo
 
 	// TODO: move to file
 	const c1 = float64(1.0)
-	const c0 = float64(1.0 / 255.0)
+	const c0 = float64(15.0 / 255.0)
 	rainbowPalette := palette.NewPalette("rainbow")
 	rainbowPalette.PutAt(colorful.Color{R: c1, G: c0, B: c0}, 0)
 	rainbowPalette.PutAt(colorful.Color{R: c0, G: c1, B: c0}, 1.0/3)
@@ -118,19 +119,44 @@ func (me *Panel) RunPipe(cancelCtx context.Context, wg *sync.WaitGroup) {
 }
 
 // Marshal returns the Marshalled Panel and implements PixelPiper interface
-func (me *Panel) Marshal() pipepart.Marshal {
-	pp := make(map[pipepart.ID]pipepart.Marshal)
-	pp[me.leakySource.GetID()] = me.leakySource.Marshal()
-	pp[me.framePipeline.GetID()] = me.framePipeline.Marshal()
-	pp[me.device.GetID()] = me.device.Marshal()
-	return pipepart.Marshal{
-		ID:          me.GetID(),
-		PrevID:      pipepart.EmptyID,
-		FirstPipeID: me.leakySource.GetID(),
-		LastPipeID:  me.device.GetID(),
-		PixelPipes:  pp,
-		Params:      me.GetParams(),
+func (me *Panel) Marshal() *pipepart.Marshal {
+	m := pipepart.MarshalFromPixelPiperBaseInterface(me)
+	m.FirstPipeID = me.leakySource.GetID()
+	m.LastPipeID = me.device.GetID()
+	m.PixelPipes = me.GetPipes()
+	return m
+}
+
+// GetPipeByID implements PixelPiperWithSubPipes interface
+func (me *Panel) GetPipeByID(id pipepart.ID) (pipepart.PixelPiper, error) {
+	if pipepart.IsPlaceholderID(id) {
+		return nil, fmt.Errorf("can not return placeholder id '%#v'", id)
 	}
+	switch id {
+	case me.framePipeline.GetID():
+		return me.framePipeline, nil
+	default:
+		return me.framePipeline.GetPipeByID(id)
+	}
+}
+
+// GetReservedPipes implements PixelPiperWithSubPipes interface
+func (me *Panel) GetReservedPipes() []pipepart.PipeType {
+	return pipepart.GetReservedPipeTypes()
+}
+
+// GetPipes implements PixelPiperWithSubPipes interface
+func (me *Panel) GetPipes() pipepart.PipesMarshal {
+	pipeParts := make(pipepart.PipesMarshal, 3)
+	pipeParts[me.leakySource.GetID()] = me.leakySource.Marshal()
+	pipeParts[me.framePipeline.GetID()] = me.framePipeline.Marshal()
+	pipeParts[me.device.GetID()] = me.device.Marshal()
+	return pipeParts
+}
+
+// GetType implements PixelPiper interface
+func (me *Panel) GetType() pipepart.PipeType {
+	return pipepart.Panel
 }
 
 // GetID implements PixelPiper interface

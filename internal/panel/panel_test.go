@@ -7,5 +7,6 @@ import (
 )
 
 func TestPixelPiperBasicInteface(t *testing.T) {
-	var _ pipepart.PixelPiperBasic = (*Panel)(nil)
+	var _ pipepart.PixelPiperBase = (*Panel)(nil)
+	var _ pipepart.PixelPiperWithSubPipes = (*Panel)(nil)
 }

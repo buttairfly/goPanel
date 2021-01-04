@@ -8,6 +8,6 @@ import (
 )
 
 // NotFound returns an echo Error
-func NotFound(entity string, value string) error {
-	return echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("NotFound: Entity '%s' with value %s", entity, value))
+func NotFound(entity string, value string, err error) error {
+	return echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("NotFound: Entity '%s' with value %s error: %v", entity, value, err))
 }

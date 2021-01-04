@@ -66,12 +66,12 @@ func (me *fullFrameFadeGenerator) GetPrevID() pipepart.ID {
 	return me.pipe.GetPrevID()
 }
 
-func (me *fullFrameFadeGenerator) Marshal() pipepart.Marshal {
-	return pipepart.Marshal{
-		ID:     me.GetID(),
-		PrevID: me.GetPrevID(),
-		Params: me.GetParams(),
-	}
+func (me *fullFrameFadeGenerator) Marshal() *pipepart.Marshal {
+	return pipepart.MarshalFromPixelPiperInterface(me)
+}
+
+func (me *fullFrameFadeGenerator) GetType() pipepart.PipeType {
+	return pipepart.FullFrameFadeGenerator
 }
 
 // GetParams implements PixelPiper interface

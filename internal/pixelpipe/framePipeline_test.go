@@ -15,6 +15,10 @@ import (
 )
 
 func TestNewEmptyFramePipeline_AddPipeAfter(t *testing.T) {
+
+	var _ pipepart.PixelPiper = (*FramePipeline)(nil)
+	var _ pipepart.PixelPiperAddableSubPipe = (*FramePipeline)(nil)
+
 	logger, _ := zap.NewDevelopment()
 	defer logger.Sync()
 
@@ -23,8 +27,6 @@ func TestNewEmptyFramePipeline_AddPipeAfter(t *testing.T) {
 		addBefore      pipepart.ID
 		expectedPrevID pipepart.ID
 	}
-
-	var _ pipepart.PixelPiper = (*FramePipeline)(nil)
 
 	const sourceID = pipepart.SourceID
 

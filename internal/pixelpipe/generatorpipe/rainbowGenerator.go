@@ -14,6 +14,7 @@ import (
 
 type rainbowGenerator struct {
 	pipe     *pipepart.Pipe
+	params   []pipepart.PipeParam
 	palette  palette.Palette
 	wheelPos float64
 	dx       float64
@@ -35,6 +36,7 @@ func RainbowGenerator(
 
 	return &rainbowGenerator{
 		pipe:    pipepart.NewPipe(id, outputChan),
+		params:  getParams(palette, dx, dy, logger),
 		palette: palette,
 		dx:      dx,
 		dy:      dy,
@@ -86,33 +88,17 @@ func (me *rainbowGenerator) GetPrevID() pipepart.ID {
 	return me.pipe.GetPrevID()
 }
 
-func (me *rainbowGenerator) Marshal() pipepart.Marshal {
-	return pipepart.Marshal{
-		ID:     me.GetID(),
-		PrevID: me.GetPrevID(),
-		Params: me.GetParams(),
-	}
+func (me *rainbowGenerator) Marshal() *pipepart.Marshal {
+	return pipepart.MarshalFromPixelPiperInterface(me)
+}
+
+func (me *rainbowGenerator) GetType() pipepart.PipeType {
+	return pipepart.RainbowGenerator
 }
 
 // GetParams implements PixelPiper interface
 func (me *rainbowGenerator) GetParams() []pipepart.PipeParam {
-	pp := make([]pipepart.PipeParam, 3)
-	pp[0] = pipepart.PipeParam{
-		Type:  pipepart.NameID,
-		Name:  "palette",
-		Value: string(me.palette.GetID()),
-	}
-	pp[1] = pipepart.PipeParam{
-		Type:  pipepart.Float64,
-		Name:  "dx",
-		Value: fmt.Sprintf("%g", me.dx),
-	}
-	pp[2] = pipepart.PipeParam{
-		Type:  pipepart.Float64,
-		Name:  "dy",
-		Value: fmt.Sprintf("%g", me.dy),
-	}
-	return pp
+	return me.params
 }
 
 func (me *rainbowGenerator) GetOutput(id pipepart.ID) hardware.FrameSource {
@@ -128,4 +114,24 @@ func (me *rainbowGenerator) SetInput(prevID pipepart.ID, inputChan hardware.Fram
 		me.logger.Fatal("PipeIDEmptyError", zap.Error(pipepart.PipeIDEmptyError()))
 	}
 	me.pipe.SetInput(prevID, inputChan)
+}
+
+func getParams(palette palette.Palette, dx, dy float64, logger *zap.Logger) []pipepart.PipeParam {
+	pp := make([]pipepart.PipeParam, 3)
+	pp[0] = pipepart.PipeParam{
+		Type:  pipepart.NameID,
+		Name:  "palette",
+		Value: string(palette.GetID()),
+	}
+	pp[1] = pipepart.PipeParam{
+		Type:  pipepart.Float64,
+		Name:  "dx",
+		Value: fmt.Sprintf("%g", dx),
+	}
+	pp[2] = pipepart.PipeParam{
+		Type:  pipepart.Float64,
+		Name:  "dy",
+		Value: fmt.Sprintf("%g", dy),
+	}
+	return pp
 }

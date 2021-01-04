@@ -94,12 +94,12 @@ func (me *snakeGenerator) GetOutput(id pipepart.ID) hardware.FrameSource {
 	return nil
 }
 
-func (me *snakeGenerator) Marshal() pipepart.Marshal {
-	return pipepart.Marshal{
-		ID:     me.GetID(),
-		PrevID: me.GetPrevID(),
-		Params: me.GetParams(),
-	}
+func (me *snakeGenerator) Marshal() *pipepart.Marshal {
+	return pipepart.MarshalFromPixelPiperInterface(me)
+}
+
+func (me *snakeGenerator) GetType() pipepart.PipeType {
+	return pipepart.SnakeGenerator
 }
 
 // GetParams implements PixelPiper interface

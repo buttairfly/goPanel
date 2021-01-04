@@ -5,12 +5,13 @@ type PipeType string
 
 // PipeType definitions as enum
 const (
-	Source PipeType = "source"
-	Sink   PipeType = "sink"
-
+	// reserved
 	DummyPipe PipeType = "dummy"
+	Source    PipeType = "source"
+	Sink      PipeType = "sink"
+	Panel     PipeType = "panel"
 
-	Panel            PipeType = "panel"
+	// structure
 	FramePipeline    PipeType = "pipeline"
 	PipeIntersection PipeType = "intersection"
 
@@ -22,6 +23,31 @@ const (
 	SnakeGenerator          PipeType = "snakeGenerator"
 	WhiteNoiseGenerator     PipeType = "whiteNoiseGenerator"
 
-	//alphablender
+	// alphablender
 	ClockBlender PipeType = "clockBlender"
 )
+
+// GetReservedPipeTypes returns all reserved PipeTypes
+func GetReservedPipeTypes() []PipeType {
+	return []PipeType{
+		DummyPipe,
+		Source,
+		Sink,
+		Panel,
+	}
+}
+
+// GetPipeTypes returns all possible PipeTypes
+func GetPipeTypes() []PipeType {
+	return []PipeType{
+		FramePipeline,
+		PipeIntersection,
+		DrawGenerator,
+		FullFrameFadeGenerator,
+		LastBlackFrameGenerator,
+		RainbowGenerator,
+		SnakeGenerator,
+		WhiteNoiseGenerator,
+		ClockBlender,
+	}
+}

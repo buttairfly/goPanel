@@ -64,12 +64,12 @@ func (me *lastBlackFrameGenerator) GetPrevID() pipepart.ID {
 	return me.pipe.GetPrevID()
 }
 
-func (me *lastBlackFrameGenerator) Marshal() pipepart.Marshal {
-	return pipepart.Marshal{
-		ID:     me.GetID(),
-		PrevID: me.GetPrevID(),
-		Params: me.GetParams(),
-	}
+func (me *lastBlackFrameGenerator) Marshal() *pipepart.Marshal {
+	return pipepart.MarshalFromPixelPiperInterface(me)
+}
+
+func (me *lastBlackFrameGenerator) GetType() pipepart.PipeType {
+	return pipepart.LastBlackFrameGenerator
 }
 
 // GetParams implements PixelPiper interface

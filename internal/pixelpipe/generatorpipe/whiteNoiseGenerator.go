@@ -73,12 +73,12 @@ func (me *whiteNoiseGenerator) GetPrevID() pipepart.ID {
 	return me.pipe.GetPrevID()
 }
 
-func (me *whiteNoiseGenerator) Marshal() pipepart.Marshal {
-	return pipepart.Marshal{
-		ID:     me.GetID(),
-		PrevID: me.GetPrevID(),
-		Params: me.GetParams(),
-	}
+func (me *whiteNoiseGenerator) Marshal() *pipepart.Marshal {
+	return pipepart.MarshalFromPixelPiperInterface(me)
+}
+
+func (me *whiteNoiseGenerator) GetType() pipepart.PipeType {
+	return pipepart.WhiteNoiseGenerator
 }
 
 // GetParams implements PixelPiper interface

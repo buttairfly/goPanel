@@ -2,6 +2,7 @@ package pixelpipe
 
 import (
 	"context"
+	"fmt"
 	"sync"
 
 	"go.uber.org/zap"
@@ -142,6 +143,11 @@ func (me *FramePipeline) SetInput(prevID pipepart.ID, inputChan hardware.FrameSo
 	me.prevID = prevID
 }
 
+// GetType implements PixelPiper interface
+func (me *FramePipeline) GetType() pipepart.PipeType {
+	return pipepart.FramePipeline
+}
+
 // GetID implements PixelPiper interface
 func (me *FramePipeline) GetID() pipepart.ID {
 	return me.internalLastPipe.GetID()
@@ -155,6 +161,42 @@ func (me *FramePipeline) GetPrevID() pipepart.ID {
 // GetParams implements PixelPiper interface
 func (me *FramePipeline) GetParams() []pipepart.PipeParam {
 	return nil
+}
+
+// Marshal implements PixelPiper interface
+func (me *FramePipeline) Marshal() *pipepart.Marshal {
+	m := pipepart.MarshalFromPixelPiperInterface(me)
+	m.FirstPipeID = me.firstPipeID
+	m.LastPipeID = me.lastPipeID
+	m.PixelPipes = me.GetPipes()
+	return m
+}
+
+// GetPipeByID implements PixelPiperWithSubPipes interface
+func (me *FramePipeline) GetPipeByID(id pipepart.ID) (pipepart.PixelPiper, error) {
+	if id == me.GetID() {
+		return me, nil
+	}
+	pipe, ok := me.pixelPipes[id]
+	if ok {
+		return pipe, nil
+	}
+	for _, subPipe := range me.pixelPipes {
+		f, subPipeIsFramePipeline := subPipe.(*FramePipeline)
+		if subPipeIsFramePipeline {
+			return f.GetPipeByID(id)
+		}
+	}
+	return nil, fmt.Errorf("pipe '%s' not found", id)
+}
+
+// GetPipes implements PixelPiperWithSubPipes interface
+func (me *FramePipeline) GetPipes() pipepart.PipesMarshal {
+	pixelPipes := make(pipepart.PipesMarshal, len(me.pixelPipes))
+	for id, p := range me.pixelPipes {
+		pixelPipes[id] = p.Marshal()
+	}
+	return pixelPipes
 }
 
 // AddPipeBefore adds a pipe segment before id

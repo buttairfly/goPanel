@@ -24,7 +24,7 @@ type LedDevice interface {
 	Open() error
 	Write(command string) (int, error)
 	Close() error
-	GetType() Type
+	GetDeviceType() Type
 	GetCurrentFrame() hardware.Frame
 }
 

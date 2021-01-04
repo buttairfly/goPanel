@@ -72,14 +72,16 @@ func (me *Source) GetID() pipepart.ID {
 }
 
 // Marshal returns the Marshalled description of Source
-func (me *Source) Marshal() pipepart.Marshal {
-	return pipepart.Marshal{
-		ID:     me.GetID(),
-		Params: me.GetParams(),
-	}
+func (me *Source) Marshal() *pipepart.Marshal {
+	return pipepart.MarshalFromPixelPiperBaseInterface(me)
 }
 
 // GetParams implements PixelPiper interface
 func (me *Source) GetParams() []pipepart.PipeParam {
 	return nil
+}
+
+// GetType implements PixelPiper interface
+func (me *Source) GetType() pipepart.PipeType {
+	return pipepart.Source
 }

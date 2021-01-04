@@ -1,5 +1,7 @@
 package pipepart
 
+import "fmt"
+
 // ID is an identifier for a pixelPiper elemement and used to name pixelPipes
 type ID string
 
@@ -23,4 +25,20 @@ func IsEmptyID(id ID) bool {
 // IsPlaceholderID returns true, when the ID should not be used to create a pipe
 func IsPlaceholderID(id ID) bool {
 	return IsEmptyID(id) || id == SourceID || id == SinkID || id == PanelID
+}
+
+// GoString implements GoStringer interface
+func (id ID) GoString() string {
+	switch id {
+	case EmptyID:
+		return "EmptyId \"\""
+	case SourceID:
+		return fmt.Sprintf("SourceID \"%s\"", id)
+	case SinkID:
+		return fmt.Sprintf("SinkID \"%s\"", id)
+	case PanelID:
+		return fmt.Sprintf("PanelID \"%s\"", id)
+	default:
+		return fmt.Sprintf("\"%s\"", id)
+	}
 }

@@ -7,19 +7,19 @@ import (
 )
 
 // GetMarshalledPalettes returns the marshalled panel palettes
-func (me *Panel) GetMarshalledPalettes() map[palette.ID]palette.Marshal {
-	p := make(map[palette.ID]palette.Marshal, len(me.palettes))
-	for id, palette := range me.palettes {
-		p[id] = palette.Marshal()
+func (me *Panel) GetMarshalledPalettes() map[palette.ID]*palette.Marshal {
+	p := make(map[palette.ID]*palette.Marshal, len(me.palettes))
+	for id, currentPalette := range me.palettes {
+		p[id] = currentPalette.Marshal()
 	}
 	return p
 }
 
 // GetMarshaledPaletteByID returns the marshalled panel palette by id
-func (me *Panel) GetMarshaledPaletteByID(id palette.ID) (palette.Marshal, error) {
+func (me *Panel) GetMarshaledPaletteByID(id palette.ID) (*palette.Marshal, error) {
 	p, err := me.GetPaletteByID(id)
 	if err != nil {
-		return palette.Marshal{}, err
+		return nil, err
 	}
 	return p.Marshal(), nil
 }

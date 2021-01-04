@@ -1,6 +1,6 @@
 [Unit]
 Description=gopanel service
-After=network.target time-sync.target
+After=network.target systemd-time-wait-sync.service
 StartLimitIntervalSec=0
 
 [Service]

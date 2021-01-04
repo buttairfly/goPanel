@@ -83,3 +83,13 @@ func (me *Pipe) GetParams() []PipeParam {
 func (me *Pipe) GetID() ID {
 	return me.id
 }
+
+// Marshal marshals a PixelPiper and Pipe
+func (me *Pipe) Marshal() *Marshal {
+	return MarshalFromPixelPiperInterface(me)
+}
+
+// GetType implements a PixelPiperBasic
+func (me *Pipe) GetType() PipeType {
+	return DummyPipe
+}

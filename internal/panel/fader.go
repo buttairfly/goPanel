@@ -7,7 +7,7 @@ import (
 )
 
 // GetFaders returns the panel faders
-func (me *Panel) GetFaders() map[fader.ID]fader.Fader {
+func (me *Panel) GetFaders() map[fader.ID]*fader.Fader {
 	return me.faders
 }
 
@@ -15,7 +15,7 @@ func (me *Panel) GetFaders() map[fader.ID]fader.Fader {
 func (me *Panel) GetFaderByID(id fader.ID) (*fader.Fader, error) {
 	fader, exists := me.faders[id]
 	if exists {
-		return &fader, nil
+		return fader, nil
 	}
 	return nil, errors.New("not found")
 }

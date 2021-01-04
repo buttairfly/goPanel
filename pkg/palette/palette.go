@@ -16,7 +16,7 @@ type Palette interface {
 	GetKeyColorAtPos(pos float64) (*colorful.Color, error)
 	DeleteAt(pos float64) error
 	MoveAt(move ColorMoveMarshal) error
-	Marshal() Marshal
+	Marshal() *Marshal
 	Clear() Palette
 	GetID() ID
 	GetColors() []fixColor

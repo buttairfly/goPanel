@@ -19,7 +19,7 @@ func GetVersionByName(c echo.Context) error {
 	name := c.Param("name")
 	version, err := version.GetVersionByName(name)
 	if err != nil {
-		return weberror.NotFound("version", name)
+		return weberror.NotFound("version", name, err)
 	}
 	return c.JSON(http.StatusOK, version)
 }

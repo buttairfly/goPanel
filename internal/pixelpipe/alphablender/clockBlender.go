@@ -19,6 +19,7 @@ import (
 
 type clockBlender struct {
 	pipe        *pipepart.Pipe
+	params      []pipepart.PipeParam
 	minDimmer   float64
 	maxDimmer   float64
 	currentTime string
@@ -32,13 +33,13 @@ const clockDigitTimeDevider = 2
 // NewClockBlender adds a clock over the current frame
 func NewClockBlender(id pipepart.ID, minDimmer float64, maxDimmer float64, logger *zap.Logger) pipepart.PixelPiper {
 	pipepart.CheckNoPlaceholderID(id, logger)
-	minDimmer = checkDimmer("minDimmer", minDimmer, 0.0, logger)
-	maxDimmer = checkDimmer("maxDimmer", maxDimmer, 1.0, logger)
 	outputChan := make(chan hardware.Frame)
+
 	return &clockBlender{
 		pipe:      pipepart.NewPipe(id, outputChan),
 		minDimmer: minDimmer,
 		maxDimmer: maxDimmer,
+		params:    getParams(minDimmer, maxDimmer, logger),
 		logger:    logger,
 	}
 }
@@ -146,28 +147,17 @@ func (me *clockBlender) GetPrevID() pipepart.ID {
 	return me.pipe.GetPrevID()
 }
 
-func (me *clockBlender) Marshal() pipepart.Marshal {
-	return pipepart.Marshal{
-		ID:     me.GetID(),
-		PrevID: me.GetPrevID(),
-		Params: me.GetParams(),
-	}
+func (me *clockBlender) Marshal() *pipepart.Marshal {
+	return pipepart.MarshalFromPixelPiperInterface(me)
+}
+
+func (me *clockBlender) GetType() pipepart.PipeType {
+	return pipepart.ClockBlender
 }
 
 // GetParams implements PixelPiper interface
 func (me *clockBlender) GetParams() []pipepart.PipeParam {
-	pp := make([]pipepart.PipeParam, 2)
-	pp[0] = pipepart.PipeParam{
-		Name:  "minDimmer",
-		Type:  pipepart.Gauge0to1,
-		Value: fmt.Sprintf("%f", me.minDimmer),
-	}
-	pp[1] = pipepart.PipeParam{
-		Name:  "maxDimmer",
-		Type:  pipepart.Gauge0to1,
-		Value: fmt.Sprintf("%f", me.minDimmer),
-	}
-	return pp
+	return me.params
 }
 
 func (me *clockBlender) GetOutput(id pipepart.ID) hardware.FrameSource {
@@ -183,6 +173,25 @@ func (me *clockBlender) SetInput(prevID pipepart.ID, inputChan hardware.FrameSou
 		me.logger.Fatal("PipeIDEmptyError", zap.Error(pipepart.PipeIDEmptyError()))
 	}
 	me.pipe.SetInput(prevID, inputChan)
+}
+
+func getParams(minDimmer, maxDimmer float64, logger *zap.Logger) []pipepart.PipeParam {
+	minDimmer = checkDimmer("minDimmer", minDimmer, 0.0, logger)
+	maxDimmer = checkDimmer("maxDimmer", maxDimmer, 1.0, logger)
+
+	pipeParams := make([]pipepart.PipeParam, 2)
+
+	pipeParams[0] = pipepart.PipeParam{
+		Name:  "minDimmer",
+		Type:  pipepart.Gauge0to1,
+		Value: fmt.Sprintf("%f", minDimmer),
+	}
+	pipeParams[1] = pipepart.PipeParam{
+		Name:  "maxDimmer",
+		Type:  pipepart.Gauge0to1,
+		Value: fmt.Sprintf("%f", maxDimmer),
+	}
+	return pipeParams
 }
 
 func checkDimmer(name string, dimmer float64, defaultValue float64, logger *zap.Logger) float64 {
