@@ -2,8 +2,8 @@ package palette
 
 // Marshal is the marshalable version of palette.palette and therefore palette.Palette
 type Marshal struct {
-	ID        ID
-	FixColors []FixColor
+	ID        ID         `json:"id" yaml:"id"`
+	FixColors []FixColor `json:"fixColors" yaml:"fixColors"`
 }
 
 // FixColor is the marshalable version of palette.fixColor
