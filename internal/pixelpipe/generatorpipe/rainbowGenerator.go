@@ -100,7 +100,7 @@ func (me *rainbowGenerator) GetParams() []pipepart.PipeParam {
 	pp[0] = pipepart.PipeParam{
 		Type:  pipepart.NameID,
 		Name:  "palette",
-		Value: me.palette.GetName(),
+		Value: string(me.palette.GetID()),
 	}
 	pp[1] = pipepart.PipeParam{
 		Type:  pipepart.Float64,

@@ -18,13 +18,13 @@ type Palette interface {
 	MoveAt(move ColorMoveMarshal) error
 	Marshal() Marshal
 	Clear() Palette
-	GetName() string
+	GetID() ID
 	GetColors() []fixColor
 }
 
 type palette struct {
+	id        ID
 	fixColors []fixColor
-	name      string
 }
 
 type fixColor struct {
@@ -33,9 +33,9 @@ type fixColor struct {
 }
 
 // NewPalette generates a new Palette
-func NewPalette(name string) Palette {
+func NewPalette(id ID) Palette {
 	p := new(palette)
-	p.name = name
+	p.id = id
 	return p.Clear()
 }
 
@@ -45,8 +45,8 @@ func (p *palette) Clear() Palette {
 	return p
 }
 
-func (p *palette) GetName() string {
-	return p.name
+func (p *palette) GetID() ID {
+	return p.id
 }
 
 func (p *palette) GetColors() []fixColor {

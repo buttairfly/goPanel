@@ -21,7 +21,7 @@ func GetPalettes(c echo.Context) error {
 // GetPaletteByID returns the panel palette by id
 func GetPaletteByID(c echo.Context) error {
 	id := c.Param("id")
-	palette, err := panel.GetPanel().GetMarshaledPaletteByID(id)
+	palette, err := panel.GetPanel().GetMarshaledPaletteByID(palette.ID(id))
 	if err != nil {
 		return weberror.NotFound("palette", id)
 	}
@@ -31,35 +31,35 @@ func GetPaletteByID(c echo.Context) error {
 // PostColorAtPosToPaletteByID adds a new color to palette with id
 func PostColorAtPosToPaletteByID(c echo.Context) error {
 	id := c.Param("id")
-	p, err := panel.GetPanel().GetPaletteByID(id)
+	p, err := panel.GetPanel().GetPaletteByID(palette.ID(id))
 	if err != nil {
 		return weberror.NotFound("palette", id)
 	}
 
-	var paletteColor palette.ColorMarshal
+	var fixColor palette.FixColor
 	var unmarshalErr *json.UnmarshalTypeError
 
 	decoder := json.NewDecoder(c.Request().Body)
 	decoder.DisallowUnknownFields()
-	errDecode := decoder.Decode(&paletteColor)
+	errDecode := decoder.Decode(&fixColor)
 	if err != nil {
 		if errors.As(err, &unmarshalErr) {
 			return weberror.BodyUnmarshal("palette.ColorMarshal", unmarshalErr)
 		}
 		return weberror.BodyNotFound(c, errDecode)
 	}
-	col, err := colorful.Hex(paletteColor.Color)
+	col, err := colorful.Hex(fixColor.Color)
 	if err != nil {
-		return weberror.InvalidColorString("palette", id, paletteColor.Color, err)
+		return weberror.InvalidColorString("palette", id, fixColor.Color, err)
 	}
-	p.PutAt(col, paletteColor.Pos)
+	p.PutAt(col, fixColor.Pos)
 	return c.JSON(http.StatusOK, p.Marshal())
 }
 
 // PutMoveColorAtPaletteByID moves a color fixpoint within the palette scale
 func PutMoveColorAtPaletteByID(c echo.Context) error {
 	id := c.Param("id")
-	p, err := panel.GetPanel().GetPaletteByID(id)
+	p, err := panel.GetPanel().GetPaletteByID(palette.ID(id))
 	if err != nil {
 		return weberror.NotFound("palette", id)
 	}

@@ -87,7 +87,7 @@ func (me *whiteNoiseGenerator) GetParams() []pipepart.PipeParam {
 	pp[0] = pipepart.PipeParam{
 		Name:  "palette",
 		Type:  pipepart.NameID,
-		Value: me.palette.GetName(),
+		Value: string(me.palette.GetID()),
 	}
 	pp[1] = pipepart.PipeParam{
 		Name:  "newPixel",

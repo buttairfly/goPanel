@@ -81,7 +81,7 @@ func (me *drawGenerator) GetParams() []pipepart.PipeParam {
 	pp[0] = pipepart.PipeParam{
 		Name:  "palette",
 		Type:  pipepart.NameID,
-		Value: me.palette.GetName(),
+		Value: string(me.palette.GetID()),
 	}
 	return pp
 }

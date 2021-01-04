@@ -127,8 +127,9 @@ func TestPaletteAdd(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(c.desc, func(t *testing.T) {
-			palette := NewPalette(c.desc)
-			assert.Equal(t, palette.GetName(), c.desc, "Name is correct")
+			currendID := ID(c.desc)
+			palette := NewPalette(currendID)
+			assert.Equal(t, palette.GetID(), currendID, "ID is correct")
 			for _, paletteColor := range c.paletteColors {
 				palette.PutAt(paletteColor.color, paletteColor.pos)
 			}
