@@ -44,7 +44,7 @@ func PostColorAtPosToPaletteByID(c echo.Context) error {
 	errDecode := decoder.Decode(&fixColor)
 	if err != nil {
 		if errors.As(err, &unmarshalErr) {
-			return weberror.BodyUnmarshal("palette.ColorMarshal", unmarshalErr)
+			return weberror.BodyUnmarshal("palette.FixColor", unmarshalErr)
 		}
 		return weberror.BodyNotFound(c, errDecode)
 	}
@@ -72,7 +72,7 @@ func PutMoveColorAtPaletteByID(c echo.Context) error {
 	errDecode := decoder.Decode(&paletteMove)
 	if err != nil {
 		if errors.As(err, &unmarshalErr) {
-			return weberror.BodyUnmarshal("palette.ColorMarshal", unmarshalErr)
+			return weberror.BodyUnmarshal("palette.ColorMoveMarshal", unmarshalErr)
 		}
 		return weberror.BodyNotFound(c, errDecode)
 	}
@@ -80,6 +80,34 @@ func PutMoveColorAtPaletteByID(c echo.Context) error {
 	errMove := p.MoveAt(paletteMove)
 	if errMove != nil {
 		return weberror.NotPossible("move not possible", errMove)
+	}
+	return c.JSON(http.StatusOK, p.Marshal())
+}
+
+// PutBlenderAtPaletteByID sets a new Blender to palette with id
+func PutBlenderAtPaletteByID(c echo.Context) error {
+	id := c.Param("id")
+	p, err := panel.GetPanel().GetPaletteByID(palette.ID(id))
+	if err != nil {
+		return weberror.NotFound("palette", id, err)
+	}
+
+	var setBlender palette.SetBlenderMarshal
+	var unmarshalErr *json.UnmarshalTypeError
+
+	decoder := json.NewDecoder(c.Request().Body)
+	decoder.DisallowUnknownFields()
+	errDecode := decoder.Decode(&setBlender)
+	if err != nil {
+		if errors.As(err, &unmarshalErr) {
+			return weberror.BodyUnmarshal("palette.SetBlenderMarshal", unmarshalErr)
+		}
+		return weberror.BodyNotFound(c, errDecode)
+	}
+
+	errBlender := p.SetBlender(setBlender.Blender)
+	if errBlender != nil {
+		return weberror.NotPossible("set blender not possible", errBlender)
 	}
 	return c.JSON(http.StatusOK, p.Marshal())
 }

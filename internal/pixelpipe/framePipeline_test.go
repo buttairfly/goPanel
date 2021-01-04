@@ -47,7 +47,7 @@ func TestNewEmptyFramePipeline_AddPipeAfter(t *testing.T) {
 			desc: "single pipe added",
 			pipes: []PipeAdder{
 				{
-					pipe:           generatorpipe.DrawGenerator("drawGenerator", palette.NewPalette("empty"), logger, make(chan generatorpipe.DrawCommand, 0)),
+					pipe:           generatorpipe.DrawGenerator("drawGenerator", palette.NewPalette("empty", palette.RGB), logger, make(chan generatorpipe.DrawCommand, 0)),
 					addBefore:      "single pipe added",
 					expectedPrevID: sourceID,
 				},
@@ -60,7 +60,7 @@ func TestNewEmptyFramePipeline_AddPipeAfter(t *testing.T) {
 			desc: "two pipes added",
 			pipes: []PipeAdder{
 				{
-					pipe:           generatorpipe.DrawGenerator("drawGenerator", palette.NewPalette("empty"), logger, make(chan generatorpipe.DrawCommand, 0)),
+					pipe:           generatorpipe.DrawGenerator("drawGenerator", palette.NewPalette("empty", palette.RGB), logger, make(chan generatorpipe.DrawCommand, 0)),
 					addBefore:      "two pipes added",
 					expectedPrevID: sourceID,
 				},
@@ -83,7 +83,7 @@ func TestNewEmptyFramePipeline_AddPipeAfter(t *testing.T) {
 					expectedPrevID: "drawGenerator",
 				},
 				{
-					pipe:           generatorpipe.DrawGenerator("drawGenerator", palette.NewPalette("empty"), logger, make(chan generatorpipe.DrawCommand, 0)),
+					pipe:           generatorpipe.DrawGenerator("drawGenerator", palette.NewPalette("empty", palette.RGB), logger, make(chan generatorpipe.DrawCommand, 0)),
 					addBefore:      "clock",
 					expectedPrevID: sourceID,
 				},

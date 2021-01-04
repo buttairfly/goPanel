@@ -41,6 +41,7 @@ type PixelPiperBase interface {
 	RunPipe(cancelCtx context.Context, wg *sync.WaitGroup)
 	GetType() PipeType
 	GetParams() []PipeParam
+	// SetParam(param PipeParam) ([]PipeParam, error)
 }
 
 // PixelPiperAddableSubPipe is a PixelPiperWithSubPipes which can add new PixelPiper

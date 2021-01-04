@@ -14,6 +14,7 @@ func Palette(g *echo.Group) {
 	configGroup.GET("/id/:id", controller.GetPaletteByID).Name = "get-palette-by-id"
 	configGroup.POST("/id/:id/color/set", controller.PostColorAtPosToPaletteByID).Name = "set-color-at-pos-to-palette-by-id"
 	configGroup.PUT("/id/:id/color/move", controller.PutMoveColorAtPaletteByID).Name = "move-color-at-palette-by-id"
+	configGroup.PUT("/id/:id/blender/set", controller.PutBlenderAtPaletteByID).Name = "put-blender-at-palette-by-id"
 
 	// configGroup.POST("/id/:id", controller.PostPaletteById).Name = "new-palette-by-id"
 }

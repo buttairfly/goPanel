@@ -17,7 +17,6 @@ import (
 	"github.com/buttairfly/goPanel/internal/pixelpipe/pipepart"
 	"github.com/buttairfly/goPanel/pkg/fader"
 	"github.com/buttairfly/goPanel/pkg/palette"
-	"github.com/lucasb-eyer/go-colorful"
 )
 
 var panel *Panel
@@ -35,6 +34,7 @@ type Panel struct {
 
 // NewPanel creates a new panel struct at a global variable
 func NewPanel(config *config.MainConfig, device device.LedDevice, logger *zap.Logger) *Panel {
+	palette.Init("config/palette/")
 	frameSource := leakybuffer.NewFrameSource(config.TileConfigs.ToTileConfigs(), logger)
 	emptyFramePipeID := pipepart.ID("mainPipe")
 
@@ -42,40 +42,21 @@ func NewPanel(config *config.MainConfig, device device.LedDevice, logger *zap.Lo
 		config:        config,
 		device:        device,
 		faders:        make(map[fader.ID]*fader.Fader, 0),
-		palettes:      make(map[palette.ID]palette.Palette, 0),
+		palettes:      palette.GetGlobal(),
 		leakySource:   frameSource,
 		frameSource:   frameSource.GetOutput(frameSource.GetID()),
 		framePipeline: pixelpipe.NewEmptyFramePipeline(emptyFramePipeID, logger),
 	}
-
-	// TODO: move to file
-	fire := palette.NewPalette("fire")
-	fire.PutAt(colorful.Color{R: 0.1, G: 0, B: 0}, 0)
-	fire.PutAt(colorful.Color{R: 0.5, G: 0.1, B: 0}, 1.0/3)
-	fire.PutAt(colorful.Color{R: 0.3, G: 0, B: 0}, 2.0/3)
-	fire.PutAt(colorful.Color{R: 0.4, G: 0.1, B: 0}, 1.0)
-	panel.palettes[fire.GetID()] = fire
-
-	// TODO: move to file
-	const c1 = float64(1.0)
-	const c0 = float64(15.0 / 255.0)
-	rainbowPalette := palette.NewPalette("rainbow")
-	rainbowPalette.PutAt(colorful.Color{R: c1, G: c0, B: c0}, 0)
-	rainbowPalette.PutAt(colorful.Color{R: c0, G: c1, B: c0}, 1.0/3)
-	rainbowPalette.PutAt(colorful.Color{R: c0, G: c0, B: c1}, 2.0/3)
-	rainbowPalette.PutAt(colorful.Color{R: c1, G: c0, B: c0}, 1.0)
-	panel.palettes[rainbowPalette.GetID()] = rainbowPalette
-
 	panel.framePipeline.SetInput(pipepart.SourceID, panel.frameSource)
-
 	device.SetInput(panel.framePipeline.GetID(), panel.framePipeline.GetOutput(emptyFramePipeID))
 
+	defaultPalette, _ := palette.GetGlobalByID(palette.DefaultID)
 	// TODO: load from file
 	panel.framePipeline.AddPipeBefore(
 		emptyFramePipeID,
 		generatorpipe.RainbowGenerator(
 			"rainbow",
-			rainbowPalette,
+			defaultPalette,
 			0.009,
 			0.02,
 			logger,
@@ -96,7 +77,7 @@ func NewPanel(config *config.MainConfig, device device.LedDevice, logger *zap.Lo
 	// 	emptyFramePipeID,
 	// 	generatorpipe.SnakeGenerator(
 	// 		"rainbow",
-	// 		rainbowPalette,
+	// 		defaultPalette,
 	// 		195.0/200,
 	// 		logger,
 	// 	),

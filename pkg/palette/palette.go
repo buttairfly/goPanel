@@ -20,10 +20,12 @@ type Palette interface {
 	Clear() Palette
 	GetID() ID
 	GetColors() []fixColor
+	SetBlender(blender string) error
 }
 
 type palette struct {
 	id        ID
+	blender   Blender
 	fixColors []fixColor
 }
 
@@ -33,115 +35,127 @@ type fixColor struct {
 }
 
 // NewPalette generates a new Palette
-func NewPalette(id ID) Palette {
-	p := new(palette)
-	p.id = id
-	return p.Clear()
+func NewPalette(id ID, blender Blender) Palette {
+	me := &palette{
+		id:      id,
+		blender: blender,
+	}
+	me.Clear()
+	return me
 }
 
-func (p *palette) Clear() Palette {
+func (me *palette) Clear() Palette {
 	fixColorSlice := make([]fixColor, 0, 0)
-	p.fixColors = fixColorSlice
-	return p
+	me.fixColors = fixColorSlice
+	return me
 }
 
-func (p *palette) GetID() ID {
-	return p.id
+func (me *palette) GetID() ID {
+	return me.id
 }
 
-func (p *palette) GetColors() []fixColor {
-	return p.fixColors
+func (me *palette) GetColors() []fixColor {
+	return me.fixColors
 }
 
-func (p *palette) addAt(c colorful.Color, pos float64) {
-	pos = guaranteeBetween0And1(pos)
-	p.fixColors = append(p.slice(), fixColor{color: c, pos: pos})
-	sort.Sort(p)
-}
-
-func (p *palette) replaceAt(c colorful.Color, pos float64) error {
-	index, err := p.getIndexFromPos(pos)
+func (me *palette) SetBlender(blender string) error {
+	b, err := FromString(blender)
 	if err != nil {
 		return err
 	}
-	p.slice()[index].color = c
+	me.blender = b
 	return nil
 }
 
-func (p *palette) PutAt(c colorful.Color, pos float64) {
-	if err := p.replaceAt(c, pos); err != nil {
-		p.addAt(c, pos)
+func (me *palette) addAt(c colorful.Color, pos float64) {
+	pos = guaranteeBetween0And1(pos)
+	me.fixColors = append(me.slice(), fixColor{color: c, pos: pos})
+	sort.Sort(me)
+}
+
+func (me *palette) replaceAt(c colorful.Color, pos float64) error {
+	index, err := me.getIndexFromPos(pos)
+	if err != nil {
+		return err
+	}
+	me.slice()[index].color = c
+	return nil
+}
+
+func (me *palette) PutAt(c colorful.Color, pos float64) {
+	if err := me.replaceAt(c, pos); err != nil {
+		me.addAt(c, pos)
 	}
 }
 
-func (p *palette) GetKeyColorAtPos(pos float64) (*colorful.Color, error) {
-	index, err := p.getIndexFromPos(pos)
+func (me *palette) GetKeyColorAtPos(pos float64) (*colorful.Color, error) {
+	index, err := me.getIndexFromPos(pos)
 	if err != nil {
 		return nil, err
 	}
-	return &(p.slice()[index].color), nil
+	return &(me.slice()[index].color), nil
 }
 
-func (p *palette) MoveAt(move ColorMoveMarshal) error {
-	index, errFrom := p.getIndexFromPos(move.From)
+func (me *palette) MoveAt(move ColorMoveMarshal) error {
+	index, errFrom := me.getIndexFromPos(move.From)
 	if errFrom != nil {
 		return fmt.Errorf("move from %v", errFrom)
 	}
 
 	toPos := guaranteeBetween0And1(move.To)
-	toIndex, errTo := p.getIndexFromPos(toPos)
+	toIndex, errTo := me.getIndexFromPos(toPos)
 	if errTo == nil {
 		return fmt.Errorf("move to index %d already used toPos: %f (%+v)", toIndex, toPos, move)
 	}
-	p.slice()[index].pos = toPos
-	sort.Sort(p)
+	me.slice()[index].pos = toPos
+	sort.Sort(me)
 	return nil
 }
 
-func (p *palette) DeleteAt(pos float64) error {
-	index, err := p.getIndexFromPos(pos)
+func (me *palette) DeleteAt(pos float64) error {
+	index, err := me.getIndexFromPos(pos)
 	if err != nil {
 		return err
 	}
-	p.fixColors = append(p.slice()[:index], p.slice()[index+1:]...)
+	me.fixColors = append(me.slice()[:index], me.slice()[index+1:]...)
 	return nil
 }
 
 // Blend will blend colors within the palaette within [0.0,1.0]
 // when the palette does not start with 0.0 the first palette color value is returned
 // when the palette does not end with a 1.0 pos value, the last value is returned
-func (p *palette) Blend(pos float64) colorful.Color {
-	if p.Len() == 0 {
+func (me *palette) Blend(pos float64) colorful.Color {
+	if me.Len() == 0 {
 		return colorful.Color{R: 0, G: 0, B: 0}
 	}
 	pos = guaranteeBetween0And1(pos)
-	return p.getInterpolatedColorFor(pos)
+	return me.getInterpolatedColorFor(pos)
 }
 
 // This is the meat of the gradient computation. It returns a HCL-blend between
 // the two colors around `t`.
 // Note: It relies heavily on the fact that the gradient keypoints are sorted.
-func (p *palette) getInterpolatedColorFor(t float64) colorful.Color {
-	for i := 0; i < p.Len()-1; i++ {
-		c1 := p.slice()[i]
+func (me *palette) getInterpolatedColorFor(t float64) colorful.Color {
+	for i := 0; i < me.Len()-1; i++ {
+		c1 := me.slice()[i]
 		if c1.pos > t {
 			// palette does not start at 0.0 and t < c0.pos
-			return p.slice()[i].color
+			return me.slice()[i].color
 		}
-		c2 := p.slice()[i+1]
+		c2 := me.slice()[i+1]
 		if c1.pos <= t && t <= c2.pos {
 			// We are in between c1 and c2. Go blend them!
 			t12 := (t - c1.pos) / (c2.pos - c1.pos)
-			return c1.color.BlendHcl(c2.color, t12).Clamped()
+			return me.blender.Blend(c1.color, c2.color, t12).Clamped()
 		}
 	}
 	// Nothing found? Means we're at (or past) the last gradient keypoint.
-	return p.slice()[p.Len()-1].color
+	return me.slice()[me.Len()-1].color
 }
 
-func (p *palette) getIndexFromPos(pos float64) (int, error) {
+func (me *palette) getIndexFromPos(pos float64) (int, error) {
 	pos = guaranteeBetween0And1(pos)
-	for i, pc := range p.slice() {
+	for i, pc := range me.slice() {
 		if pc.pos == pos {
 			return i, nil
 		}
@@ -162,17 +176,17 @@ func guaranteeBetween0And1(pos float64) float64 {
 	return pos
 }
 
-func (p *palette) slice() []fixColor {
-	return (p.fixColors)
+func (me *palette) slice() []fixColor {
+	return (me.fixColors)
 }
 
-func (p *palette) Len() int {
-	return len(p.slice())
+func (me *palette) Len() int {
+	return len(me.slice())
 }
-func (p *palette) Less(i, j int) bool {
-	return p.slice()[i].pos < p.slice()[j].pos
+func (me *palette) Less(i, j int) bool {
+	return me.slice()[i].pos < me.slice()[j].pos
 }
 
-func (p *palette) Swap(i, j int) {
-	p.slice()[i], p.slice()[j] = p.slice()[j], p.slice()[i]
+func (me *palette) Swap(i, j int) {
+	me.slice()[i], me.slice()[j] = me.slice()[j], me.slice()[i]
 }

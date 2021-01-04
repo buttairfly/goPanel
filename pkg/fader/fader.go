@@ -12,10 +12,10 @@ type Fader struct {
 }
 
 // NewEmptyFader creates an empty Fader
-func NewEmptyFader(id ID, start float64, granularity int, wrapping bool) *Fader {
+func NewEmptyFader(id ID, blender palette.Blender, start float64, granularity int, wrapping bool) *Fader {
 	return &Fader{
 		id:          id,
-		palette:     palette.NewPalette("palette_" + palette.ID(id)),
+		palette:     palette.NewPalette("palette_"+palette.ID(id), blender),
 		currentPos:  start,
 		granularity: granularity,
 		wrapping:    wrapping,
