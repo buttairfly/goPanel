@@ -52,25 +52,25 @@ func NewPanel(config *config.MainConfig, device device.LedDevice, logger *zap.Lo
 
 	defaultPalette, _ := palette.GetGlobalByID(palette.DefaultID)
 	// TODO: load from file
-	panel.framePipeline.AddPipeBefore(
-		emptyFramePipeID,
-		generatorpipe.WhiteNoiseGenerator(
-			"noise",
-			defaultPalette,
-			1,
-			logger,
-		),
-	)
 	// panel.framePipeline.AddPipeBefore(
 	// 	emptyFramePipeID,
-	// 	generatorpipe.RainbowGenerator(
-	// 		"rainbow",
+	// 	generatorpipe.WhiteNoiseGenerator(
+	// 		"noise",
 	// 		defaultPalette,
-	// 		0.009,
-	// 		0.02,
+	// 		1,
 	// 		logger,
 	// 	),
 	// )
+	panel.framePipeline.AddPipeBefore(
+		emptyFramePipeID,
+		generatorpipe.RainbowGenerator(
+			"rainbow",
+			defaultPalette,
+			0.009,
+			0.02,
+			logger,
+		),
+	)
 
 	panel.framePipeline.AddPipeBefore(
 		emptyFramePipeID,

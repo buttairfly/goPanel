@@ -13,8 +13,8 @@ func Init(filePath string) {
 	globalPalette = make(map[ID]Palette, 1)
 	d := NewPalette(DefaultID, RGB)
 	d.PutAt(colorful.Color{R: 1.0, G: 0.0, B: 0.0}, 0.0)
-	d.PutAt(colorful.Color{R: 0.0, G: 1.0, B: 0.0}, 1.0/3.0)
-	d.PutAt(colorful.Color{R: 0.0, G: 0.0, B: 1.0}, 2.0/3.0)
+	d.PutAt(colorful.Color{R: 0.7, G: 0.0, B: 0.2}, 1.0/3.0)
+	d.PutAt(colorful.Color{R: 0.5, G: 0.5, B: 0.0}, 2.0/3.0)
 	d.PutAt(colorful.Color{R: 1.0, G: 0.0, B: 0.0}, 1.0)
 	SetGlobal(d)
 }
