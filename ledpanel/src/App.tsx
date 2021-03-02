@@ -1,14 +1,14 @@
 import React from 'react';
-import logo from './logo.svg';
 import { Counter } from './features/counter/Counter';
+import { ColorPalette } from './features/colorpalette/Colorpalette';
 import './App.css';
 
 function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
         <Counter />
+        <ColorPalette />
         {/*<span>
           <span>Learn </span>
           <a
