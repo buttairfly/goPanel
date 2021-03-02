@@ -1,15 +1,16 @@
-import React from 'react';
-import { Counter } from './features/counter/Counter';
-import { ColorPalette } from './features/colorpalette/Colorpalette';
-import './App.css';
+// eslint-disable-next-line no-use-before-define
+import React from 'react'
+import { Counter } from './features/counter/Counter'
+import { ColorPalette } from './features/colorpalette/Colorpalette'
+import './App.css'
 
-function App() {
+function App () {
   return (
     <div className="App">
       <header className="App-header">
         <Counter />
         <ColorPalette />
-        {/*<span>
+        {/* <span>
           <span>Learn </span>
           <a
             className="App-link"
@@ -46,10 +47,10 @@ function App() {
           >
             React Redux
           </a>
-        </span>*/}
+        </span> */}
       </header>
     </div>
-  );
+  )
 }
 
-export default App;
+export default App

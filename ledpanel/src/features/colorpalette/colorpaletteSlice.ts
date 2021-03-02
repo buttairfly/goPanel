@@ -41,7 +41,6 @@ export const colorPaletteSlice = createSlice({
   name: 'palette',
   initialState,
   reducers: {
-    // Use the PayloadAction type to declare the contents of `action.payload`
     updateById: (state, action: PayloadAction<ColorPalette>) => {
       state.palettes[`${action.payload.id}`] = action.payload
     }
