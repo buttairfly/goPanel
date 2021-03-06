@@ -19,6 +19,7 @@ plugins:
   - react
   - '@typescript-eslint'
   - 'prefer-arrow'
+  - 'react-hooks'
 rules:
   no-use-before-define: off
   '@typescript-eslint/no-use-before-define': 

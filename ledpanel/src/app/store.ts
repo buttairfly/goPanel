@@ -1,11 +1,11 @@
 import { configureStore, ThunkAction, Action } from '@reduxjs/toolkit'
 import counterReducer from '../features/counter/counterSlice'
-import colorPaletteReducer from '../features/colorpalette/colorpaletteSlice'
+import colorPaletteReducer from '../features/colorlist/colorlist.slice'
 
 export const store = configureStore({
   reducer: {
     counter: counterReducer,
-    colorPalette: colorPaletteReducer
+    colorPalettes: colorPaletteReducer
   }
 })
 
