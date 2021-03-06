@@ -7,6 +7,7 @@ extends:
   - standard
 parser: '@typescript-eslint/parser'
 parserOptions:
+  project: './tsconfig.json'
   ecmaFeatures:
     jsx: true
   ecmaVersion: 12
@@ -17,8 +18,12 @@ settings:
 plugins:
   - react
   - '@typescript-eslint'
-rules: {
+  - 'prefer-arrow'
+rules:
   no-use-before-define: off
-  '@typescript-eslint/no-use-before-define':
+  '@typescript-eslint/no-use-before-define': 
     - error
-}
+  func-style:
+    - error
+    - expression
+    - allowArrowFunctions: true

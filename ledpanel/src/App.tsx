@@ -1,9 +1,9 @@
 import React from 'react'
 import { Counter } from './features/counter/Counter'
-import { ColorPalette } from './features/colorpalette/Colorpalette'
+import { ColorPalette } from './features/colorpalette/colorpalette'
 import './App.css'
 
-function App () {
+const App = () => {
   return (
     <div className="App">
       <header className="App-header">
