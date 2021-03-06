@@ -2,7 +2,8 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { RootState } from '../../app/store'
 import { Id } from '../../types/id'
 import { BlenderId } from '../../types/blender'
-import { ColorPalette, FixColor } from './colorpalette.type'
+import { ColorPalette } from './colorpalette.type'
+import { FixColor } from './fixcolor/fixcolor.type'
 
 interface ColorPaletteState {
   palettes: {
@@ -34,14 +35,6 @@ const initialState: ColorPaletteState = {
       colors: [{
         color: '#f00',
         pos: 0.0
-      },
-      {
-        color: '#0f0',
-        pos: 0.3
-      },
-      {
-        color: '#00f',
-        pos: 0.6
       }]
     }
   }
