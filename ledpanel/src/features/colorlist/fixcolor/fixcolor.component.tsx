@@ -7,28 +7,28 @@ import {
   selectFixColor
 } from './fixcolor.calc'
 import styles from './fixcolor.module.css'
-import { FixColorUpdate } from './fixcolor.type'
+import { FixColorUpdatePayload } from './fixcolor.type'
 
 import { updateFixColor, selectState } from '../colorlist.slice'
 
 type Props = {
-  id: string;
+  parentId: string;
   fixColorIndex: number;
   parentWidth: number;
 }
 
 export const FixColorComponent = (props: Props) => {
-  const { id, parentWidth, fixColorIndex } = props
+  const { parentId, parentWidth, fixColorIndex } = props
   const width = parentWidth - 2 * 42
   const dispatch = useDispatch()
   const state = useSelector(selectState)
-  const fixColor = selectFixColor(state, id, fixColorIndex)
+  const fixColor = selectFixColor(state, parentId, fixColorIndex)
 
   const [pos, setPos] = useState(fixColor.pos)
 
   useEffect(() => {
-    const fixColorUpdate: FixColorUpdate = {
-      id,
+    const fixColorUpdate: FixColorUpdatePayload = {
+      id: parentId,
       fixColorIndex,
       fixColor: {
         pos
@@ -44,7 +44,7 @@ export const FixColorComponent = (props: Props) => {
 
   const changeLabelPos: ChangeEventHandler<any> = (e) => {
     const val = e.target.value
-    const num = val.replace(/a-z%!"§%&\/\(\)=\?@;/i, '')
+    const num = val.replace(/a-z%!"§%&\/\(\)=\?@;-_#\+¿*/gmi, '')
     const num2 = num.replace(/,/, '.')
     const newPos: number = parseFloat(num2)
     if (!isNaN(newPos)) {

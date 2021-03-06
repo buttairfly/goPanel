@@ -3,13 +3,20 @@ export type FixColor = {
   pos: number;
 }
 
-export type ColorUpdate = {
+export type FixColorUpdate = {
   color?: string;
   pos?: number;
 }
 
-export type FixColorUpdate = {
+export type FixColorRemovePayload = {
   id: string;
   fixColorIndex: number;
-  fixColor: ColorUpdate;
+}
+
+export interface FixColorUpdatePayload extends FixColorRemovePayload {
+  fixColor: FixColorUpdate;
+}
+
+export interface FixColorAddPayload extends FixColorRemovePayload {
+  fixColor: FixColor;
 }

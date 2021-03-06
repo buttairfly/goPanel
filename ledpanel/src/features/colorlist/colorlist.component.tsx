@@ -1,10 +1,11 @@
 import React from 'react'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import sizeMe, { SizeMeProps } from 'react-sizeme'
 
 import {
   selectState,
-  selectColorPalettesIds
+  selectColorPalettesIds,
+  getAllPalettesAsync
 } from './colorlist.slice'
 import {
   calcPaletteById
@@ -20,11 +21,18 @@ type Props = StateFromProps & DispatchFromProps & SizeMeProps
 
 const ColorListComponent = (props: Props) => {
   const { width } = props.size
-
   const palettesState = useSelector(selectState)
   const paletteIds = useSelector(selectColorPalettesIds)
+
+  const dispatch = useDispatch()
   return (
     <div className={styles.container}>
+      <button
+          className={styles.asyncButton}
+          onClick={() => dispatch(getAllPalettesAsync())}
+        >
+          Add Async
+        </button>
       { paletteIds.map(paletteId => {
         const palette = calcPaletteById(palettesState, paletteId)
         return (<ColorPaletteComponent

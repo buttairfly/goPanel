@@ -1,5 +1,5 @@
 
-import { ColorPaletteListState } from './colorlist.slice'
+import { ColorPaletteListState } from './colorlist.type'
 import { ColorPalette } from './colorpalette/colorpalette.type'
 import { Id } from '../../types/id'
 

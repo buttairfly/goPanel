@@ -1,4 +1,4 @@
-import { ColorPaletteListState } from '../colorlist.slice'
+import { ColorPaletteListState } from '../colorlist.type'
 import { FixColor } from './fixcolor.type'
 import { calcPaletteById } from '../colorlist.calc'
 import { Id } from '../../../types/id'

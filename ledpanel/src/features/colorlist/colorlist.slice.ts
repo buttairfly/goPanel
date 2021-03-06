@@ -1,17 +1,12 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { RootState } from '../../app/store'
+import { AppThunk, RootState } from '../../app/store'
 import { BlenderId } from '../../types/blender'
 import { ColorPalette } from './colorpalette/colorpalette.type'
-import { FixColor, FixColorUpdate } from './fixcolor/fixcolor.type'
+import { FixColor, FixColorUpdatePayload, FixColorAddPayload } from './fixcolor/fixcolor.type'
 import { calcPaletteById } from './colorlist.calc'
 import { Id } from '../../types/id'
-
-export interface ColorPaletteListState {
-  palettes: {
-    [name:string]:ColorPalette;
-  }
-  currentPaletteName: string;
-}
+import { ColorPaletteList, ColorPaletteListState } from './colorlist.type'
+import { useAllPalettes } from './colorlist.provider'
 
 const initialState: ColorPaletteListState = {
   palettes: {
@@ -47,11 +42,17 @@ export const colorPaletteSlice = createSlice({
   name: 'colorPalettes',
   initialState,
   reducers: {
+    getAllPalettes: (state, action: PayloadAction<ColorPaletteList>) => {
+      state.palettes = action.payload
+    },
     updateById: (state, action: PayloadAction<ColorPalette>) => {
       state.palettes[`${action.payload.id}`] = action.payload
     },
-    updateFixColor: (state, action: PayloadAction<FixColorUpdate>) => {
-      console.log(JSON.stringify(action))
+    addFixColor: (state, action: PayloadAction<FixColorAddPayload>) => {
+      const update = action.payload
+      state.palettes[`${update.id}`].colors.push(update.fixColor)
+    },
+    updateFixColor: (state, action: PayloadAction<FixColorUpdatePayload>) => {
       const update = action.payload
       state.palettes[`${update.id}`].colors[update.fixColorIndex] = {
         ...state.palettes[`${update.id}`].colors[update.fixColorIndex],
@@ -61,7 +62,11 @@ export const colorPaletteSlice = createSlice({
   }
 })
 
-export const { updateById, updateFixColor } = colorPaletteSlice.actions
+export const { updateById, getAllPalettes, addFixColor, updateFixColor } = colorPaletteSlice.actions
+
+export const getAllPalettesAsync = (): AppThunk => dispatch => {
+  useAllPalettes()
+}
 
 export const selectState = (state: RootState): ColorPaletteListState => state.colorPalettes
 
