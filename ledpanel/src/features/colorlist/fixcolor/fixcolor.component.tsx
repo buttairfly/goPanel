@@ -1,6 +1,6 @@
-import React, { useEffect, useReducer, useState } from 'react'
+import React, { ChangeEventHandler, useEffect, useState } from 'react'
 import Draggable, { DraggableEventHandler } from 'react-draggable'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 
 import {
   calculateFixpointBackgroundStyle,
@@ -9,7 +9,7 @@ import {
 import styles from './fixcolor.module.css'
 import { FixColorUpdate } from './fixcolor.type'
 
-import reducer, { updateFixColor, selectState } from '../colorlist.slice'
+import { updateFixColor, selectState } from '../colorlist.slice'
 
 type Props = {
   id: string;
@@ -20,7 +20,8 @@ type Props = {
 export const FixColorComponent = (props: Props) => {
   const { id, parentWidth, fixColorIndex } = props
   const width = parentWidth - 2 * 42
-  const [state, dispatch] = useReducer(reducer, useSelector(selectState))
+  const dispatch = useDispatch()
+  const state = useSelector(selectState)
   const fixColor = selectFixColor(state, id, fixColorIndex)
 
   const [pos, setPos] = useState(fixColor.pos)
@@ -33,21 +34,27 @@ export const FixColorComponent = (props: Props) => {
         pos
       }
     }
-    console.log(width, pos, pos / width, JSON.stringify(fixColorUpdate))
-    if (pos !== fixColor.pos) { dispatch(updateFixColor(fixColorUpdate)) }
-  })
-
-  const roundDecimals = (num: number): number => {
-    const decimals = 1000
-    return Math.round(num * decimals) / decimals
-  }
+    console.log(width, pos, JSON.stringify(fixColorUpdate))
+    dispatch(updateFixColor(fixColorUpdate))
+  }, [pos])
 
   const updateFixColorPos: DraggableEventHandler = (e, position) => {
-    setPos(roundDecimals(position.x / width))
+    setPos(position.x / width)
   }
 
-  const changeLabelPos: =
-
+  const changeLabelPos: ChangeEventHandler<any> = (e) => {
+    const val = e.target.value
+    const num = val.replace(/a-z%!"§%&\/\(\)=\?@;/i, '')
+    const num2 = num.replace(/,/, '.')
+    const newPos: number = parseFloat(num2)
+    if (!isNaN(newPos)) {
+      if (newPos > 100) {
+        setPos(1)
+      } else {
+        setPos(newPos / 100.0)
+      }
+    }
+  }
   return (
       <Draggable
         position={{ x: pos * width, y: 0 }}
@@ -68,7 +75,7 @@ export const FixColorComponent = (props: Props) => {
             <div className={styles.paletteFixColorLabelBackground}>
               <input
                 className={styles.paletteFixColorLabelInput}
-                value={roundDecimals(pos)}
+                value={`${((pos) * 100).toFixed(1)}%`}
                 onChange={changeLabelPos}
               />
               &nbsp;
