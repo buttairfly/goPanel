@@ -76,8 +76,7 @@
 
 .removeButton {
   position: absolute;
-  font: 12px bold;
-  top: -32px;
-  left: -6px;
-  border-radius: 20px;
+  top: -48px;
+  left: -10px;
+  border-radius: 8px;
 }

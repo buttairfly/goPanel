@@ -12,6 +12,7 @@ import {
 } from './colorlist.calc'
 import styles from './colorlist.module.css'
 import { ColorPaletteComponent } from './colorpalette/colorpalette.component'
+import { Button } from 'react-bootstrap'
 
 interface StateFromProps {}
 
@@ -27,12 +28,13 @@ const ColorListComponent = (props: Props) => {
   const dispatch = useDispatch()
   return (
     <div className={styles.container}>
-      <button
+      <Button
           className={styles.asyncButton}
           onClick={() => dispatch(getAllPalettesAsync())}
+          variant={'primary'}
         >
-          Add Async
-        </button>
+          Get Palettes
+        </Button>
       { paletteIds.map(paletteId => {
         const palette = calcPaletteById(palettesState, paletteId)
         return (<ColorPaletteComponent

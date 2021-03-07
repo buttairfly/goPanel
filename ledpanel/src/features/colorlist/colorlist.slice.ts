@@ -68,8 +68,7 @@ export const colorPaletteSlice = createSlice({
     },
     removeFixColor: (state, action: PayloadAction<FixColorRemovePayload>) => {
       const update = action.payload
-      console.log(update)
-      state.palettes[`${update.id}`].colors = state.palettes[`${update.id}`].colors.filter((_, index) => { console.log(index); return index !== update.fixColorIndex })
+      state.palettes[`${update.id}`].colors = state.palettes[`${update.id}`].colors.filter((_, index) => index !== update.fixColorIndex)
     },
     updateFixColor: (state, action: PayloadAction<FixColorUpdatePayload>) => {
       const update = action.payload

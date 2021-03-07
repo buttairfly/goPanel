@@ -12,6 +12,8 @@ import { FixColorRemovePayload, FixColorUpdatePayload } from './fixcolor.type'
 import { updateFixColor, removeFixColor, selectState } from '../colorlist.slice'
 import { Button } from 'react-bootstrap'
 
+import { XSquare } from 'react-bootstrap-icons'
+
 type Props = {
   parentId: string;
   fixColorIndex: number;
@@ -53,7 +55,7 @@ export const FixColorComponent = (props: Props) => {
       fixColorIndex
     }
     dispatch(removeFixColor(fixColor))
-  }, [fixColorIndex])
+  }, [])
 
   const changeLabelPos = useCallback((e) => {
     const val = e.target.value
@@ -99,7 +101,10 @@ export const FixColorComponent = (props: Props) => {
             <Button
               className={styles.removeButton}
               onClick={deleteFixColor}
-              variant="danger">X</Button>
+              variant="danger"
+            >
+              <XSquare />
+            </Button>
           )}
         </div>
       </Draggable>
