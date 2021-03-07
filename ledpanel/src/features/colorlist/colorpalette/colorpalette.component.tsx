@@ -47,9 +47,9 @@ export const ColorPaletteComponent = (props: Props) => {
             style={calculateBackgroundStyle(paletteState, id)}
           >
             <div className={styles.paletteFixColorContainer}>
-              { fixColors.map((_, fixColorIndex) => (
+              { fixColors.map((fixColor, fixColorIndex) => (
               <FixColorComponent
-                key={fixColorIndex}
+                key={`${fixColorIndex}${fixColor.color}`}
                 fixColorIndex={fixColorIndex}
                 parentWidth={width}
                 parentId={id}
