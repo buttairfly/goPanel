@@ -2,7 +2,12 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { AppThunk, RootState } from '../../app/store'
 import { BlenderId } from '../../types/blender'
 import { ColorPalette } from './colorpalette/colorpalette.type'
-import { FixColor, FixColorUpdatePayload, FixColorAddPayload } from './fixcolor/fixcolor.type'
+import {
+  FixColor,
+  FixColorUpdatePayload,
+  FixColorAddPayload,
+  FixColorRemovePayload
+} from './fixcolor/fixcolor.type'
 import { calcPaletteById } from './colorlist.calc'
 import { Id } from '../../types/id'
 import { ColorPaletteList, ColorPaletteListState } from './colorlist.type'
@@ -35,8 +40,15 @@ const initialState: ColorPaletteListState = {
       }]
     }
   },
-  isDragging: false,
+  currentColor: '#000',
   currentPaletteName: 'default'
+}
+
+const removeActive = (slice: FixColor[]): FixColor[] => {
+  return slice.map((fixColor) => {
+    delete fixColor.active
+    return fixColor
+  })
 }
 
 export const colorPaletteSlice = createSlice({
@@ -51,22 +63,26 @@ export const colorPaletteSlice = createSlice({
     },
     addFixColor: (state, action: PayloadAction<FixColorAddPayload>) => {
       const update = action.payload
+      state.palettes[`${update.id}`].colors = removeActive(state.palettes[`${update.id}`].colors)
       state.palettes[`${update.id}`].colors.push(update.fixColor)
+    },
+    removeFixColor: (state, action: PayloadAction<FixColorRemovePayload>) => {
+      const update = action.payload
+      console.log(update)
+      state.palettes[`${update.id}`].colors = state.palettes[`${update.id}`].colors.filter((_, index) => { console.log(index); return index !== update.fixColorIndex })
     },
     updateFixColor: (state, action: PayloadAction<FixColorUpdatePayload>) => {
       const update = action.payload
+      state.palettes[`${update.id}`].colors = removeActive(state.palettes[`${update.id}`].colors)
       state.palettes[`${update.id}`].colors[update.fixColorIndex] = {
         ...state.palettes[`${update.id}`].colors[update.fixColorIndex],
         ...update.fixColor
       }
-    },
-    toggleDragging: (state) => {
-      state.isDragging = !state.isDragging
     }
   }
 })
 
-export const { updateById, getAllPalettes, addFixColor, updateFixColor, toggleDragging } = colorPaletteSlice.actions
+export const { updateById, getAllPalettes, addFixColor, removeFixColor, updateFixColor } = colorPaletteSlice.actions
 
 export const getAllPalettesAsync = (): AppThunk => dispatch => {
   useAllPalettes()
@@ -77,7 +93,7 @@ export const selectState = (state: RootState): ColorPaletteListState => state.co
 export const selectColorPalettesIds = (state: RootState) =>
   Object.keys(selectState(state).palettes)
 
-export const selectIsDragging = (state: RootState): boolean => selectState(state).isDragging
+export const selectCurrentColor = (state: RootState): string => selectState(state).currentColor
 
 export const selectPalette = (state: RootState, id: String): ColorPalette =>
   calcPaletteById(selectState(state), id)

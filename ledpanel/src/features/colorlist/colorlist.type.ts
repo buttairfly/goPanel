@@ -1,8 +1,8 @@
 import { ColorPalette } from './colorpalette/colorpalette.type'
 
 export type ColorPaletteListState = {
-  palettes: ColorPaletteList
-  isDragging: boolean;
+  palettes: ColorPaletteList;
+  currentColor: string;
   currentPaletteName: string;
 }
 

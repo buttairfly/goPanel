@@ -73,3 +73,11 @@
   text-align: center;
   z-index: 2;
 }
+
+.removeButton {
+  position: absolute;
+  font: 12px bold;
+  top: -32px;
+  left: -6px;
+  border-radius: 20px;
+}

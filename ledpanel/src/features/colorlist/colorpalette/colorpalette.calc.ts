@@ -1,5 +1,6 @@
 import { ColorPalette } from './colorpalette.type'
 import { Id } from '../../../types/id'
+import { FixColor } from '../fixcolor/fixcolor.type'
 
 export const calculateBackgroundStyle = (p: ColorPalette, id: Id) => {
   if (p.colors.length < 1) {
@@ -14,7 +15,9 @@ export const calculateBackgroundStyle = (p: ColorPalette, id: Id) => {
   }
 
   let s = ''
-  p.colors.forEach(c => {
+  const colors: FixColor[] = JSON.parse(JSON.stringify(p.colors))
+  const sortedColors = colors.sort((a, b) => a.pos - b.pos)
+  sortedColors.forEach(c => {
     s += `, ${c.color} ${c.pos * 100}%`
   })
   return {

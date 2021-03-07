@@ -6,7 +6,7 @@ import { calculateBackgroundStyle } from './colorpalette.calc'
 import styles from './colorpalette.module.css'
 import { FixColorComponent } from '../fixcolor/fixcolor.component'
 
-import { addFixColor, selectIsDragging } from '../colorlist.slice'
+import { addFixColor, selectCurrentColor } from '../colorlist.slice'
 import { FixColorAddPayload } from '../fixcolor/fixcolor.type'
 
 type Props = {
@@ -19,21 +19,20 @@ export const ColorPaletteComponent = (props: Props) => {
   const { paletteState, id, parentWidth } = props
   const fixColors = paletteState.colors
 
+  const width = parentWidth - 2 * 42
   const dispatch = useDispatch()
-  const isDragging = useSelector(selectIsDragging)
+  const currentColor = useSelector(selectCurrentColor)
   const addFixColorClick: MouseEventHandler = (e) => {
     const addFixColorPayload: FixColorAddPayload = {
       id,
       fixColorIndex: paletteState.colors.length,
       fixColor: {
-        color: '#ff0',
-        pos: e.clientX / parentWidth
+        color: currentColor,
+        pos: e.clientX / width,
+        active: true
       }
     }
-    console.log(isDragging)
-    if (isDragging === false) {
-      dispatch(addFixColor(addFixColorPayload))
-    }
+    dispatch(addFixColor(addFixColorPayload))
   }
   return (
     <div key={id}>
@@ -52,7 +51,7 @@ export const ColorPaletteComponent = (props: Props) => {
               <FixColorComponent
                 key={fixColorIndex}
                 fixColorIndex={fixColorIndex}
-                parentWidth={parentWidth}
+                parentWidth={width}
                 parentId={id}
               />
               ))}
