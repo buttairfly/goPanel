@@ -1,12 +1,12 @@
 import React, { MouseEventHandler } from 'react'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 
 import { ColorPalette } from './colorpalette.type'
 import { calculateBackgroundStyle } from './colorpalette.calc'
 import styles from './colorpalette.module.css'
 import { FixColorComponent } from '../fixcolor/fixcolor.component'
 
-import { addFixColor } from '../colorlist.slice'
+import { addFixColor, selectIsDragging } from '../colorlist.slice'
 import { FixColorAddPayload } from '../fixcolor/fixcolor.type'
 
 type Props = {
@@ -20,6 +20,7 @@ export const ColorPaletteComponent = (props: Props) => {
   const fixColors = paletteState.colors
 
   const dispatch = useDispatch()
+  const isDragging = useSelector(selectIsDragging)
   const addFixColorClick: MouseEventHandler = (e) => {
     const addFixColorPayload: FixColorAddPayload = {
       id,
@@ -29,8 +30,10 @@ export const ColorPaletteComponent = (props: Props) => {
         pos: e.clientX / parentWidth
       }
     }
-    e.stopPropagation()
-    dispatch(addFixColor(addFixColorPayload))
+    console.log(isDragging)
+    if (isDragging === false) {
+      dispatch(addFixColor(addFixColorPayload))
+    }
   }
   return (
     <div key={id}>
@@ -41,7 +44,7 @@ export const ColorPaletteComponent = (props: Props) => {
         <div className={styles.palette}>
           <div
             className={styles.paletteBackgroundcolor}
-            onClick={addFixColorClick}
+            onDoubleClick={addFixColorClick}
             style={calculateBackgroundStyle(paletteState, id)}
           >
             <div className={styles.paletteFixColorContainer}>

@@ -9,7 +9,7 @@ import {
 import styles from './fixcolor.module.css'
 import { FixColorUpdatePayload } from './fixcolor.type'
 
-import { updateFixColor, selectState } from '../colorlist.slice'
+import { updateFixColor, selectState, toggleDragging } from '../colorlist.slice'
 
 type Props = {
   parentId: string;
@@ -34,9 +34,12 @@ export const FixColorComponent = (props: Props) => {
         pos
       }
     }
-    console.log(width, pos, JSON.stringify(fixColorUpdate))
     dispatch(updateFixColor(fixColorUpdate))
   }, [pos])
+
+  const toggleDrag: DraggableEventHandler = (e, position) => {
+    dispatch(toggleDragging())
+  }
 
   const updateFixColorPos: DraggableEventHandler = (e, position) => {
     setPos(position.x / width)
@@ -54,12 +57,15 @@ export const FixColorComponent = (props: Props) => {
         setPos(newPos / 100.0)
       }
     }
+    console.log(val)
   }
   return (
       <Draggable
         position={{ x: pos * width, y: 0 }}
         axis='x'
         bounds='parent'
+        onStart={toggleDrag}
+        onStop={toggleDrag}
         onDrag={updateFixColorPos}
       >
         <div

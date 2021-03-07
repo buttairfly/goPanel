@@ -35,6 +35,7 @@ const initialState: ColorPaletteListState = {
       }]
     }
   },
+  isDragging: false,
   currentPaletteName: 'default'
 }
 
@@ -58,11 +59,14 @@ export const colorPaletteSlice = createSlice({
         ...state.palettes[`${update.id}`].colors[update.fixColorIndex],
         ...update.fixColor
       }
+    },
+    toggleDragging: (state) => {
+      state.isDragging = !state.isDragging
     }
   }
 })
 
-export const { updateById, getAllPalettes, addFixColor, updateFixColor } = colorPaletteSlice.actions
+export const { updateById, getAllPalettes, addFixColor, updateFixColor, toggleDragging } = colorPaletteSlice.actions
 
 export const getAllPalettesAsync = (): AppThunk => dispatch => {
   useAllPalettes()
@@ -72,6 +76,8 @@ export const selectState = (state: RootState): ColorPaletteListState => state.co
 
 export const selectColorPalettesIds = (state: RootState) =>
   Object.keys(selectState(state).palettes)
+
+export const selectIsDragging = (state: RootState): boolean => selectState(state).isDragging
 
 export const selectPalette = (state: RootState, id: String): ColorPalette =>
   calcPaletteById(selectState(state), id)
