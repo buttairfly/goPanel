@@ -10,7 +10,7 @@ export const useAllPalettes = async () => {
     const palettes: ColorPaletteList = (await axios.get(`${config.baseUrl}/api/v1/panel/palette/all`)).data
     console.log(palettes)
     const dispatch = useDispatch()
-    dispatch(getAllPalettes)
+    dispatch(getAllPalettes(palettes))
     return palettes
   } catch (e) {
     console.log(JSON.stringify(e))
