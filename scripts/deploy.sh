@@ -2,9 +2,6 @@
 
 PROJECT_DIR="$(dirname "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )")"
 SCRIPT_DIR="$PROJECT_DIR/scripts"
-BINDIR="${GOPATH}/bin"
-PACKAGE="gopanel"
-BINARY="${PACKAGE}-arm"
 
 VERSION=`git describe --always --dirty`
 DATE=`date -u +%FT%T%z`
@@ -18,7 +15,7 @@ source "$SCRIPT_DIR/commands.sh"
 
 echo -e "${GREEN}${BINARY}${NC}: compiled at ${BLUE}${DATE}${NC} with version ${LIGHT_BLUE}${VERSION}${NC}"
 
-if BUILD; then
+if BUILD_BACKEND "$PROJECT_DIR" "$VERSION" "$DATE" "$ENV"; then
     echo -e "build  ${BLUE}${BINARY}${NC}"
 
     echo -e "stop service ${BLUE}${PACKAGE}${NC}, when available"
@@ -38,6 +35,11 @@ if BUILD; then
         echo -e "deploy ${BLUE}${BINARY}${NC}"
 
         SSH test ! -d ./config && SSH mkdir ./config && echo "~/config folder created"
+
+        SSH test ! -d ./ledpanel/build && SSH mkdir -p ./ledpanel/build && echo "~/ledpanel/build folder created"
+
+        COPY ${PROJECT_DIR}/config/ pi@ledpix:~/config
+        echo -e "deploy ${BLUE}config folder${NC}"
 
         COPY ${PROJECT_DIR}/config/ pi@ledpix:~/config
         echo -e "deploy ${BLUE}config folder${NC}"

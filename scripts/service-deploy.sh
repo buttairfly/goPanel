@@ -3,36 +3,22 @@
 # set -x
 
 PROJECT_DIR="$(dirname "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )")"
+SCRIPT_DIR="$PROJECT_DIR/scripts"
 BINDIR="${GOPATH}/bin"
 PACKAGE="gopanel"
 BINARY="${PACKAGE}-arm"
 
-VERSION=`git describe --always --dirty`
-DATE=`date -u +%FT%T%z`
 ENV='env GOOS=linux GOARCH=arm GOARM=5'
 
 # color codes
-RED="\033[0;31m"
-GREEN='\033[0;32m'
-BLUE='\033[0;34m'
-LIGHT_BLUE='\033[1;34m'
-NC='\033[0m' # No Color
-
+source "$SCRIPT_DIR/color.sh"
 
 # commands
-function COPY {
-  rsync -acE --progress $1 $2
-}
-function BUILD {
-  return $(`${ENV} go build -ldflags "-X main.compileDate=${DATE} -X main.versionTag=${VERSION}" -o ${BINDIR}/${BINARY} ${PROJECT_DIR}/cmd/${PACKAGE}`)
-}
-function SSH {
-  ssh -t pi@ledpix $@
-}
+source "$SCRIPT_DIR/commands.sh"
 
 echo -e "deploy service ${GREEN}${BINARY}${NC}: compiled at ${BLUE}${DATE}${NC} with version ${LIGHT_BLUE}${VERSION}${NC}"
 
-if BUILD; then
+if BUILD_BACKEND "$PROJECT_DIR" "$VERSION" "$DATE" "$ENV"; then
     echo -e "service build  ${BLUE}${BINARY}${NC}"
     if SSH test ! -d ./service ; then
       echo -e "servive folder ${RED}not available${NC}"

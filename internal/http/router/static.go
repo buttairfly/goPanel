@@ -8,6 +8,7 @@ import (
 
 // StaticRouter surfs all static content
 func StaticRouter(e *echo.Echo) {
+	//	e.Static("/", "ledpanel/build")
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
 	})

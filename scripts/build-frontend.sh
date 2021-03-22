@@ -7,7 +7,7 @@ VERSION=`git describe --always --dirty`
 DATE=`date -u +%FT%T%z`
 
 FRONTEND_DIR="$PROJECT_DIR/ledpanel"
-FRONTEND_VERSION="$( jq .version ./ledpanel/package.json )"
+FRONTEND_VERSION="$( jq .version ${FRONTEND_DIR}/package.json )"
 
 # color codes
 source "$SCRIPT_DIR/color.sh"
@@ -17,4 +17,9 @@ source "$SCRIPT_DIR/commands.sh"
 
 echo -e "${GREEN}frontend${NC}: compiled at ${BLUE}${DATE}${NC} with version ${FRONTEND_VERSION} git ${LIGHT_BLUE}${VERSION}${NC}"
 
-exit BUILD_FRONTEND $PROJECT_DIR
+if BUILD_FRONTEND $PROJECT_DIR; then
+    exit 0
+else
+    echo "build frontend failed" >&2
+    exit 1
+fi
