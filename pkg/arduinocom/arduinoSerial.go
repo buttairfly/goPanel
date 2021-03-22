@@ -27,6 +27,7 @@ type ArduinoCom struct {
 	latched     int64
 	paritySeed  byte
 	numLed      int
+	initRetries int
 	logger      *zap.Logger
 }
 
@@ -41,6 +42,7 @@ func NewArduinoCom(numLed int, sc *SerialConfig, logger *zap.Logger) *ArduinoCom
 	a.stats = make(chan *Stat, 10)
 	a.numLed = numLed
 	a.paritySeed = sc.ParitySeed
+	a.initRetries = 50
 	a.logger = logger
 	return a
 }
@@ -87,7 +89,13 @@ func (a *ArduinoCom) Init() {
 				close(a.initDone)
 			}
 		} else {
+			// fully initialized
 			return
+		}
+		a.initRetries--
+		a.logger.Info("retry serial init", zap.Int("retries left", a.initRetries))
+		if a.initRetries < 0 {
+			a.logger.Fatal("reached maximum logger retires")
 		}
 	}
 }
