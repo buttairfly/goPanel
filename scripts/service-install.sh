@@ -14,6 +14,10 @@ source "$SCRIPT_DIR/commands.sh"
 
 echo -e "service install"
 
+if SSH test ! -d ./service/config ; then
+    SSH mkdir -p ./service/config
+fi
+
 if source "$SCRIPT_DIR/deploy.sh"; then
     SSH sudo rsync -acE --progress ./service/${PACKAGE}.service /etc/systemd/system/${PACKAGE}.service
     echo -e "service deploy ${BLUE}systemd file${NC}"

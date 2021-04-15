@@ -29,7 +29,7 @@ if BUILD_BACKEND "$PROJECT_DIR" "$VERSION" "$DATE" "$ENV"; then
 
         echo -e "service deploy ${BLUE}${BINARY}${NC}"
         if SSH test ! -d ./service/config ; then
-          echo -e "service config folder ${RED}not available${NC}"
+          echo -e "service config folder ${RED}not available${NC} run service install beforehand"
           exit 1
         fi
 
