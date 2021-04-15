@@ -2,7 +2,7 @@ type: serial
 serialConfig:
   streamConfig:
     name: /dev/ttyUSB0
-    baud: 1152000
+    baud: 115200
     size: 8
     readTimeout: 1s
   verbose: false

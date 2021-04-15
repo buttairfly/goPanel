@@ -38,7 +38,7 @@ func TestNewDeviceConfigFile(t *testing.T) {
 				SerialConfig: &arduinocom.SerialConfig{
 					StreamConfig: &arduinocom.StreamConfig{
 						Name:        "/dev/ttyUSB0",
-						Baud:        1152000,
+						Baud:        115200,
 						ReadTimeout: 1 * time.Second,
 						Size:        8,
 					},
