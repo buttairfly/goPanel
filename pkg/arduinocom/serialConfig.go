@@ -13,6 +13,6 @@ type SerialConfig struct {
 	RawFramePartNumLed int                 `json:"rawFramePartNumLed" yaml:"rawFramePartNumLed"`
 	ParitySeed         byte                `json:"paritySeed" yaml:"paritySeed"`
 	InitSleepTime      time.Duration       `json:"initSleepTime,omitempty" yaml:"initSleepTime,omitempty"`
-	LatchSleepTime     time.Duration       `json:"latchSleepTime,omitempty" yaml:"latchSleepTime,omitempty"`
+	CmdSleepTime       time.Duration       `json:"cmdSleepTime,omitempty" yaml:"cmdSleepTime,omitempty"`
 	ArduinoErrorConfig *ArduinoErrorConfig `json:"arduinoErrorConfig,omitempty" yaml:"arduinoErrorConfig,omitempty"`
 }

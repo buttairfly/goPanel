@@ -5,14 +5,14 @@ ledDeviceConfig:
       name: /dev/ttyUSB0
       baud: 115200
       size: 8
-      readTimeout: 1s
+      readTimeout: 300ms
     verbose: false
     verboseArduino: false
     readBufferSize: 1024
     rawFramePartNumLed: 10
     paritySeed: 165
     initSleepTime: 7ms
-    latchSleepTime: 3ms
+    cmdSleepTime: 5ms
     arduinoErrorConfig:
       Elati:
         name: latch timeout

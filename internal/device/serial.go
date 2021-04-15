@@ -76,11 +76,11 @@ func (me *serialDevice) RunPipe(cancelCtx context.Context, wg *sync.WaitGroup) {
 func (me *serialDevice) runFrameProcessor(wg *sync.WaitGroup) {
 	defer wg.Done()
 
-	latchDelay := me.com.Config().LatchSleepTime
-	lastFrameTime := time.Now().Add(-latchDelay)
+	cmdDelay := me.com.Config().CmdSleepTime
+	lastFrameTime := time.Now().Add(-cmdDelay)
 
 	// initialize bitbanger with number of leds
-	time.Sleep(latchDelay)
+	time.Sleep(cmdDelay)
 	me.com.Init()
 
 	me.logger.Sugar().Infof("numLed ledStripe %d", me.numLed)
@@ -97,7 +97,7 @@ func (me *serialDevice) runFrameProcessor(wg *sync.WaitGroup) {
 		ledStripeAction := ledStripe.GetAction()
 		if ledStripeAction.HasChanged() {
 			now := time.Now()
-			sleepDuration := latchDelay - (now.Sub(lastFrameTime))
+			sleepDuration := cmdDelay - (now.Sub(lastFrameTime))
 			stat := &arduinocom.Stat{
 				Event:     arduinocom.LatchStatType,
 				TimeStamp: now,
@@ -187,13 +187,13 @@ func (me *serialDevice) setPixel(pixelNum int, buffer []uint8) {
 	bufIndex := pixelNum * NumBytePerColor
 	command := fmt.Sprintf("P%04x%02x%02x%02x", pixelNum, buffer[bufIndex+0], buffer[bufIndex+1], buffer[bufIndex+2])
 	me.Write(command)
-	time.Sleep(me.com.Config().LatchSleepTime)
+	time.Sleep(me.com.Config().CmdSleepTime)
 }
 
 func (me *serialDevice) shade(pixel int, buffer []uint8) {
 	command := fmt.Sprintf("S%04x%02x%02x%02x", pixel, buffer[0], buffer[1], buffer[2])
 	me.Write(command)
-	time.Sleep(me.com.Config().LatchSleepTime)
+	time.Sleep(me.com.Config().CmdSleepTime)
 }
 
 func (me *serialDevice) rawFrame(pixel int, frameBuffer []uint8) {
@@ -211,8 +211,8 @@ func (me *serialDevice) rawFrame(pixel int, frameBuffer []uint8) {
 		pixelOffset := maxRawFrameParts * currentRawFramePartNumLed
 		me.rawFramePart(pixel, pixelOffset, maxRawFrameParts, remainingRawFramePartNumLed, frameBuffer)
 	}
-	time.Sleep(me.com.Config().LatchSleepTime)
 	me.latchFrame()
+	time.Sleep(me.com.Config().CmdSleepTime)
 }
 
 func (me *serialDevice) rawFramePart(pixel, pixelOffset, currentRawFramePart, currentRawFramePartNumLed int, frameBuffer []uint8) {
@@ -223,7 +223,7 @@ func (me *serialDevice) rawFramePart(pixel, pixelOffset, currentRawFramePart, cu
 		frameString += color
 	}
 	command := fmt.Sprintf("W%04x%02x%02x%s", pixel, currentRawFramePart, currentRawFramePartNumLed, frameString)
-	time.Sleep(me.com.Config().LatchSleepTime)
+	time.Sleep(me.com.Config().CmdSleepTime)
 	me.Write(command)
 }
 

@@ -39,7 +39,7 @@ func TestNewDeviceConfigFile(t *testing.T) {
 					StreamConfig: &arduinocom.StreamConfig{
 						Name:        "/dev/ttyUSB0",
 						Baud:        115200,
-						ReadTimeout: 1 * time.Second,
+						ReadTimeout: 300 * time.Millisecond,
 						Size:        8,
 					},
 					ReadBufferSize:     1024,
@@ -48,7 +48,7 @@ func TestNewDeviceConfigFile(t *testing.T) {
 					VerboseArduino:     false,
 					ParitySeed:         0xa5,
 					InitSleepTime:      7 * time.Millisecond,
-					LatchSleepTime:     3000 * time.Microsecond, // 5.5ms when verbose = true
+					CmdSleepTime:       5 * time.Millisecond, // 5.5ms when verbose = true
 				},
 			},
 			expectedFile: ".config.yaml",
