@@ -7,6 +7,7 @@
 
 #include "Arduino.h"
 
+const String ErrorBufferCorrupted = "Ebcorr"; // character: current command
 const String ErrorLatchTimeout = "Elati"; // param: min latch wait time ms
 const String ErrorNoCommand = "Encmd"; // character: command
 const String ErrorNotDefinedCommand = "Endcm"; // character: command

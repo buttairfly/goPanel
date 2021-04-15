@@ -65,6 +65,10 @@ var ledPanelArduinoConfig = &ArduinoErrorConfig{
 		Name:  "latch timeout",
 		Param: "min latch wait time ms",
 	},
+	"Ebcorr": ArduinoErrorDescription{
+		Name:      "buffer corrupted",
+		Character: "current command",
+	},
 	"Enhxn": ArduinoErrorDescription{
 		Name:      "not hex number parameter",
 		Character: "current char",

@@ -1,3 +1,6 @@
+Ebcorr:
+  name: buffer corrupted
+  character: current command
 Elati:
   name: latch timeout
   param: min latch wait time ms
